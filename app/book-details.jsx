@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Linking, Platform, Alert } fr
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import styles from '../assets/styles/bookDetails.styles'; 
-import { formatPublishDate } from '../../mobile/lib/utils';
+import { formatPublishDate } from '../lib/utils';
 
 export default function BookDetails() {
   const { book } = useLocalSearchParams();
