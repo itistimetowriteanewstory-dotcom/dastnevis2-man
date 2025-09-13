@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 import COLORS from '../../constants/colors';
 
-export default StyleSheet.create({
+const bookear = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -72,5 +72,6 @@ export default StyleSheet.create({
   },
 });
 
+export default bookear;
 
 
