@@ -2,7 +2,7 @@
 import { View, Text, ScrollView, TouchableOpacity, Linking, Platform, Alert } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
-import styles from '../../mobile/assets/styles/bookDetails.styles'; 
+import styles from '../assets/styles/bookDetails.styles'; 
 import { formatPublishDate } from '../../mobile/lib/utils';
 
 export default function BookDetails() {
