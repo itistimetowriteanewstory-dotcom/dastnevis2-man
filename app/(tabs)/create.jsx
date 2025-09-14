@@ -43,7 +43,7 @@ const result = await ImagePicker.launchImageLibraryAsync({
   mediaTypes: "images",
   allowsEditing: true,
   aspect: [4, 3],
-  quality: 0.5,
+  quality: 0.3,
   base64: true,
 })
 
@@ -106,6 +106,16 @@ if(!result.canceled) {
         location,
       }),
     });
+
+    if (!response.ok) {
+  const text = await response.text();
+  console.error("پاسخ سرور:", text);
+  Alert.alert("خطا", "پاسخ نامعتبر از سرور دریافت شد");
+  setLoading(false);
+  return;
+}
+
+
 
     const data = await response.json();
 

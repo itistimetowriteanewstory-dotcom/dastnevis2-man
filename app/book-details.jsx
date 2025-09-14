@@ -14,7 +14,7 @@ export default function BookDetails() {
 
     const url = Platform.OS === 'ios' ? `telprompt:${phoneNumber}` : `tel:${phoneNumber}`;
 
-    Linking.canOpenURL(url)
+    Linking.openURL(url)
       .then((supported) => {
         if (!supported) {
           Alert.alert('خطا', 'امکان باز کردن شماره‌گیر وجود ندارد');
