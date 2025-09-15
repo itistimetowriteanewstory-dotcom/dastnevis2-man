@@ -7,6 +7,8 @@ import { Link } from "expo-router"
 import {useAuthStore} from "../../store/authStore";
 
 import { I18nManager } from 'react-native';
+import { registerForPushNotificationsAsync } from "../../lib/notification";
+
 
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
@@ -22,9 +24,17 @@ export default function Login() {
   const handleLogin = async () => {
    const result = await login(email, password);
 
-   if (!result.success) Alert.alert("Error", result.error);
+   if (!result.success) {
+   Alert.alert("Error", result.error);
+   return;
+   } 
 
+    if (result.token) {
+    await registerForPushNotificationsAsync(result.token);
+  }
   };
+  
+
 
   return (
   <KeyboardAvoidingView

@@ -5,6 +5,7 @@ import COLORS from '../../constants/colors';
 import { useState } from 'react';
 import { useRouter } from "expo-router";
 import { useAuthStore } from '../../store/authStore';
+import { registerForPushNotificationsAsync } from "../../lib/notification";
 export default function Signup() {
 
   const [username, setUsername] = useState("");
@@ -24,8 +25,12 @@ export default function Signup() {
 if (!result.success) {
   console.log("خطا:", result.error); // برای تست
   Alert.alert("خطا", result.error || "مشکلی پیش آمده است");
+  return;
 }
 
+if (result.token) {
+    await registerForPushNotificationsAsync(result.token);
+  }
 
   };
 
