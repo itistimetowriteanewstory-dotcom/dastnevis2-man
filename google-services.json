@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "163001716794",
+    "project_id": "minebook-66410",
+    "storage_bucket": "minebook-66410.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:163001716794:android:9c13e81fc0fbd45f9f2503",
+        "android_client_info": {
+          "package_name": "com.anonymous.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4sFY7Y45dxAvbXcUYCqOBLKXSUO0NYqo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

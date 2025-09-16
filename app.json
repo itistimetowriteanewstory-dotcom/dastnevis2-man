@@ -17,7 +17,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.mobile"
+      "package": "com.anonymous.mobile",
+       "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -34,7 +35,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true
