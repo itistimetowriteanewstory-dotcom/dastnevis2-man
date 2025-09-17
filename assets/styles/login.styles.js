@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
   footerText: {
     color: COLORS.textSecondary,
     marginRight: 5,
+    fontSize: 18,
      textAlign: 'right',
   writingDirection: 'rtl',
 
@@ -122,6 +123,7 @@ const styles = StyleSheet.create({
   link: {
     color: COLORS.primary,
     fontWeight: "600",
+    fontSize: 18,
      textAlign: 'right',
   writingDirection: 'rtl',
   },

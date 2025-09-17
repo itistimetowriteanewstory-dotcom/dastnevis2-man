@@ -231,10 +231,10 @@ if(!result.canceled) {
 
 {/* job title */}
 <View style={styles.formGroup}>
-  <Text style={styles.label}>حوزه کاری</Text>
+  <Text style={styles.label}>محل کار</Text>
   <TextInput
     style={styles.inputContainer}
-    placeholder="مثال: آموزشی .اداری .فنی."
+    placeholder="مثال: قلعه فتح الله خان, شار نو, دهبوری"
     placeholderTextColor={COLORS.placeholderText}
     value={jobtitle}
     onChangeText={setJobtitle}

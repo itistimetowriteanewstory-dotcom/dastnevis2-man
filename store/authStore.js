@@ -35,7 +35,7 @@ export const useAuthStore = create((set) => ({
         isLoading: false,
       });
 
-      return { success: true };
+      return { success: true, token: data.token, user: data.user};
     } catch (error) {
       set({ isLoading: false });
       return { success: false, error: error.message };
@@ -60,7 +60,7 @@ export const useAuthStore = create((set) => ({
    await AsyncStorage.setItem("token", data.token);
 
    set({token: data.token, user: data.user, isLoading: false });
-   return {success: true};
+   return {success: true, token: data.token, user: data.user};
 
   } catch (error) {
     set({isLoading: false});

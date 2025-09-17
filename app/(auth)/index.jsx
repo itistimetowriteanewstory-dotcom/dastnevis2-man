@@ -22,15 +22,20 @@ export default function Login() {
  const {isLoading, login} = useAuthStore();
 
   const handleLogin = async () => {
+    
    const result = await login(email, password);
-
+ 
    if (!result.success) {
+     
    Alert.alert("Error", result.error);
    return;
    } 
 
     if (result.token) {
     await registerForPushNotificationsAsync(result.token);
+    console.log("✅ registerForPushNotificationsAsync called");
+  }else {
+    console.warn("⚠️ No token returned from login");
   }
   };
   
@@ -117,7 +122,7 @@ export default function Login() {
 
  { /* footer */}
  <View style={styles.footer}>
-  <Text  style={styles.footerText} >اگر حساب کاربری ندارید ثبت نام کنید </Text>
+  <Text  style={styles.footerText} >اگر حساب کاربری ندارید ثبت نام کنید: </Text>
 <Link href="/signup" asChild>
 <TouchableOpacity>
   <Text style={styles.link}>ثبت نام</Text>

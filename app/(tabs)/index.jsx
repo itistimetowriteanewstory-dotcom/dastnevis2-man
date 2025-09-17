@@ -57,7 +57,7 @@ setHasMore(pageNum < data.totalPages);
 setPage(pageNum)
 
 } catch (error) {
-  console.log("error fetching books ", error);
+ // console.log("error fetching books ", error);
 }finally{
   if(refresh) setRefreshing(false);
   else setLoading(false);

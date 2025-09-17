@@ -4,6 +4,7 @@ import SafeScreen from "../component/SafeScreen"
 import { StatusBar } from "expo-status-bar";
 import {useAuthStore} from "../store/authStore";
 import { useEffect } from "react";
+import * as Notifications from "expo-notifications";
 
 export default function RootLayout() {
 
@@ -27,6 +28,28 @@ export default function RootLayout() {
 
 
    },[user, token, segments])
+
+    // 📲 اضافه کردن Listenerهای نوتیفیکیشن
+  useEffect(() => {
+    const subscription1 = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log("نوتیف رسید:", notification);
+      }
+    );
+
+    const subscription2 = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        console.log("کاربر روی نوتیف کلیک کرد:", response);
+      }
+    );
+
+    // پاکسازی هنگام خروج
+    return () => {
+      subscription1.remove();
+      subscription2.remove();
+    };
+  }, []);
+
   return (  
     <SafeAreaProvider>
       <SafeScreen>

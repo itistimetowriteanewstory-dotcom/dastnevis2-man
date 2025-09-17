@@ -147,7 +147,7 @@ export default function Profile() {
             <Ionicons name="briefcase-outline" size={50} color={COLORS.textSecondary} />
             <Text style={styles.emptyText}>شغلی اضافه نشده</Text>
             <TouchableOpacity style={styles.addButton} onPress={() => router.push("/create")}>
-              <Text style={styles.addButtonText}>اولین نفری باشید که شغلی را ثبت میکند</Text>
+              <Text style={styles.addButtonText}>اولین موقعیت شغلی خودرا ثبت کنید</Text>
             </TouchableOpacity>
           </View>
         }
