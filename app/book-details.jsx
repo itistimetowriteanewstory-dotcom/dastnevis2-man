@@ -28,8 +28,8 @@ export default function BookDetails() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Image source={{ uri: parsedBook.user.profileImage }} style={styles.avatar} />
-        <Text style={styles.username}>{parsedBook.user.username}</Text>
+        <Image source={{ uri: parsedBook.user?.profileImage }} style={styles.avatar} />
+        <Text style={styles.username}>{parsedBook.user?.username}</Text>
       </View>
 
       <Image source={parsedBook.image} style={styles.bookImage} contentFit="cover" />

@@ -98,10 +98,10 @@ const filteredBooks = books.filter(book => {
   <View style={styles.header}> 
       <View style={styles.userInfo}>
         <Image
-          source={{ uri: item.user.profileImage }}
+          source={{ uri: item.user?.profileImage }}
           style={styles.avatar}
         />
-        <Text style={styles.username}>{item.user.username}</Text>
+        <Text style={styles.username}>{item.user?.username}</Text>
       </View>
    </View>
 
