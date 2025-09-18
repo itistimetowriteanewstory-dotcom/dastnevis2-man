@@ -46,7 +46,7 @@ export default function BookDetails() {
         )}
 
         {parsedBook.jobtitle && (
-          <Text style={styles.info}>حوزه شغلی: {parsedBook.jobtitle}</Text>
+          <Text style={styles.info}>محل کار : {parsedBook.jobtitle}</Text>
         )}
 
         {parsedBook.income && (

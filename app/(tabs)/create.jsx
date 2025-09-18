@@ -107,10 +107,17 @@ if(!result.canceled) {
       }),
     });
 
-    if (!response.ok) {
-  const text = await response.text();
-  console.error("پاسخ سرور:", text);
-  Alert.alert("خطا", "پاسخ نامعتبر از سرور دریافت شد");
+   if (!response.ok) {
+  let errorMessage = "مشکلی پیش آمد";
+  try {
+    const errorData = await response.json();
+    if (errorData.message) {
+      errorMessage = errorData.message;
+    }
+  } catch (e) {
+    console.error("خطا در خواندن پاسخ:", e);
+  }
+  Alert.alert("خطا", errorMessage);
   setLoading(false);
   return;
 }
