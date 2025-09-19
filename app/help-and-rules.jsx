@@ -37,8 +37,13 @@ export default function HelpAndRulesScreen() {
         <Text style={styles.text}>- رعایت احترام به سایر کاربران الزامی است.</Text>
         <Text style={styles.text}>- ارسال محتوای نامناسب یا خلاف با قوانین اسلامی ممنوع است و پیگیری قانونی دارد.</Text>
         <Text style={styles.text}>- هرگونه تخلف منجر به محدودیت دسترسی خواهد شد.</Text>
-         <Text style={styles.text}>- هر شغلی که خلاف با قوانین اسلامی باشد در اثر وقت از برناه پاک خواهد شد و پیگرد قانونی دارد</Text>
-           <Text style={styles.text}>- در صورت ارسال تخلف بعد از بررسی های کارسشناسان اگر تخلفی رخ نداده باشد با پیگرد قانونی دارد</Text>
+         <Text style={styles.text}>- هر شغلی که خلاف با قوانین اسلامی باشد در اسرع وقت از برنامه پاک خواهد شد و پیگرد قانونی دارد.</Text>
+           <Text style={styles.text}>- در صورت ارسال تخلف بعد از بررسی های کارشناسان اگر تخلفی رخ نداده باشد کابر با پیگرد قانونی رو به رو خواهد شد.</Text>
+      </View>
+
+       <View style={styles.footer}>
+        <Text style={styles.footerText}>طراحی و توسعه داده شده توسط </Text>
+         <Text style={styles.footerText}>سید مهدی موسوی</Text>
       </View>
 
     </ScrollView>
@@ -54,6 +59,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 1,
     borderColor: "#ecb22bf0",
+  },
+   footer: {
+    marginTop: 30,
+    paddingVertical: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#ecb22bf0",
+    alignItems: "center",
+  },
+  footerText: {
+    fontSize: 17,
+    color: "#555",
+    fontStyle: "italic",
   },
    section: { marginBottom: 20 },
   title: { fontSize: 18, fontWeight: "bold", marginBottom: 8 },
