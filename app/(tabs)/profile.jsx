@@ -122,6 +122,16 @@ export default function Profile() {
       <ProfileHeader />
       <LogoutButton />
 
+      {/* دکمه رفتن به صفحه راهنما و قوانین */}
+    <TouchableOpacity
+      style={styles.helpButton}
+      onPress={() => router.push("/help-and-rules")}
+    >
+      <Ionicons name="help-circle-outline" size={20} color={COLORS.white} />
+      <Text style={styles.helpButtonText}>راهنما و قوانین</Text>
+    </TouchableOpacity>
+
+
       {/* YOUR RECOMMENDATIONS */}
       <View style={styles.booksHeader}>
         <Text style={styles.booksTitle}>کار های ثبت شده شما</Text>

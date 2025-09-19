@@ -164,6 +164,21 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  helpButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: "#e17055",
+  padding: 12,
+  borderRadius: 8,
+  marginVertical: 10,
+},
+helpButtonText: {
+  marginLeft: 8,
+  fontSize: 16,
+  color: COLORS.white,
+  fontWeight: "600",
+},
   addButtonText: {
     color: COLORS.white,
     fontWeight: "600",
