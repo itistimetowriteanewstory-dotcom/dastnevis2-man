@@ -3,18 +3,18 @@ import { View, Text, KeyboardAvoidingView, Platform, ScrollView, TextInput, Touc
 import { useRouter } from "expo-router";
 import styles from "../../assets/styles/create.styles";
 import { Ionicons } from "@expo/vector-icons";
-import COLORS from '../../constants/colors';
+import COLORS from '../../colectionColor/colors';
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import {useAuthStore} from "../../store/authStore";
-import { API_URL } from '../../constants/api';
+import { API_URL } from '../../colectionColor/api';
 
 export default function Create() {
-  const [title, setTitle] = useState("");           // عنوان (رشته‌ی خالی به عنوان مقدار اولیه)
-const [caption, setCaption] = useState("");       // کپشن یا توضیح (رشته‌ی خالی)         // امتیاز (عدد ۳ به عنوان مقدار اولیه)
-const [image, setImage] = useState(null);         // تصویر (در ابتدا null)
-const [imageBase64, setImageBase64] = useState(null); // نسخه‌ی Base64 تصویر (در ابتدا null)
-const [loading, setLoading] = useState(false);    // وضعیت بارگذاری (در ابتدا false)
+  const [title, setTitle] = useState("");           
+const [caption, setCaption] = useState("");       
+const [image, setImage] = useState(null);         
+const [imageBase64, setImageBase64] = useState(null); 
+const [loading, setLoading] = useState(false);    
 const [phoneNumber, setPhoneNumber] = useState("");
 const [jobtitle, setJobtitle] = useState("");
 const [income, setIncome] = useState("");
@@ -90,7 +90,7 @@ if(!result.canceled) {
     const imageDataUri = `data:${imageType};base64,${imageBase64}`;
 
     // ارسال درخواست POST به سرور
-    const response = await fetch(`${API_URL}/books`, {
+    const response = await fetch(`${API_URL}/jobs`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`, // اصلاح حروف بزرگ
@@ -165,14 +165,14 @@ if(!result.canceled) {
       </View>
 
       <View style={styles.form}>
-        { /* book title */}
+        { /* job title */}
         <View style={styles.formGroup}>
   <Text style={styles.label}>عنوان شغل</Text>
   <View style={styles.inputContainer}>
   
     <TextInput
       style={styles.input}
-      placeholder="مثال: به یک داکتر در شفاخانه ابن سینا نیاز داریم"
+      placeholder="مثال: به یک داکتر در شفا خانه ابن سینا نیاز داریم"
       placeholderTextColor={COLORS.placeholderText}
       value={title}
       onChangeText={setTitle}

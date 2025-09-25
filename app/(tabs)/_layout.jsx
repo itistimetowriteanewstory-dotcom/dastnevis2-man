@@ -36,7 +36,7 @@ export default function TabLayout() {
         />)
      }}
      />
-     <Tabs.Screen name="create" 
+     <Tabs.Screen name="createJobs" 
      options={{
         title: "ثبت شغل",
          tabBarIcon: ({color, size}) => (<Ionicons 

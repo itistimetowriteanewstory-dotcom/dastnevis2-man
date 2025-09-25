@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { useAuthStore } from "../store/authStore";
 import styles from "../assets/styles/profile.styles";
 import { Ionicons } from "@expo/vector-icons";
-import COLORS from "../constants/colors";
+import COLORS from "../colectionColor/colors";
 
 export default function LogoutButton() {
   const { logout } = useAuthStore();

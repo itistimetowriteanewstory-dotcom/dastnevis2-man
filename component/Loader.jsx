@@ -1,5 +1,5 @@
 import { View, Text, ActivityIndicator } from 'react-native'
-import COLORS from '../constants/colors'
+import COLORS from '../colectionColor/colors'
 
 
 export default function Loader() {

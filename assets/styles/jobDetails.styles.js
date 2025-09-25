@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
-import COLORS from '../../constants/colors';
+import COLORS from '../../colectionColor/colors';
 
-const bookear = StyleSheet.create({
+const jobdetails = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -30,7 +30,7 @@ const bookear = StyleSheet.create({
     color: COLORS.textPrimary,
   },
 
-  bookImage: {
+  jobImage: {
     width: '100%',
     height: 220,
     borderRadius: 14,
@@ -66,12 +66,12 @@ const bookear = StyleSheet.create({
   },
 
   date: {
-    fontSize: 13,
+    fontSize: 15,
     color: COLORS.textSecondary,
     textAlign: 'left',
   },
 });
 
-export default bookear;
+export default jobdetails;
 
 

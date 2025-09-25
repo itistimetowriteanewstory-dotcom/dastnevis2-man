@@ -1,6 +1,6 @@
-// styles/create.styles.js
+
 import { StyleSheet } from "react-native";
-import COLORS from "../../constants/colors";
+import COLORS from "../../colectionColor/colors";
 
 const styles = StyleSheet.create({
   container: {
@@ -83,16 +83,7 @@ const styles = StyleSheet.create({
     height: 100,
     color: COLORS.textDark,
   },
-  ratingContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: COLORS.inputBackground,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: 8,
-  },
+
   starButton: {
     padding: 8,
   },

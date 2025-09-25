@@ -1,6 +1,6 @@
 // styles/home.styles.js
 import { StyleSheet } from "react-native";
-import COLORS from "../../constants/colors";
+import COLORS from "../../colectionColor/colors";
 
 const styles = StyleSheet.create({
   container: {
@@ -31,12 +31,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
    
   },
-  headerSubtitle: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    
-  },
-  bookCard: {
+  
+  jobCard: {
     backgroundColor: COLORS.cardBackground,
     borderRadius: 16,
     marginBottom: 20,
@@ -49,12 +45,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  bookHeader: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    marginBottom: 12,
-  },
+ 
   userInfo: {
     flexDirection: "row",
     alignItems: "center",
@@ -63,41 +54,45 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    marginLeft: 10,
+    marginLeft: 5,
    
   },
+   jobContent: {
+    flexDirection: "row-reverse",   // چینش افقی
+    alignItems: "flex-start",
+ },
   username: {
     fontSize: 15,
     fontWeight: "600",
     color: COLORS.textPrimary,
     
   },
-  bookImageContainer: {
-    width: "100%",
-    height: 200,
+  jobImageContainer: {
+    width: 130,
+    height: 160,
     borderRadius: 12,
     overflow: "hidden",
-    marginBottom: 12,
-    backgroundColor: COLORS.border,
+    marginRight: 12,
+    backgroundColor: COLORS.border, 
+    marginTop: 5,
   },
-  bookImage: {
+  jobImage: {
     width: "100%",
     height: "100%",
+    
   },
-  bookDetails: {
-    padding: 4,
+  jobDetails: {
+    flex: 1,
+    justifyContent: "flex-start",
   },
-  bookTitle: {
+  jobTitle: {
     fontSize: 18,
     fontWeight: "700",
     color: COLORS.textPrimary,
     marginBottom: 6,
 
   },
-  ratingContainer: {
-    flexDirection: "row",
-    marginBottom: 8,
-  },
+
   caption: {
     fontSize: 14,
     color: COLORS.textDark,
@@ -107,7 +102,7 @@ const styles = StyleSheet.create({
   
   },
   date: {
-    fontSize: 12,
+    fontSize: 14,
     color: COLORS.textSecondary,
   },
   emptyContainer: {

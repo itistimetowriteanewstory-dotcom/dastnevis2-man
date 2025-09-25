@@ -1,6 +1,6 @@
 // styles/profile.styles.js
 import { StyleSheet } from "react-native";
-import COLORS from "../../constants/colors";
+import COLORS from "../../colectionColor/colors";
 
 const styles = StyleSheet.create({
   container: {
@@ -73,25 +73,25 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 8,
   },
-  booksHeader: {
+  jobsHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
   },
-  booksTitle: {
+  jobsTitle: {
     fontSize: 18,
     fontWeight: "700",
     color: COLORS.textPrimary,
   },
-  booksCount: {
+  jobsCount: {
     fontSize: 14,
     color: COLORS.textSecondary,
   },
-  booksList: {
+  jobsList: {
     paddingBottom: 20,
   },
-  bookItem: {
+  jobItem: {
     flexDirection: "row",
     backgroundColor: COLORS.cardBackground,
     borderRadius: 12,
@@ -105,33 +105,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  bookImage: {
+  jobImage: {
     width: 70,
     height: 100,
     borderRadius: 8,
     marginRight: 12,
   },
-  bookInfo: {
+  jobInfo: {
     flex: 1,
     justifyContent: "space-between",
   },
-  bookTitle: {
+  jobTitle: {
     fontSize: 16,
     fontWeight: "600",
     color: COLORS.textPrimary,
     marginBottom: 4,
   },
-  ratingContainer: {
-    flexDirection: "row",
-    marginBottom: 4,
-  },
-  bookCaption: {
+
+  jobCaption: {
     fontSize: 14,
     color: COLORS.textDark,
     marginBottom: 4,
     flex: 1,
   },
-  bookDate: {
+  jobDate: {
     fontSize: 12,
     color: COLORS.textSecondary,
   },

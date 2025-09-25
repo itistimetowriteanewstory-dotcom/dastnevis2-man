@@ -9,21 +9,21 @@ import {
   RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { API_URL } from "../../constants/api";
+import { API_URL } from "../../colectionColor/api";
 import { useAuthStore } from "../../store/authStore";
 import styles from "../../assets/styles/profile.styles";
 import ProfileHeader from "../../component/ProfileHeader";
 import LogoutButton from "../../component/LogoutButton";
 import { Ionicons } from "@expo/vector-icons";
-import COLORS from "../../constants/colors";
+import COLORS from "../../colectionColor/colors";
 import { Image } from "expo-image";
 import Loader from "../../component/Loader";
 
 export default function Profile() {
-  const [books, setBooks] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [deleteBookId, setDeleteBookId] = useState(null);
+  const [deleteJobId, setDeleteJobId] = useState(null);
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -35,14 +35,14 @@ export default function Profile() {
     try {
       setIsLoading(true);
 
-      const response = await fetch(`${API_URL}/books/user`, {
+      const response = await fetch(`${API_URL}/jobs/user`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "امکان بارگذاری شغل های ثبت شده شما وجود ندارد");
 
-      setBooks(data);
+      setJobs(data);
     } catch (error) {
       console.error("دریافت اطلاعات با خطا مواجه شد:", error);
       Alert.alert("خطا", "بارگذاری اطلاعات کاربر با خطا مواجه شد. برای تازه سازی صفحه را پایین بکشید");
@@ -55,11 +55,11 @@ export default function Profile() {
     fetchData();
   }, []);
 
-  const handleDeleteBook = async (bookId) => {
+  const handleDeleteJobs = async (jobId) => {
     try {
-      setDeleteBookId(bookId);
+      setDeleteJobId(jobId);
 
-      const response = await fetch(`${API_URL}/books/${bookId}`, {
+      const response = await fetch(`${API_URL}/jobs/${jobId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -67,38 +67,38 @@ export default function Profile() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "خطا در پاک کردن شغل");
 
-      setBooks(books.filter((book) => book._id !== bookId));
+      setJobs(jobs.filter((job) => job._id !== jobId));
       Alert.alert("موفقیت آمیز", "شغل حذف شد");
     } catch (error) {
       Alert.alert("خطا", error.message || "خطا در پاک کردن شغل");
     } finally {
-      setDeleteBookId(null);
+      setDeleteJobId(null);
     }
   };
 
-  const confirmDelete = (bookId) => {
+  const confirmDelete = (jobId) => {
     Alert.alert("حذف شغل؟", "آیا میخواهید شغل مورد نظر را پاک کنید؟", [
       { text: "لغو", style: "cancel" },
-      { text: "حذف", style: "destructive", onPress: () => handleDeleteBook(bookId) },
+      { text: "حذف", style: "destructive", onPress: () => handleDeleteJobs(jobId) },
     ]);
   };
 
-  const renderBookItem = ({ item }) => (
-    <View style={styles.bookItem}>
-      <Image source={item.image} style={styles.bookImage} />
-      <View style={styles.bookInfo}>
-        <Text style={styles.bookTitle}>{item.title}</Text>
+  const renderJobItem = ({ item }) => (
+    <View style={styles.jobItem}>
+      <Image source={item.image} style={styles.jobImage} />
+      <View style={styles.jobInfo}>
+        <Text style={styles.jobTitle}>{item.title}</Text>
        {item.income && (
-  <Text style={styles.bookTitle}>معاش:افغانی {item.income}</Text>
+  <Text style={styles.jobTitle}>معاش:افغانی {item.income}</Text>
 )}
-        <Text style={styles.bookCaption} numberOfLines={2}>
+        <Text style={styles.jobCaption} numberOfLines={2}>
           {item.caption}
         </Text>
-        <Text style={styles.bookDate}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+        <Text style={styles.jobDate}>{new Date(item.createdAt).toLocaleDateString()}</Text>
       </View>
 
       <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item._id)}>
-        {deleteBookId === item._id ? (
+        {deleteJobId === item._id ? (
           <ActivityIndicator size="small" color={COLORS.primary} />
         ) : (
           <Ionicons name="trash-outline" size={20} color={COLORS.primary} />
@@ -133,17 +133,17 @@ export default function Profile() {
 
 
       {/* YOUR RECOMMENDATIONS */}
-      <View style={styles.booksHeader}>
-        <Text style={styles.booksTitle}>کار های ثبت شده شما</Text>
-        <Text style={styles.booksCount}>{books.length} شغل</Text>
+      <View style={styles.jobsHeader}>
+        <Text style={styles.jobsTitle}>کار های ثبت شده شما</Text>
+        <Text style={styles.jobsCount}>{jobs.length} شغل</Text>
       </View>
 
       <FlatList
-        data={books}
-        renderItem={renderBookItem}
+        data={jobs}
+        renderItem={renderJobItem}
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.booksList}
+        contentContainerStyle={styles.jobsList}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -156,7 +156,7 @@ export default function Profile() {
           <View style={styles.emptyContainer}>
             <Ionicons name="briefcase-outline" size={50} color={COLORS.textSecondary} />
             <Text style={styles.emptyText}>شغلی اضافه نشده</Text>
-            <TouchableOpacity style={styles.addButton} onPress={() => router.push("/create")}>
+            <TouchableOpacity style={styles.addButton} onPress={() => router.push("/createJobs")}>
               <Text style={styles.addButtonText}>اولین موقعیت شغلی خودرا ثبت کنید</Text>
             </TouchableOpacity>
           </View>
