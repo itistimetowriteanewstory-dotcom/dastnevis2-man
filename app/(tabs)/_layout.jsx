@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import COLORS from "../../constants/colors";
+import COLORS from "../../colectionColor/colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 
