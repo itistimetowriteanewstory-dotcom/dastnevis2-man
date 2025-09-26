@@ -177,12 +177,12 @@ refreshControl={
       {/* جستجو بر اساس عنوان */}
       <TextInput
         style={{
-          backgroundColor: COLORS.background,
+          backgroundColor: COLORS.black,
           padding: 10,
           borderRadius: 8,
           marginBottom: 8,
           borderWidth: 1,
-          borderColor: COLORS.textSecondary
+          borderColor: COLORS.black
         }}
         placeholder="کار مورد نظر خود را بنویسید"
         value={searchQuery}
@@ -192,11 +192,11 @@ refreshControl={
       {/* فیلتر بر اساس شهر */}
       <TextInput
         style={{
-          backgroundColor: COLORS.background,
+          backgroundColor: COLORS.black,
           padding: 10,
           borderRadius: 8,
           borderWidth: 1,
-          borderColor: COLORS.textSecondary
+          borderColor: COLORS.black
         }}
         placeholder="ولایت خود را بنویسید"
         value={locationFilter}

@@ -91,6 +91,7 @@ if (result.token) {
     <TextInput 
     style={styles.input}
     placeholder='ایمیل خود را وارد کنید'
+    placeholderTextColor={COLORS.placeholderText}
     value={email}
     onChangeText={setEmail}
     keyboardType='email-address'
