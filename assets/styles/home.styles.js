@@ -1,4 +1,4 @@
-// styles/home.styles.js
+
 import { StyleSheet } from "react-native";
 import COLORS from "../../colectionColor/colors";
 
@@ -6,9 +6,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-  writingDirection: 'rtl', // برای iOS
-
-
+    writingDirection: 'rtl', // برای iOS
   },
   loadingContainer: {
     flex: 1,
@@ -29,7 +27,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     color: COLORS.primary,
     marginBottom: 8,
-   
   },
   
   jobCard: {
@@ -55,17 +52,15 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
     marginLeft: 5,
-   
   },
-   jobContent: {
+  jobContent: {
     flexDirection: "row-reverse",   // چینش افقی
     alignItems: "flex-start",
- },
+  },
   username: {
     fontSize: 15,
     fontWeight: "600",
     color: COLORS.textPrimary,
-    
   },
   jobImageContainer: {
     width: 130,
@@ -79,7 +74,6 @@ const styles = StyleSheet.create({
   jobImage: {
     width: "100%",
     height: "100%",
-    
   },
   jobDetails: {
     flex: 1,
@@ -90,7 +84,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.textPrimary,
     marginBottom: 6,
-
   },
 
   caption: {
@@ -98,8 +91,7 @@ const styles = StyleSheet.create({
     color: COLORS.textDark,
     marginBottom: 8,
     lineHeight: 20,
-  writingDirection: 'rtl',
-  
+    writingDirection: 'rtl',
   },
   date: {
     fontSize: 14,
@@ -129,3 +121,4 @@ const styles = StyleSheet.create({
 });
 
 export default styles;
+
