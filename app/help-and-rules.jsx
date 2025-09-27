@@ -39,11 +39,16 @@ export default function HelpAndRulesScreen() {
         <Text style={styles.text}>- هرگونه تخلف منجر به محدودیت دسترسی خواهد شد.</Text>
          <Text style={styles.text}>- هر شغلی که خلاف با قوانین اسلامی باشد در اسرع وقت از برنامه پاک خواهد شد و پیگرد قانونی دارد.</Text>
            <Text style={styles.text}>- در صورت ارسال تخلف بعد از بررسی های کارشناسان اگر تخلفی رخ نداده باشد کابر با پیگرد قانونی رو به رو خواهد شد.</Text>
+           
+      </View>
+      <View style={styles.shatter}>
+         <Text style={styles.text}>- الهام گرفته از codesistency</Text>
       </View>
 
        <View style={styles.footer}>
-        <Text style={styles.footerText}>طراحی و توسعه داده شده توسط </Text>
+        <Text style={styles.footerText}> طراحی و توسعه داده شده توسط </Text>
          <Text style={styles.footerText}>سید مهدی موسوی</Text>
+          
       </View>
 
     </ScrollView>
@@ -76,5 +81,8 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: "bold", marginBottom: 8 },
   text: { fontSize: 14, marginBottom: 6, lineHeight: 20 },
   email: { fontSize: 16, color: "blue", textDecorationLine: "underline", marginTop: 8 },
+  shatter: {
+    marginBottom: -30,
+  }
 });
 
