@@ -178,7 +178,6 @@ refreshControl={
       <TextInput
         style={{
           backgroundColor: COLORS.background,
-          placeholderTextColor: COLORS.placeholderText,
           padding: 10,
           borderRadius: 8,
           marginBottom: 8,
@@ -186,6 +185,7 @@ refreshControl={
           borderColor: COLORS.textSecondary
         }}
         placeholder="کار مورد نظر خود را بنویسید"
+        placeholderTextColor={COLORS.placeholderText}
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
@@ -194,13 +194,13 @@ refreshControl={
       <TextInput
         style={{
           backgroundColor: COLORS.background,
-          placeholderTextColor: COLORS.placeholderText,
           padding: 10,
           borderRadius: 8,
           borderWidth: 1,
           borderColor: COLORS.textSecondary
         }}
         placeholder="ولایت خود را بنویسید"
+        placeholderTextColor={COLORS.placeholderText}
         value={locationFilter}
         onChangeText={setLocationFilter}
       />
