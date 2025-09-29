@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "163001716794",
-    "project_id": "minebook-66410",
-    "storage_bucket": "minebook-66410.firebasestorage.app"
+    "project_number": "166500244039",
+    "project_id": "dastnevis-2877d",
+    "storage_bucket": "dastnevis-2877d.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:163001716794:android:9c13e81fc0fbd45f9f2503",
+        "mobilesdk_app_id": "1:166500244039:android:137d2e4f2b73fe385e6f62",
         "android_client_info": {
-          "package_name": "com.anonymous.mobile"
+          "package_name": "com.dastnevis.mobile"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB4sFY7Y45dxAvbXcUYCqOBLKXSUO0NYqo"
+          "current_key": "AIzaSyBkswYTlxy9keYqUQUxplNO8QcjdIdOoD0"
         }
       ],
       "services": {
