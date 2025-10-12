@@ -24,6 +24,7 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [deleteJobId, setDeleteJobId] = useState(null);
+  const [properties, setProperties] = useState([]);
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -35,21 +36,29 @@ export default function Profile() {
     try {
       setIsLoading(true);
 
-      const response = await fetch(`${API_URL}/jobs/user`, {
+       const jobsRes = await fetch(`${API_URL}/jobs/user`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      const jobsData = await jobsRes.json();
+      if (!jobsRes.ok) throw new Error(jobsData.message || "خطا در بارگذاری شغل‌ها");
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "امکان بارگذاری شغل های ثبت شده شما وجود ندارد");
+      // گرفتن آگهی‌های ملکی
+      const propsRes = await fetch(`${API_URL}/properties/user`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const propsData = await propsRes.json();
+      if (!propsRes.ok) throw new Error(propsData.message || "خطا در بارگذاری ملک‌ها");
 
-      setJobs(data);
+      setJobs(jobsData);
+      setProperties(propsData);
     } catch (error) {
-      console.error("دریافت اطلاعات با خطا مواجه شد:", error);
-      Alert.alert("خطا", "بارگذاری اطلاعات کاربر با خطا مواجه شد. برای تازه سازی صفحه را پایین بکشید");
+      console.error("خطا در دریافت اطلاعات:", error);
+      Alert.alert("خطا", "بارگذاری اطلاعات کاربر با خطا مواجه شد");
     } finally {
       setIsLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchData();
@@ -83,13 +92,44 @@ export default function Profile() {
     ]);
   };
 
+  const handleDeleteProperty = async (propertyId) => {
+  try {
+    const response = await fetch(`${API_URL}/properties/${propertyId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "خطا در پاک کردن ملک");
+
+    setProperties(properties.filter((p) => p._id !== propertyId));
+    Alert.alert("موفقیت آمیز", "ملک حذف شد");
+  } catch (error) {
+    Alert.alert("خطا", error.message || "خطا در پاک کردن ملک");
+  }
+};
+
+const confirmDeleteProperty = (propertyId) => {
+  Alert.alert(
+    "حذف ملک؟",
+    "آیا می‌خواهید آگهی ملک مورد نظر را پاک کنید؟",
+    [
+      { text: "لغو", style: "cancel" },
+      { text: "حذف", style: "destructive", onPress: () => handleDeleteProperty(propertyId) },
+    ]
+  );
+};
+
+
+
+
   const renderJobItem = ({ item }) => (
     <View style={styles.jobItem}>
       <Image source={item.image} style={styles.jobImage} />
       <View style={styles.jobInfo}>
         <Text style={styles.jobTitle}>{item.title}</Text>
        {item.income && (
-  <Text style={styles.jobTitle}>معاش:افغانی {item.income}</Text>
+  <Text style={styles.jobTitle}>معاش: {item.income}افغانی</Text>
 )}
         <Text style={styles.jobCaption} numberOfLines={2}>
           {item.caption}
@@ -106,6 +146,36 @@ export default function Profile() {
       </TouchableOpacity>
     </View>
   );
+
+  const renderPropertyItem = ({ item }) => (
+    <View style={styles.jobItem}>
+      <Image source={item.image} style={styles.jobImage} />
+      <View style={styles.jobInfo}>
+        <Text style={styles.jobTitle}>{item.title}</Text>
+        {item.price && <Text style={styles.jobTitle}>قیمت: {item.price}</Text>}
+        <Text style={styles.jobCaption} numberOfLines={2}>
+          {item.description}
+        </Text>
+        <Text style={styles.jobDate}>
+          {new Date(item.createdAt).toLocaleDateString()}
+        </Text>
+      </View>
+          {/* دکمه حذف ملک */}
+    <TouchableOpacity
+      style={styles.deleteButton}
+      onPress={() => confirmDeleteProperty(item._id)}
+    >
+      <Ionicons name="trash-outline" size={20} color={COLORS.primary} />
+    </TouchableOpacity>
+
+    </View>
+  );
+
+const allAds = [
+  ...jobs.map((j) => ({ ...j, adType: "job" })),
+  ...properties.map((p) => ({ ...p, adType: "property" })),
+].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // مرتب‌سازی بر اساس تاریخ
+
 
 
   const handleRefresh = async () => {
@@ -134,30 +204,33 @@ export default function Profile() {
 
       {/* YOUR RECOMMENDATIONS */}
       <View style={styles.jobsHeader}>
-        <Text style={styles.jobsTitle}>کار های ثبت شده شما</Text>
-        <Text style={styles.jobsCount}>{jobs.length} شغل</Text>
+        <Text style={styles.jobsTitle}>آگهی های ثبت شده توسط شما</Text>
+        <Text style={styles.jobsCount}>{allAds.length} آگهی</Text>
       </View>
 
       <FlatList
-        data={jobs}
-        renderItem={renderJobItem}
-        keyExtractor={(item) => item._id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.jobsList}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={[COLORS.primary]}
-            tintColor={COLORS.primary}
-          />
+  data={allAds}
+  renderItem={({ item }) =>
+    item.adType === "job" ? renderJobItem({ item }) : renderPropertyItem({ item })
+  }
+  keyExtractor={(item) => item._id}
+  showsVerticalScrollIndicator={false}
+  contentContainerStyle={styles.jobsList}
+  refreshControl={
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={handleRefresh}
+      colors={[COLORS.primary]}
+      tintColor={COLORS.primary}
+    />
+
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="briefcase-outline" size={50} color={COLORS.textSecondary} />
-            <Text style={styles.emptyText}>شغلی اضافه نشده</Text>
-            <TouchableOpacity style={styles.addButton} onPress={() => router.push("/createJobs")}>
-              <Text style={styles.addButtonText}>اولین موقعیت شغلی خودرا ثبت کنید</Text>
+            <Text style={styles.emptyText}>آگهی تا هنوز اضافه نشده است</Text>
+            <TouchableOpacity style={styles.addButton} onPress={() => router.push("/createAdChoice")}>
+              <Text style={styles.addButtonText}>اولین آگهی خودرا ثبت کنید</Text>
             </TouchableOpacity>
           </View>
         }

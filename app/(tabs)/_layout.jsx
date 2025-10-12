@@ -36,9 +36,9 @@ export default function TabLayout() {
         />)
      }}
      />
-     <Tabs.Screen name="createJobs" 
+     <Tabs.Screen name="createAdChoice" 
      options={{
-        title: "ثبت شغل",
+        title: "ثیت آگهی",
          tabBarIcon: ({color, size}) => (<Ionicons 
         name="add-circle-outline"
         size={size}

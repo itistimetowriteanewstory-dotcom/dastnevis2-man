@@ -9,6 +9,8 @@ import COLORS from '../../colectionColor/colors';
 import { formatPublishDate } from '../../lib/utils';
 import Loader from '../../component/Loader';
 import { Link } from 'expo-router';
+import { Picker } from '@react-native-picker/picker';
+
 
 export default function Home() {
   const {token} = useAuthStore();
@@ -19,129 +21,145 @@ export default function Home() {
   const [addMore, setAddMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 const [locationFilter, setLocationFilter] = useState("");
+ const [filterType, setFilterType] = useState("all");
+
+const fetchAllData = async (pageNum = 1, refresh = false) => {
+  try {
+    if (refresh) setRefreshing(true);
+    else if (pageNum === 1) setLoading(true);
+
+    // درخواست همزمان به دو API
+    const [jobsRes, propsRes] = await Promise.all([
+      fetch(`${API_URL}/jobs?page=${pageNum}&limit=5`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`${API_URL}/properties?page=${pageNum}&limit=5`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ]);
+
+    const jobsData = await jobsRes.json();
+    const propsData = await propsRes.json();
+
+    if (!jobsRes.ok) throw new Error(jobsData.message || "خطا در گرفتن آگهی‌های شغلی");
+    if (!propsRes.ok) throw new Error(propsData.message || "خطا در گرفتن آگهی‌های ملکی");
+
+    // ترکیب دو لیست و مرتب‌سازی بر اساس تاریخ
+    const combined = [...jobsData.jobs, ...propsData.properties].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    setJobs(pageNum === 1 || refresh ? combined : [...jobs, ...combined]);
+   setAddMore(pageNum < jobsData.totalPages || pageNum < propsData.totalPages);
+    setPage(pageNum);
+  } catch (error) {
+    console.error("fetch error:", error);
+  } finally {
+    if (refresh) setRefreshing(false);
+    else setLoading(false);
+  }
+};
 
 
-
-  const fetchJobs = async (pageNum=1, refresh=false) => {
-
-try {
-  if(refresh) setRefreshing(true);
-  else if(pageNum===1) setLoading(true);
-
-const response = await fetch(`${API_URL}/jobs?page=${pageNum}&limit=5`, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
-const data = await response.json();
-if(!response.ok) throw new Error(data.message || "failed to fetch jobs ");
-
-
-
-
-const uniqueJobs =
-  refresh || pageNum === 1
-    ? data.jobs
-    : Array.from(
-        new Set([...jobs, ...data.jobs].map((job) => job._id))
-      ).map((id) =>
-        [...jobs, ...data.jobs].find((job) => job._id === id)
-      );
-
-setJobs(uniqueJobs);
-
-
-
-setAddMore(pageNum < data.totalPages);
-setPage(pageNum)
-
-} catch (error) {
  
-}finally{
-  if(refresh) setRefreshing(false);
-  else setLoading(false);
-}
-
-  };
 
   useEffect(() =>{
-    fetchJobs()
+    fetchAllData()
   },[]);
 
   const handleLoadMore = async () => {
    if(addMore && !loading && !refreshing) {
-    await fetchJobs(page + 1);
+    await fetchAllData(page + 1);
    }
   };
 
-const filteredjobs = jobs.filter(job => {
-  const matchesTitle = job.title.toLowerCase().includes(searchQuery.toLowerCase());
-  const matchesLocation = locationFilter
-    ? (job.location && job.location.toLowerCase().includes(locationFilter.toLowerCase()))
-    : true;
-  return matchesTitle && matchesLocation;
-});
+   const filteredjobs = jobs.filter(job => {
+    const matchesTitle = job.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesLocation = locationFilter
+      ? (job.location && job.location.toLowerCase().includes(locationFilter.toLowerCase()))
+      : true;
 
-  const renderItem = ({ item }) => (
-  <Link
-    href={{
-      pathname: '/job-details',
-      params: { job: JSON.stringify(item) },
-    }}
-    asChild
-  >
+    const isJob = !!job.income;
+    const matchesType =
+      filterType === "all" ||
+      (filterType === "jobs" && isJob) ||
+      (filterType === "properties" && !isJob);
 
-    <TouchableOpacity activeOpacity={0.5}>
-      <View style={styles.jobCard}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.userInfo}>
-            <Image
-              source={{ uri: item.user?.profileImage }}
-              style={styles.avatar}
-            />
-            <Text style={styles.username}>{item.user?.username}</Text>
+    return matchesTitle && matchesLocation && matchesType;
+  });
+
+
+ 
+const renderItem = ({ item }) => {
+  const isJob = !!item.income; // اگر income داشت یعنی شغل است
+
+  return (
+    <Link
+      href={{
+        pathname: isJob ? "/job-details" : "/property-details",
+        params: { data: JSON.stringify(item) }, // 👈 ارسال کل آیتم به صفحه جزئیات
+      }}
+      asChild
+    >
+      <TouchableOpacity activeOpacity={0.5}>
+        <View style={styles.jobCard}>
+          <View style={styles.header}>
+            <View style={styles.userInfo}>
+              <Image source={{ uri: item.user?.profileImage }} style={styles.avatar} />
+              <Text style={styles.username}>{item.user?.username}</Text>
+            </View>
           </View>
-        </View>
 
-        {/* Title */}
-        <Text style={styles.jobTitle}>{item.title}</Text>
+          <Text style={styles.jobTitle}>{item.title}</Text>
 
-        {/* Content (image + details) */}
-        <View style={styles.jobContent}>
+          <View style={styles.jobContent}>
+            {/* 👇 عکس شغل یا ملک */}
+            {isJob && item.image && (
+              <View style={styles.jobImageContainer}>
+                <Image source={{ uri: item.image }} style={styles.jobImage} contentFit="cover" />
+              </View>
+            )}
+
+          {!isJob && item.image && (
           <View style={styles.jobImageContainer}>
-            <Image source={item.image} style={styles.jobImage} contentFit="cover" />
-          </View>
+           <Image source={{ uri: item.image }} style={styles.jobImage} contentFit="cover" />
+         </View>
+           )}
 
-          <View style={styles.jobDetails}>
-           
+            <View style={styles.jobDetails}>
+              {item.location && <Text style={styles.jobTitle}>ولایت: {item.location}</Text>}
 
-            {item.location && (
-              <Text style={styles.jobTitle}>ولایت: {item.location}</Text>
-            )}
 
-            {item.income && (
-              <Text style={styles.jobTitle}>معاش: افغانی {item.income}</Text>
-            )}
+              {isJob && item.income && (
+                <Text style={styles.jobTitle}>معاش: {item.income}.افغانی</Text>
+              )}
 
-             {item.phoneNumber && (
-              <Text style={styles.jobTitle}>نمبر تلفون: {item.phoneNumber}</Text>
-            )}
+              {!isJob && (
+                <>
+                  {item.price && <Text style={styles.jobTitle}>قیمت فروش: {item.price}.افغانی</Text>}
+                  {item.rentPrice && <Text style={styles.jobTitle}>اجاره: {item.rentPrice}.افغانی</Text>}
+                  {item.mortgagePrice && <Text style={styles.jobTitle}>رهن: {item.mortgagePrice}.افغانی</Text>}
+                </>
+              )}
 
-            <Text style={styles.caption} numberOfLines={2} ellipsizeMode="tail">
-              {item.caption}
-            </Text>
+              {item.phoneNumber && (
+                <Text style={styles.jobTitle}>نمبر تلفون: {item.phoneNumber}</Text>
+              )}
 
-            <Text style={styles.date}>
-              ثبت شده در تاریخ {formatPublishDate(item.createdAt)}
-            </Text>
+              <Text style={styles.caption} numberOfLines={2} ellipsizeMode="tail">
+                {item.description || item.caption}
+              </Text>
+
+              <Text style={styles.date}>
+                ثبت شده در تاریخ {formatPublishDate(item.createdAt)}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  </Link>
-);
-
+      </TouchableOpacity>
+    </Link>
+  );
+};
 
 
   if (loading) return <Loader />;
@@ -151,7 +169,7 @@ const filteredjobs = jobs.filter(job => {
   return (
     <View style={styles.container}>
       <FlatList 
-      data={searchQuery || locationFilter ? filteredjobs : jobs}
+      data={filteredjobs}
     
       renderItem={renderItem}
       keyExtractor={(item) => item._id}
@@ -161,7 +179,7 @@ const filteredjobs = jobs.filter(job => {
 refreshControl={
   <RefreshControl 
    refreshing={refreshing}
-   onRefresh={()=> fetchJobs(1, true)}
+   onRefresh={()=> fetchAllData(1, true)}
    colors={[COLORS.primary]}
    tintColor={COLORS.primary}
   />
@@ -204,6 +222,24 @@ refreshControl={
         value={locationFilter}
         onChangeText={setLocationFilter}
       />
+
+      {/* 👇 دراپ‌داون انتخاب نوع */}
+            <Picker
+              selectedValue={filterType}
+              onValueChange={(value) => setFilterType(value)}
+              style={{
+                backgroundColor: COLORS.background,
+                borderWidth: 1,
+                borderColor: COLORS.textSecondary,
+                borderRadius: 8,
+                marginTop: 8
+              }}
+            >
+              <Picker.Item label="همه آگهی‌ها" value="all" />
+              <Picker.Item label="فقط کارها" value="jobs" />
+              <Picker.Item label="فقط املاک" value="properties" />
+            </Picker>
+
     </View>
   </View>
       }
