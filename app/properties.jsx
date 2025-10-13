@@ -156,6 +156,7 @@ export default function Properties() {
     { label: 'گرو', value: 'mortgage', color: COLORS.black },
     { label: 'گرو و کرایه', value: 'rent_mortgage', color: COLORS.black }
   ]}
+  useNativeAndroidPickerStyle={false}
   style={{
     inputIOS: {
       backgroundColor: '#f9e6ba',
@@ -195,6 +196,7 @@ export default function Properties() {
               value={locationFilter}
               onChangeText={setLocationFilter}
             />
+
           </View>
         }
         ListFooterComponent={

@@ -158,6 +158,27 @@ propertyDate: {
   marginTop: 6,
 },
 
+ button: {
+    backgroundColor: COLORS.primary,   // رنگ پس‌زمینه
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#999',          // رنگ بوردر
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 8,
+     
+
+  },
+  buttonText: {
+    color: 'white',                // رنگ متن
+    fontSize: 18,                 // سایز متن
+    fontWeight: 'bold',
+    marginRight: 20,
+
+  },
+
 
 });
 

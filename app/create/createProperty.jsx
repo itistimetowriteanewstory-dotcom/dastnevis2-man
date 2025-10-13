@@ -239,6 +239,7 @@ export default function CreateProperty() {
       { label: 'گرو', value: 'mortgage', color: COLORS.black },
       { label: 'گرو و کرایه', value: 'rent_mortgage', color: COLORS.black }
     ]}
+    useNativeAndroidPickerStyle={false}
     style={{
       inputIOS: {
         backgroundColor: '#f9e6ba',
@@ -246,16 +247,16 @@ export default function CreateProperty() {
         padding: 12,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: COLORS.textSecondary,
+        borderColor: COLORS.border,
         marginTop: 8
       },
       inputAndroid: {
         backgroundColor: '#f9e6ba',
         color: COLORS.black,
-        padding: 5,
-        borderRadius: 15,
+        padding: 12,
+        borderRadius: 8,
         borderWidth: 1,
-        borderColor: COLORS.textSecondary,
+        borderColor: COLORS.border,
         marginTop: 8
       },
       placeholder: {

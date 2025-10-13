@@ -140,6 +140,13 @@ export default function Jobs() {
         ListHeaderComponent={
           <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
 
+            <TouchableOpacity
+      style={styles.button}
+      onPress={() => router.push('/properties')}
+    >
+      <Text style={styles.buttonText}>رفتن به صفحه آگهی های املاک</Text>
+    </TouchableOpacity>
+
             <TextInput
               style={{
                 backgroundColor: COLORS.background,
@@ -155,6 +162,8 @@ export default function Jobs() {
               onChangeText={setSearchQuery}
             />
 
+          
+
             <TextInput
               style={{
                 backgroundColor: COLORS.background,
@@ -169,46 +178,10 @@ export default function Jobs() {
               value={locationFilter}
               onChangeText={setLocationFilter}
             />
+         
+ 
 
-            <RNPickerSelect
-              onValueChange={(value) => {
-                setSelectedType(value);
-                if (value === "properties") {
-                  router.push("/properties");
-                }
-              }}
-              items={[
-                { label: 'آگهی‌های کار', value: 'jobs', color: COLORS.black },
-                { label: 'آگهی‌های ملک', value: 'properties', color: COLORS.black }
-              ]}
-              placeholder={{
-              label: 'نوع آگهی را انتخاب کنید', // 👈 متن دلخواه فارسی
-              value: null,
-              }}
-              style={{
-                inputIOS: {
-                  backgroundColor: '#f9e6ba',
-                  color: COLORS.black,
-                  padding: 12,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: COLORS.textSecondary,
-                  marginTop: 8
-                },
-                inputAndroid: {
-                  backgroundColor: '#f9e6ba',
-                  color: COLORS.black,
-                  padding: 12,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: COLORS.textSecondary,
-                  marginTop: 8
-                },
-                 placeholder: {
-                 color: COLORS.black
-                 }
-              }}
-            />
+
           </View>
         }
         ListFooterComponent={
