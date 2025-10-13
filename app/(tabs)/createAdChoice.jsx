@@ -12,7 +12,7 @@ export default function CreateAdChoice() {
 
       {/* دکمه ثبت آگهی شغلی */}
       <TouchableOpacity
-        style={[styles.button, { width: screenWidth - 40 }]} // 👈 دکمه تمام عرض با کمی فاصله از کناره‌ها
+        style={[styles.button, { marginHorizontal: 20, alignSelf: "stretch" }]} // 👈 دکمه تمام عرض با کمی فاصله از کناره‌ها
         onPress={() => router.push("/create/createJobs")}
       >
         <Text style={styles.buttonText}>ثبت آگهی شغلی</Text>
@@ -20,7 +20,7 @@ export default function CreateAdChoice() {
 
       {/* دکمه ثبت آگهی ملک */}
       <TouchableOpacity
-        style={[styles.button, { width: screenWidth - 40 }]}
+        style={[styles.button, { marginHorizontal: 20, alignSelf: "stretch" }]}
         onPress={() => router.push("/create/createProperty")}
       >
         <Text style={styles.buttonText}>ثبت آگهی ملک</Text>

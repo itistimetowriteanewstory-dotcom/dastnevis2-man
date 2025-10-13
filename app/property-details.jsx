@@ -88,21 +88,28 @@ export default function PropertyDetails() {
         {property.price && (
           <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
             <Ionicons name="cash-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  قیمت فروش: {property.price}</Text>
+            <Text style={styles.info}>  قیمت فروش: {property.price} افغانی</Text>
           </View>
         )}
 
         {property.rentPrice && (
           <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
             <Ionicons name="cash-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  اجاره: {property.rentPrice}</Text>
+            <Text style={styles.info}>  کرایه: {property.rentPrice} افغانی</Text>
           </View>
         )}
 
         {property.mortgagePrice && (
           <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
             <Ionicons name="business-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  رهن: {property.mortgagePrice}</Text>
+            <Text style={styles.info}>  گرو: {property.mortgagePrice} افغانی</Text>
+          </View>
+        )}
+
+         {property.area && (
+          <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
+            <Ionicons name="map-outline" size={20} color={COLORS.primary} />
+            <Text style={styles.info}>  متراژ: {property.area} متر مربع</Text>
           </View>
         )}
 

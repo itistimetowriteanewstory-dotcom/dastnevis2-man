@@ -118,6 +118,47 @@ const styles = StyleSheet.create({
   footerLoader: {
     marginVertical: 20,
   },
+
+  propertyCard: {
+  backgroundColor: "#faeccdff",
+  borderRadius: 10,
+  marginBottom: 12,
+  overflow: "hidden", // باعث میشه گوشه‌های گرد روی عکس هم اعمال بشه
+  borderWidth: 1,
+  borderColor: "#e2d6c1",
+},
+
+propertyImage: {
+  width: "100%",   // 👈 به اندازه عرض کارت
+  height: 180,     // ارتفاع ثابت (می‌تونی تغییر بدی)
+  resizeMode: "cover",
+  borderRadius: 12,
+},
+
+propertyContent: {
+  padding: 10,
+},
+
+propertyTitle: {
+  fontSize: 16,
+  fontWeight: "bold",
+  marginBottom: 6,
+  color: "#333",
+},
+
+propertyInfo: {
+  fontSize: 14,
+  color: "#555",
+  marginBottom: 4,
+},
+
+propertyDate: {
+  fontSize: 12,
+  color: "#999",
+  marginTop: 6,
+},
+
+
 });
 
 export default styles;

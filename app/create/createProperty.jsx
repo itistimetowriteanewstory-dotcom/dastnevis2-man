@@ -176,7 +176,7 @@ export default function CreateProperty() {
         <View style={styles.card}>
           <View style={styles.header}>
             <Text style={styles.title}>ثبت ملک برای فروش, گرو و کرایه</Text>
-            <Text style={styles.subtitle}> اگر ملکی برای فروش یا رهن و اجاره دارید میتوانید آنرا در اسرع وقت به فروش یا به اجاره بسپارید</Text>
+            <Text style={styles.subtitle}> اگر ملکی برای فروش یا گرو و کرایه دارید میتوانید آنرا در اسرع وقت به فروش یا به کرایه بسپارید</Text>
           </View>
 
           <View style={styles.form}>
@@ -229,11 +229,11 @@ export default function CreateProperty() {
   style={styles.inputContainer}
   onValueChange={(itemValue) => setPropertyType(itemValue)}
 >
-  <Picker.Item label="انتخاب کنید..." value="" />
-  <Picker.Item label="فروش" value="sale" />
-  <Picker.Item label="کرایه" value="rent" />
-  <Picker.Item label="گرو" value="mortgage" />
-  <Picker.Item label="گرو و کرایه" value="rent_mortgage" />
+  <Picker.Item label="انتخاب کنید..." value="" color={COLORS.black}/>
+  <Picker.Item label="فروش" value="sale" color={COLORS.black}/>
+  <Picker.Item label="کرایه" value="rent" color={COLORS.black}/>
+  <Picker.Item label="گرو" value="mortgage" color={COLORS.black}/>
+  <Picker.Item label="گرو و کرایه" value="rent_mortgage" color={COLORS.black} />
 </Picker>
 
 </View>
