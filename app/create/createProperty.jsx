@@ -9,6 +9,7 @@ import * as FileSystem from "expo-file-system";
 import { useAuthStore } from "../../store/authStore";
 import { API_URL } from '../../colectionColor/api';
 import { Picker } from '@react-native-picker/picker';
+import RNPickerSelect from 'react-native-picker-select'; 
 
 
 export default function CreateProperty() {
@@ -222,21 +223,48 @@ export default function CreateProperty() {
               />
             </View>
 
-              <View style={styles.formGroup}>
+           <View style={styles.formGroup}>
   <Text style={styles.label}>نوع آگهی</Text>
- <Picker
-  selectedValue={propertyType}
-  style={styles.inputContainer}
-  onValueChange={(itemValue) => setPropertyType(itemValue)}
->
-  <Picker.Item label="انتخاب کنید..." value="" color={COLORS.black}/>
-  <Picker.Item label="فروش" value="sale" color={COLORS.black}/>
-  <Picker.Item label="کرایه" value="rent" color={COLORS.black}/>
-  <Picker.Item label="گرو" value="mortgage" color={COLORS.black}/>
-  <Picker.Item label="گرو و کرایه" value="rent_mortgage" color={COLORS.black} />
-</Picker>
 
+  <RNPickerSelect
+    onValueChange={(value) => setPropertyType(value)}
+    value={propertyType}
+    placeholder={{
+      label: 'انتخاب نوع آگهی...',
+      value: null
+    }}
+    items={[
+      { label: 'فروش', value: 'sale', color: COLORS.black },
+      { label: 'کرایه', value: 'rent', color: COLORS.black },
+      { label: 'گرو', value: 'mortgage', color: COLORS.black },
+      { label: 'گرو و کرایه', value: 'rent_mortgage', color: COLORS.black }
+    ]}
+    style={{
+      inputIOS: {
+        backgroundColor: '#f9e6ba',
+        color: COLORS.black,
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: COLORS.textSecondary,
+        marginTop: 8
+      },
+      inputAndroid: {
+        backgroundColor: '#f9e6ba',
+        color: COLORS.black,
+        padding: 5,
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: COLORS.textSecondary,
+        marginTop: 8
+      },
+      placeholder: {
+        color: COLORS.black
+      }
+    }}
+  />
 </View>
+
 
 
 {propertyType === "sale" && (

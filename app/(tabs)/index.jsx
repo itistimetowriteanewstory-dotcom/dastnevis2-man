@@ -1,4 +1,12 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, TextInput } from 'react-native'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+  RefreshControl,
+  TextInput
+} from 'react-native';
 import { Image } from "expo-image";
 import { useAuthStore } from '../../store/authStore';
 import { useEffect, useState } from 'react';
@@ -8,11 +16,11 @@ import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../../colectionColor/colors';
 import { formatPublishDate } from '../../lib/utils';
 import Loader from '../../component/Loader';
-import { Link, useRouter } from 'expo-router';   // 👈 اضافه شد
-import { Picker } from '@react-native-picker/picker'; // 👈 اضافه شد
+import { Link, useRouter } from 'expo-router';
+import RNPickerSelect from 'react-native-picker-select';
 
 export default function Jobs() {
-  const {token} = useAuthStore();
+  const { token } = useAuthStore();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -20,8 +28,8 @@ export default function Jobs() {
   const [addMore, setAddMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
-  const [selectedType, setSelectedType] = useState("jobs"); // 👈 برای دراپ‌داون
-  const router = useRouter(); // 👈 برای ناوبری
+  const [selectedType, setSelectedType] = useState("jobs");
+  const router = useRouter();
 
   const fetchJobs = async (pageNum = 1, refresh = false) => {
     try {
@@ -51,7 +59,7 @@ export default function Jobs() {
   }, []);
 
   const handleLoadMore = async () => {
-    if(addMore && !loading && !refreshing) {
+    if (addMore && !loading && !refreshing) {
       await fetchJobs(page + 1);
     }
   };
@@ -113,16 +121,16 @@ export default function Jobs() {
 
   return (
     <View style={styles.container}>
-      <FlatList 
+      <FlatList
         data={filteredJobs}
         renderItem={renderItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl 
+          <RefreshControl
             refreshing={refreshing}
-            onRefresh={()=> fetchJobs(1, true)}
+            onRefresh={() => fetchJobs(1, true)}
             colors={[COLORS.primary]}
             tintColor={COLORS.primary}
           />
@@ -131,7 +139,7 @@ export default function Jobs() {
         onEndReachedThreshold={0.1}
         ListHeaderComponent={
           <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
-            {/* سرچ */}
+
             <TextInput
               style={{
                 backgroundColor: COLORS.background,
@@ -153,7 +161,8 @@ export default function Jobs() {
                 padding: 10,
                 borderRadius: 8,
                 borderWidth: 1,
-                borderColor: COLORS.textSecondary
+                borderColor: COLORS.textSecondary,
+                marginTop: 8
               }}
               placeholder="ولایت خود را بنویسید"
               placeholderTextColor={COLORS.placeholderText}
@@ -161,26 +170,45 @@ export default function Jobs() {
               onChangeText={setLocationFilter}
             />
 
-            {/* 👇 دراپ‌داون */}
-            <Picker
-              selectedValue={selectedType}
+            <RNPickerSelect
               onValueChange={(value) => {
                 setSelectedType(value);
                 if (value === "properties") {
-                  router.push("/properties"); // 👈 انتقال به صفحه Properties.jsx
+                  router.push("/properties");
                 }
               }}
-              style={{
-                backgroundColor: COLORS.background,
-                borderWidth: 1,
-                borderColor: COLORS.textSecondary,
-                borderRadius: 8,
-                marginTop: 8
+              items={[
+                { label: 'آگهی‌های کار', value: 'jobs', color: COLORS.black },
+                { label: 'آگهی‌های ملک', value: 'properties', color: COLORS.black }
+              ]}
+              placeholder={{
+              label: 'نوع آگهی را انتخاب کنید', // 👈 متن دلخواه فارسی
+              value: null,
               }}
-            >
-              <Picker.Item label="آگهی‌های کار" value="jobs" />
-              <Picker.Item label="آگهی‌های ملک" value="properties" />
-            </Picker>
+              style={{
+                inputIOS: {
+                  backgroundColor: '#f9e6ba',
+                  color: COLORS.black,
+                  padding: 12,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: COLORS.textSecondary,
+                  marginTop: 8
+                },
+                inputAndroid: {
+                  backgroundColor: '#f9e6ba',
+                  color: COLORS.black,
+                  padding: 12,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: COLORS.textSecondary,
+                  marginTop: 8
+                },
+                 placeholder: {
+                 color: COLORS.black
+                 }
+              }}
+            />
           </View>
         }
         ListFooterComponent={
@@ -194,12 +222,12 @@ export default function Jobs() {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name='briefcase-outline' size={60} color={COLORS.textSecondary}/>
+            <Ionicons name='briefcase-outline' size={60} color={COLORS.textSecondary} />
             <Text style={styles.emptyText}> هنوز آگهی شغلی اضافه نشده</Text>
           </View>
         }
       />
     </View>
-  )
+  );
 }
 

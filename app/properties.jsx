@@ -10,6 +10,7 @@ import { formatPublishDate } from '../lib/utils';
 import Loader from '../component/Loader';
 import { Link } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';   // 👈 اضافه شد
+import RNPickerSelect from 'react-native-picker-select'; 
 
 export default function Properties() {
   const {token} = useAuthStore();
@@ -141,24 +142,44 @@ export default function Properties() {
         ListHeaderComponent={
           <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
             
-            {/* 👇 دراپ‌داون انتخاب نوع آگهی */}
-            <Picker
-              selectedValue={adType}
-              onValueChange={(value) => setAdType(value)}
-              style={{
-                backgroundColor: COLORS.background,
-                borderWidth: 1,
-                borderColor: COLORS.textSecondary,
-                borderRadius: 8,
-                marginBottom: 8
-              }}
-            >
-              <Picker.Item label="همه آگهی‌ها" value="all" />
-              <Picker.Item label="فروش" value="sell" />
-              <Picker.Item label="کرایه" value="rent" />
-              <Picker.Item label="گرو" value="mortgage" />
-              <Picker.Item label="گرو و کرایه" value="rent_mortgage" />
-            </Picker>
+           <RNPickerSelect
+  onValueChange={(value) => setAdType(value)}
+  value={adType}
+  placeholder={{
+    label: 'نوع آگهی را انتخاب کنید',
+    value: null
+  }}
+  items={[
+    { label: 'همه آگهی‌ها', value: 'all', color: COLORS.black },
+    { label: 'فروش', value: 'sell', color: COLORS.black },
+    { label: 'کرایه', value: 'rent', color: COLORS.black },
+    { label: 'گرو', value: 'mortgage', color: COLORS.black },
+    { label: 'گرو و کرایه', value: 'rent_mortgage', color: COLORS.black }
+  ]}
+  style={{
+    inputIOS: {
+      backgroundColor: '#f9e6ba',
+      color: COLORS.black,
+      padding: 12,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: COLORS.textSecondary,
+      marginBottom: 8
+    },
+    inputAndroid: {
+      backgroundColor: '#f9e6ba',
+      color: COLORS.black,
+      padding: 12,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: COLORS.textSecondary,
+      marginBottom: 8
+    },
+    placeholder: {
+      color: COLORS.black
+    }
+  }}
+/>
 
             {/* 👇 اینپوت ولایت (همونطور که خواستی بمونه) */}
             <TextInput
