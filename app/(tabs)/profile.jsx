@@ -129,7 +129,7 @@ const confirmDeleteProperty = (propertyId) => {
       <View style={styles.jobInfo}>
         <Text style={styles.jobTitle}>{item.title}</Text>
        {item.income && (
-  <Text style={styles.jobTitle}>معاش: {item.income}افغانی</Text>
+  <Text style={styles.jobTitle}>معاش: {item.income}</Text>
 )}
         <Text style={styles.jobCaption} numberOfLines={2}>
           {item.caption}

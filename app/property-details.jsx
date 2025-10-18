@@ -5,6 +5,8 @@ import { Ionicons } from "@expo/vector-icons";   // 👈 آیکون‌ها
 import COLORS from "../colectionColor/colors";
 import { formatPublishDate } from "../lib/utils";
 import styles from "../assets/styles/jobDetails.styles"; // 👈 همون استایل صفحه شغل
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 export default function PropertyDetails() {
   const { data } = useLocalSearchParams();
@@ -28,6 +30,7 @@ export default function PropertyDetails() {
   };
 
   return (
+  
     <ScrollView style={styles.container}>
       {/* هدر: عکس پروفایل و نام کاربر */}
       <View style={styles.header}>
@@ -88,28 +91,28 @@ export default function PropertyDetails() {
         {property.price && (
           <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
             <Ionicons name="cash-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  قیمت فروش: {property.price} افغانی</Text>
+            <Text style={styles.info}>  قیمت فروش: {property.price} </Text>
           </View>
         )}
 
         {property.rentPrice && (
           <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
             <Ionicons name="cash-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  کرایه: {property.rentPrice} افغانی</Text>
+            <Text style={styles.info}>  کرایه: {property.rentPrice}</Text>
           </View>
         )}
 
         {property.mortgagePrice && (
           <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
             <Ionicons name="business-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  گرو: {property.mortgagePrice} افغانی</Text>
+            <Text style={styles.info}>  گرو: {property.mortgagePrice}</Text>
           </View>
         )}
 
          {property.area && (
           <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
             <Ionicons name="map-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  متراژ: {property.area} متر مربع</Text>
+            <Text style={styles.info}>  متراژ: {property.area}</Text>
           </View>
         )}
 
@@ -125,7 +128,9 @@ export default function PropertyDetails() {
           </Text>
         </View>
       </View>
+       <SafeAreaView edges={["bottom"]} style={{paddingBottom: 80}}/>
     </ScrollView>
+     
   );
 }
 

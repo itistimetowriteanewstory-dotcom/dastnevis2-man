@@ -9,7 +9,6 @@ import COLORS from '../colectionColor/colors';
 import { formatPublishDate } from '../lib/utils';
 import Loader from '../component/Loader';
 import { Link } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';   // 👈 اضافه شد
 import RNPickerSelect from 'react-native-picker-select'; 
 
 export default function Properties() {
@@ -95,7 +94,7 @@ export default function Properties() {
             <Text style={styles.propertyTitle}>{item.title}</Text>
             {item.location && <Text style={styles.propertyInfo}>ولایت: {item.location}</Text>}
 
-            {item.price && <Text style={styles.propertyInfo}>فروش</Text>}
+            {item.price && <Text style={styles.propertyInfo}>نوع آگهی: فروش</Text>}
             {item.rentPrice && item.mortgagePrice && (
               <Text style={styles.propertyInfo}>نوع آگهی: گرو و کرایه</Text>
             )}

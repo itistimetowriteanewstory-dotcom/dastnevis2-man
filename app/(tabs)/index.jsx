@@ -17,7 +17,7 @@ import COLORS from '../../colectionColor/colors';
 import { formatPublishDate } from '../../lib/utils';
 import Loader from '../../component/Loader';
 import { Link, useRouter } from 'expo-router';
-import RNPickerSelect from 'react-native-picker-select';
+
 
 export default function Jobs() {
   const { token } = useAuthStore();
@@ -100,7 +100,7 @@ export default function Jobs() {
 
             <View style={styles.jobDetails}>
               {item.location && <Text style={styles.jobTitle}>ولایت: {item.location}</Text>}
-              {item.income && <Text style={styles.jobTitle}>معاش: {item.income} افغانی</Text>}
+              {item.income && <Text style={styles.jobTitle}>معاش: {item.income} </Text>}
               {item.phoneNumber && <Text style={styles.jobTitle}>نمبر تلفون: {item.phoneNumber}</Text>}
 
               <Text style={styles.caption} numberOfLines={2} ellipsizeMode="tail">

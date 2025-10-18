@@ -6,6 +6,7 @@ import styles from '../assets/styles/jobDetails.styles';
 import { formatPublishDate } from '../lib/utils';
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../colectionColor/colors";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function JobDetails() {
   const { data } = useLocalSearchParams();
@@ -88,6 +89,7 @@ export default function JobDetails() {
           </Text>
         </View>
       </View>
+      <SafeAreaView edges={["bottom"]} style={{paddingBottom: 80}}/>
     </ScrollView>
   );
 }
