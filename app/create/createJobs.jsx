@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, KeyboardAvoidingView, Platform, ScrollView, TextInput, TouchableOpacity, Alert, Image, ActivityIndicator, } from 'react-native';
+import { View, Text, KeyboardAvoidingView, Platform, ScrollView, TextInput, TouchableOpacity, Alert, Image, ActivityIndicator, Modal} from 'react-native';
 import { useRouter } from "expo-router";
 import styles from "../../assets/styles/create.styles";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,7 +7,9 @@ import COLORS from '../../colectionColor/colors';
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import {useAuthStore} from "../../store/authStore";
-import { API_URL } from '../../colectionColor/api';
+
+import RNPickerSelect from 'react-native-picker-select'; 
+import { apiFetch } from '../../store/apiClient';
 
 export default function Create() {
   const [title, setTitle] = useState("");           
@@ -19,13 +21,15 @@ const [phoneNumber, setPhoneNumber] = useState("");
 const [jobtitle, setJobtitle] = useState("");
 const [income, setIncome] = useState("");
 const [location, setLocation] = useState("");
+const [workingHours, setWorkingHours] = useState("");
+const [paymentType, setPaymentType] = useState("");
 
 
 
 
 
    const router = useRouter();
-   const {token} = useAuthStore();
+   const {accessToken} = useAuthStore();
    //console.log(token);
 
    const pickImage = async () => {
@@ -71,7 +75,7 @@ if(!result.canceled) {
 
    const handleSubmit = async () => {
   // بررسی کامل بودن فیلدها
-  if (!title || !caption || !imageBase64) {
+  if (!title || !caption || !imageBase64 || !phoneNumber || !location || !income || !workingHours || !paymentType) {
     Alert.alert("خطا", "لطفاً همه‌ی خانه هارا پر کنید");
     return;
   }
@@ -90,20 +94,22 @@ if(!result.canceled) {
     const imageDataUri = `data:${imageType};base64,${imageBase64}`;
 
     // ارسال درخواست POST به سرور
-    const response = await fetch(`${API_URL}/jobs`, {
+    const response = await apiFetch("/jobs", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`, // اصلاح حروف بزرگ
+        Authorization: `Bearer ${accessToken}`, // اصلاح حروف بزرگ
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         title,
         caption,
         image: imageDataUri,
-         phoneNumber,
+        phoneNumber,
         jobtitle,
         income,
         location,
+        workingHours,
+        paymentType,
       }),
     });
 
@@ -140,6 +146,8 @@ if(!result.canceled) {
     setJobtitle("");
     setIncome("");
     setLocation("");
+    setWorkingHours("");
+    setPaymentType("");
     router.push("/");
 
   } catch (error) {
@@ -220,7 +228,7 @@ if(!result.canceled) {
     placeholderTextColor={COLORS.placeholderText}
     value={phoneNumber}
     onChangeText={setPhoneNumber}
-    keyboardType="numeric"
+   keyboardType="numeric"
   />
 </View>
 
@@ -257,7 +265,91 @@ if(!result.canceled) {
     placeholderTextColor={COLORS.placeholderText}
     value={income}
     onChangeText={setIncome}
-    keyboardType="numeric"
+  
+  />
+</View>
+
+<View style={styles.formGroup}>
+  <Text style={styles.label}>ساعت کاری</Text>
+  <RNPickerSelect
+    onValueChange={(value) => setWorkingHours(value)}
+    value={workingHours}
+    placeholder={{
+      label: "ساعت کاری را انتخاب کنید",
+      value: null,
+    }}
+    items={[
+      { label: "تمام وقت 12 ساعت", value: "تمام وقت 12 ساعت", color: COLORS.black },
+      { label: "پاره وقت 7 ساعت", value: "پاره وقت 7 ساعت", color: COLORS.black },
+      { label: "کارآموزی کمتر از 7 ساعت", value: "کار آموزی کمتر از 7 ساعت", color: COLORS.black },
+      { label: "توافقی", value: "توافقی", color: COLORS.black },
+    ]}
+    useNativeAndroidPickerStyle={false}
+    style={{
+      inputIOS: {
+        backgroundColor: COLORS.inputBackground,
+        color: COLORS.black,
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        marginBottom: 8,
+      },
+      inputAndroid: {
+        backgroundColor: COLORS.inputBackground,
+        color: COLORS.black,
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        marginBottom: 8,
+      },
+      placeholder: {
+        color: COLORS.black,
+      },
+    }}
+  />
+</View>
+
+<View style={styles.formGroup}>
+  <Text style={styles.label}>شیوه پرداخت</Text>
+  <RNPickerSelect
+    onValueChange={(value) => setPaymentType(value)}
+    value={paymentType}
+    placeholder={{
+      label: "شیوه پرداخت را انتخاب کنید",
+      value: null,
+    }}
+    items={[
+      { label: "ماهانه", value: "ماهانه", color: COLORS.black },
+      { label: "هفتگی", value: "هفتگی", color: COLORS.black },
+      { label: "روزانه", value: "روزانه", color: COLORS.black },
+      { label: "پروژه‌ای", value: "پروژه‌ای", color: COLORS.black },
+    ]}
+    useNativeAndroidPickerStyle={false}
+    style={{
+      inputIOS: {
+        backgroundColor: COLORS.inputBackground,
+        color: COLORS.black,
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        marginBottom: 8,
+      },
+      inputAndroid: {
+        backgroundColor: COLORS.inputBackground,
+        color: COLORS.black,
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        marginBottom: 8,
+      },
+      placeholder: {
+        color: COLORS.black,
+      },
+    }}
   />
 </View>
 

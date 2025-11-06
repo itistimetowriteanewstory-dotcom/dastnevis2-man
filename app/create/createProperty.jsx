@@ -7,9 +7,9 @@ import COLORS from '../../colectionColor/colors';
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { useAuthStore } from "../../store/authStore";
-import { API_URL } from '../../colectionColor/api';
-import { Picker } from '@react-native-picker/picker';
+
 import RNPickerSelect from 'react-native-picker-select'; 
+import { apiFetch } from '../../store/apiClient';
 
 
 export default function CreateProperty() {
@@ -28,7 +28,7 @@ export default function CreateProperty() {
   const [propertyType, setPropertyType] = useState(""); // rent | mortgage | sale
 
   const router = useRouter();
-  const { token } = useAuthStore();
+  const { accessToken } = useAuthStore();
 
   const pickImage = async () => {
     try {
@@ -127,10 +127,10 @@ export default function CreateProperty() {
 }
 
 
-      const response = await fetch(`${API_URL}/properties`, {
+      const response = await apiFetch("/properties", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),

@@ -46,6 +46,9 @@ const styles = StyleSheet.create({
   userInfo: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 6,
+    marginTop: 4,
+ 
   },
   avatar: {
     width: 36,
@@ -94,7 +97,7 @@ const styles = StyleSheet.create({
     writingDirection: 'rtl',
   },
   date: {
-    fontSize: 14,
+    fontSize: 15,
     color: COLORS.textSecondary,
   },
   emptyContainer: {
@@ -126,13 +129,14 @@ const styles = StyleSheet.create({
   overflow: "hidden", // باعث میشه گوشه‌های گرد روی عکس هم اعمال بشه
   borderWidth: 1,
   borderColor: "#e2d6c1",
+ 
 },
 
 propertyImage: {
   width: "100%",   // 👈 به اندازه عرض کارت
   height: 180,     // ارتفاع ثابت (می‌تونی تغییر بدی)
   resizeMode: "cover",
-  borderRadius: 12,
+  borderRadius: 19, 
 },
 
 propertyContent: {
@@ -178,7 +182,16 @@ propertyDate: {
     marginRight: 20,
 
   },
+  headerRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 8,
+   width: "100%",   
 
+  
+
+},
 
 });
 

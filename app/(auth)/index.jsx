@@ -31,8 +31,8 @@ if (!result.success) {
   return;
 }
 
-if (result.token) {
-  await registerForPushNotificationsAsync(result.token);
+if (result.accessToken) {
+  await registerForPushNotificationsAsync(result.accessToken);
   }
 
   };
@@ -117,6 +117,8 @@ if (result.token) {
     value={password}
     onChangeText={setPassword}
     secureTextEntry={!showPassword}
+    returnKeyType="done"              // دکمه‌ی کیبورد رو به حالت "تیک/Done" تغییر میده
+     onSubmitEditing={handleSignUp} 
     />
     <TouchableOpacity onPress={()=> setShowPassword(!showPassword)}
       style={styles.eyeIcon}

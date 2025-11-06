@@ -1,10 +1,14 @@
 import { View, Text, Image, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Alert, } from 'react-native';
 import styles from "../../assets/styles/login.styles";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import COLORS from '../../colectionColor/colors';
 import {Ionicons} from "@expo/vector-icons";
 import {useAuthStore} from "../../store/authStore";
 import { Link } from "expo-router";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+
 
 import { I18nManager } from 'react-native';
 import { registerForPushNotificationsAsync } from "../../lib/notification";
@@ -20,7 +24,11 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
  const {isLoading, login} = useAuthStore();
+const [checking, setChecking] = useState(true);
 
+
+
+const router = useRouter();
 
 
 
@@ -35,9 +43,11 @@ export default function Login() {
    return;
    } 
 
-    if (result.token) {
-    await registerForPushNotificationsAsync(result.token);
+    if (result.accessToken) {
+    await registerForPushNotificationsAsync(result.accessToken);
     console.log("✅ registerForPushNotificationsAsync called");
+     router.replace("/(tabs)"); 
+
   }else {
     console.warn("⚠️ No token returned from login");
   }
@@ -101,6 +111,8 @@ export default function Login() {
     value={password}
     onChangeText={setPassword}
     secureTextEntry={!showPassword}
+     returnKeyType="done"              // دکمه‌ی کیبورد رو به حالت "تیک/Done" تغییر میده
+     onSubmitEditing={handleLogin} 
     />
 
     <TouchableOpacity onPress={()=> setShowPassword (!showPassword)}
@@ -127,7 +139,7 @@ export default function Login() {
  { /* footer */}
  <View style={styles.footer}>
   <Text  style={styles.footerText} >اگر حساب کاربری ندارید ثبت نام کنید: </Text>
-<Link href="/signup" asChild>
+<Link href="/(auth)" asChild>
   <TouchableOpacity>
     <Text style={styles.link}>ثبت نام</Text>
   </TouchableOpacity>

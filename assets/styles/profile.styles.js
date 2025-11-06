@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 24,
+    marginBottom: 10,
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   justifyContent: "center",
   backgroundColor: "#e17055",
   padding: 12,
-  borderRadius: 8,
+  borderRadius: 12,
   marginVertical: 10,
 },
 helpButtonText: {

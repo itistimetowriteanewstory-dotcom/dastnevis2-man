@@ -3,16 +3,16 @@ import { Image } from "expo-image";
 import { useAuthStore } from '../store/authStore';
 import { useEffect, useState } from 'react';
 import styles from "../assets/styles/home.styles";
-import { API_URL } from '../colectionColor/api';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../colectionColor/colors';
 import { formatPublishDate } from '../lib/utils';
 import Loader from '../component/Loader';
 import { Link } from 'expo-router';
 import RNPickerSelect from 'react-native-picker-select'; 
+import { apiFetch } from "../store/apiClient";
 
 export default function Properties() {
-  const {token} = useAuthStore();
+  const {accessToken} = useAuthStore();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -26,8 +26,8 @@ export default function Properties() {
       if (refresh) setRefreshing(true);
       else if (pageNum === 1) setLoading(true);
 
-      const res = await fetch(`${API_URL}/properties?page=${pageNum}&limit=5`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`/properties?page=${pageNum}&limit=5`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       const data = await res.json();

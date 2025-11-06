@@ -10,7 +10,10 @@ export default function HelpAndRulesScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container}
+    contentContainerStyle={{ paddingBottom: 40 }}
+    showsVerticalScrollIndicator={false}
+    >
       <View style={styles.reportBox}>
         <Text style={styles.title}>📢 ثبت تخلف</Text>
         <Text style={styles.text}>

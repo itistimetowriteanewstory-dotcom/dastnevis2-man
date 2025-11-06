@@ -11,16 +11,17 @@ import { Image } from "expo-image";
 import { useAuthStore } from '../../store/authStore';
 import { useEffect, useState } from 'react';
 import styles from "../../assets/styles/home.styles";
-import { API_URL } from '../../colectionColor/api';
+
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../../colectionColor/colors';
 import { formatPublishDate } from '../../lib/utils';
 import Loader from '../../component/Loader';
 import { Link, useRouter } from 'expo-router';
-
+import { apiFetch } from '../../store/apiClient';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Jobs() {
-  const { token } = useAuthStore();
+  const { accessToken } = useAuthStore();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -29,6 +30,9 @@ export default function Jobs() {
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [selectedType, setSelectedType] = useState("jobs");
+  const [checking, setChecking] = useState(true);
+
+
   const router = useRouter();
 
   const fetchJobs = async (pageNum = 1, refresh = false) => {
@@ -36,8 +40,8 @@ export default function Jobs() {
       if (refresh) setRefreshing(true);
       else if (pageNum === 1) setLoading(true);
 
-      const res = await fetch(`${API_URL}/jobs?page=${pageNum}&limit=5`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`/jobs?page=${pageNum}&limit=5`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       const data = await res.json();
@@ -55,7 +59,39 @@ export default function Jobs() {
   };
 
   useEffect(() => {
-    fetchJobs();
+      const checkToken = async () => {
+    try {
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+      if (!refreshToken) {
+        router.replace("/login"); // مستقیم به login
+        return;
+      }
+
+      const res = await apiFetch("/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        await AsyncStorage.setItem("accessToken", data.accessToken);
+        fetchJobs();
+      } else {
+        await AsyncStorage.multiRemove(["accessToken", "refreshToken"]);
+        router.replace("/(auth)/login");
+      }
+    } catch (err) {
+      router.replace("/(auth)login");
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  checkToken();
+
+
+
   }, []);
 
   const handleLoadMore = async () => {
@@ -81,38 +117,34 @@ export default function Jobs() {
       asChild
     >
       <TouchableOpacity activeOpacity={0.5}>
-        <View style={styles.jobCard}>
-          <View style={styles.header}>
-            <View style={styles.userInfo}>
-              <Image source={{ uri: item.user?.profileImage }} style={styles.avatar} />
-              <Text style={styles.username}>{item.user?.username}</Text>
-            </View>
-          </View>
+        <View style={styles.propertyCard}>
+  <View style={styles.header}>
+    <View style={styles.userInfo}>
+      <Image source={{ uri: item.user?.profileImage }} style={styles.avatar} />
+      <Text style={styles.username}>{item.user?.username}</Text>
+    </View>
+  </View>
 
-          <Text style={styles.jobTitle}>{item.title}</Text>
+  {item.image && (
+    <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="cover" />
+  )}
 
-          <View style={styles.jobContent}>
-            {item.image && (
-              <View style={styles.jobImageContainer}>
-                <Image source={{ uri: item.image }} style={styles.jobImage} contentFit="cover" />
-              </View>
-            )}
+  <View style={styles.propertyContent}>
+    <Text style={styles.propertyTitle}>{item.title}</Text>
+    {item.location && <Text style={styles.propertyInfo}>ولایت: {item.location}</Text>}
+    {item.income && <Text style={styles.propertyInfo}>معاش: {item.income}</Text>}
 
-            <View style={styles.jobDetails}>
-              {item.location && <Text style={styles.jobTitle}>ولایت: {item.location}</Text>}
-              {item.income && <Text style={styles.jobTitle}>معاش: {item.income} </Text>}
-              {item.phoneNumber && <Text style={styles.jobTitle}>نمبر تلفون: {item.phoneNumber}</Text>}
+    <Text style={styles.caption} numberOfLines={2} ellipsizeMode="tail">
+      {item.description || item.caption}
+    </Text>
 
-              <Text style={styles.caption} numberOfLines={2} ellipsizeMode="tail">
-                {item.description || item.caption}
-              </Text>
+    <Text style={styles.propertyDate}>
+      ثبت شده در تاریخ {formatPublishDate(item.createdAt)}
+    </Text>
+  </View>
+</View>
 
-              <Text style={styles.date}>
-                ثبت شده در تاریخ {formatPublishDate(item.createdAt)}
-              </Text>
-            </View>
-          </View>
-        </View>
+
       </TouchableOpacity>
     </Link>
   );

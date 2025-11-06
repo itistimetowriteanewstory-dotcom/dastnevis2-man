@@ -15,7 +15,7 @@
       
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#f9e6ba"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.dastnevis.mobile",
@@ -37,7 +37,7 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#f9e6ba"
         }
       ],
       "expo-notifications"
