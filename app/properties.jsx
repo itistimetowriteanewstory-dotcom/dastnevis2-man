@@ -149,11 +149,11 @@ export default function Properties() {
     value: null
   }}
   items={[
-    { label: 'همه آگهی‌ها', value: 'all', color: COLORS.black },
-    { label: 'فروش', value: 'sell', color: COLORS.black },
-    { label: 'کرایه', value: 'rent', color: COLORS.black },
-    { label: 'گرو', value: 'mortgage', color: COLORS.black },
-    { label: 'گرو و کرایه', value: 'rent_mortgage', color: COLORS.black }
+    { label: 'همه آگهی‌ها', value: 'all'},
+    { label: 'فروش', value: 'sell'},
+    { label: 'کرایه', value: 'rent'},
+    { label: 'گرو', value: 'mortgage' },
+    { label: 'گرو و کرایه', value: 'rent_mortgage'}
   ]}
   useNativeAndroidPickerStyle={false}
   style={{
@@ -176,7 +176,7 @@ export default function Properties() {
       marginBottom: 8
     },
     placeholder: {
-      color: COLORS.black
+      color: COLORS.placeholderText
     }
   }}
 />

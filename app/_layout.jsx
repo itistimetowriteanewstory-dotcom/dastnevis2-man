@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiFetch } from "../store/apiClient";
+import { ActivityIndicator, View } from "react-native";
 
 export default function RootLayout() {
 
@@ -90,6 +91,17 @@ useEffect(() => {
       subscription2.remove();
     };
   }, []);
+
+   if (isChecking) {
+    return (
+      <SafeAreaProvider>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center",  backgroundColor: "#f9e6ba",}}>
+          <ActivityIndicator size="large" color="#e17055" />
+        </View>
+      </SafeAreaProvider>
+    );
+  }
+
 
   return (
     <SafeAreaProvider>

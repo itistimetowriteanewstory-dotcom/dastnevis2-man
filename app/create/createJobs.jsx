@@ -279,10 +279,10 @@ if(!result.canceled) {
       value: null,
     }}
     items={[
-      { label: "تمام وقت 12 ساعت", value: "تمام وقت 12 ساعت", color: COLORS.black },
-      { label: "پاره وقت 7 ساعت", value: "پاره وقت 7 ساعت", color: COLORS.black },
-      { label: "کارآموزی کمتر از 7 ساعت", value: "کار آموزی کمتر از 7 ساعت", color: COLORS.black },
-      { label: "توافقی", value: "توافقی", color: COLORS.black },
+      { label: "تمام وقت 12 ساعت", value: "تمام وقت 12 ساعت" },
+      { label: "پاره وقت 7 ساعت", value: "پاره وقت 7 ساعت"},
+      { label: "کارآموزی کمتر از 7 ساعت", value: "کار آموزی کمتر از 7 ساعت"},
+      { label: "توافقی", value: "توافقی"},
     ]}
     useNativeAndroidPickerStyle={false}
     style={{
@@ -305,7 +305,7 @@ if(!result.canceled) {
         marginBottom: 8,
       },
       placeholder: {
-        color: COLORS.black,
+        color: COLORS.placeholderText,
       },
     }}
   />
@@ -321,10 +321,10 @@ if(!result.canceled) {
       value: null,
     }}
     items={[
-      { label: "ماهانه", value: "ماهانه", color: COLORS.black },
-      { label: "هفتگی", value: "هفتگی", color: COLORS.black },
-      { label: "روزانه", value: "روزانه", color: COLORS.black },
-      { label: "پروژه‌ای", value: "پروژه‌ای", color: COLORS.black },
+      { label: "ماهانه", value: "ماهانه"},
+      { label: "هفتگی", value: "هفتگی" },
+      { label: "روزانه", value: "روزانه"},
+      { label: "پروژه‌ای", value: "پروژه‌ای"},
     ]}
     useNativeAndroidPickerStyle={false}
     style={{
@@ -347,7 +347,7 @@ if(!result.canceled) {
         marginBottom: 8,
       },
       placeholder: {
-        color: COLORS.black,
+        color: COLORS.placeholderText,
       },
     }}
   />

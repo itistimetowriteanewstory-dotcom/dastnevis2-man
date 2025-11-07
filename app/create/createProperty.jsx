@@ -234,15 +234,15 @@ export default function CreateProperty() {
       value: null
     }}
     items={[
-      { label: 'فروش', value: 'sale', color: COLORS.black },
-      { label: 'کرایه', value: 'rent', color: COLORS.black },
-      { label: 'گرو', value: 'mortgage', color: COLORS.black },
-      { label: 'گرو و کرایه', value: 'rent_mortgage', color: COLORS.black }
+      { label: 'فروش', value: 'sale' },
+      { label: 'کرایه', value: 'rent'},
+      { label: 'گرو', value: 'mortgage'},
+      { label: 'گرو و کرایه', value: 'rent_mortgage'}
     ]}
     useNativeAndroidPickerStyle={false}
     style={{
       inputIOS: {
-        backgroundColor: '#f9e6ba',
+        backgroundColor: COLORS.inputBackground,
         color: COLORS.black,
         padding: 12,
         borderRadius: 8,
@@ -251,7 +251,7 @@ export default function CreateProperty() {
         marginTop: 8
       },
       inputAndroid: {
-        backgroundColor: '#f9e6ba',
+        backgroundColor: COLORS.inputBackground,
         color: COLORS.black,
         padding: 12,
         borderRadius: 8,
@@ -260,7 +260,7 @@ export default function CreateProperty() {
         marginTop: 8
       },
       placeholder: {
-        color: COLORS.black
+        color: COLORS.placeholderText
       }
     }}
   />

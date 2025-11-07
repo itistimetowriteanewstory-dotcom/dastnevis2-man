@@ -11,7 +11,7 @@ import { Image } from "expo-image";
 import { useAuthStore } from '../../store/authStore';
 import { useEffect, useState } from 'react';
 import styles from "../../assets/styles/home.styles";
-
+import RNPickerSelect from 'react-native-picker-select'; 
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../../colectionColor/colors';
 import { formatPublishDate } from '../../lib/utils';
@@ -34,6 +34,22 @@ export default function Jobs() {
 
 
   const router = useRouter();
+
+
+const provinces = [
+  { label: "کابل", value: "کابل" },
+  { label: "هرات", value: "هرات" },
+  { label: "مزار شریف", value: "مزار شریف" },
+  { label: "قندهار", value: "قندهار" },
+  { label: "ننگرهار", value: "ننگرهار" },
+  { label: "بلخ", value: "بلخ" },
+  { label: "بامیان", value: "بامیان" },
+  { label: "پکتیا", value: "پکتیا" },
+  { label: "پروان", value: "پروان" },
+  { label: "غزنی", value: "غزنی" },
+  // ... بقیه ولایت‌ها
+];
+
 
   const fetchJobs = async (pageNum = 1, refresh = false) => {
     try {
@@ -179,41 +195,58 @@ export default function Jobs() {
       <Text style={styles.buttonText}>رفتن به صفحه آگهی های املاک</Text>
     </TouchableOpacity>
 
-            <TextInput
-              style={{
-                backgroundColor: COLORS.background,
-                padding: 10,
-                borderRadius: 8,
-                marginBottom: 8,
-                borderWidth: 1,
-                borderColor: COLORS.textSecondary
-              }}
-              placeholder="کار مورد نظر خودرا بنویسید"
-              placeholderTextColor={COLORS.placeholderText}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
+           {/* اینجا دو ورودی کنار هم */}
+    <View style={{ flexDirection: "row", gap: 8 }}>
+      <TextInput
+        style={{
+          flex: 2, // فضای بیشتر
+          backgroundColor: COLORS.background,
+           height: 60,
+          padding: 10,
+          borderRadius: 8,
+          borderWidth: 1,
+           fontSize: 15, 
+          borderColor: COLORS.textSecondary,
+        }}
+        placeholder="کار مورد نظر خودرا بنویسید"
+        placeholderTextColor={COLORS.placeholderText}
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
 
-          
-
-            <TextInput
-              style={{
-                backgroundColor: COLORS.background,
-                padding: 10,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: COLORS.textSecondary,
-                marginTop: 8
-              }}
-              placeholder="ولایت خود را بنویسید"
-              placeholderTextColor={COLORS.placeholderText}
-              value={locationFilter}
-              onChangeText={setLocationFilter}
-            />
-         
- 
-
-
+      <View
+        style={{
+          flex: 1, // فضای کمتر
+          backgroundColor: COLORS.background,
+           height: 60,
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: COLORS.textSecondary,
+          justifyContent: "center",
+        }}
+      >
+        <RNPickerSelect
+          onValueChange={(value) => setLocationFilter(value)}
+          items={provinces}
+          placeholder={{ label: "ولایت", value: null }}
+          useNativeAndroidPickerStyle={false}
+          style={{
+            inputIOS: {
+              padding: 10,
+              color: COLORS.black,
+            },
+             placeholder: {
+             color: COLORS.placeholderText, 
+               },
+            inputAndroid: {
+              padding: 10,
+              color: COLORS.black,
+            },
+          }}
+          value={locationFilter}
+        />
+       </View>
+         </View>
           </View>
         }
         ListFooterComponent={
