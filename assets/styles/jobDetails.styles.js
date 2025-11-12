@@ -35,6 +35,22 @@ infoBox: {
    // رنگ بوردر هماهنگ با تم
 },
 
+userBox: {
+  width: "100%",               // 👈 عرض ۹۰ درصد صفحه
+  height: 50,                 // 👈 ارتفاع حدود یک بند انگشت (می‌تونی تغییر بدی)
+  backgroundColor: COLORS.background,    // 👈 رنگ پس‌زمینه باکس
+  borderRadius: 8,            // 👈 گوشه‌های گرد
+  flexDirection: "row",       // 👈 عکس و متن کنار هم
+  alignItems: "center",       // 👈 وسط‌چین عمودی
+  justifyContent: "flex-start",
+  paddingHorizontal: 10,
+  marginTop: 0,              // 👈 فاصله از بالای صفحه
+  elevation: 3,               // 👈 سایه برای اندروید
+  shadowColor: "#000",        // 👈 سایه برای iOS
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  marginBottom: 10,
+},
 
   avatar: {
     width: 44,

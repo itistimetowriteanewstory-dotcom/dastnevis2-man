@@ -133,25 +133,29 @@ const styles = StyleSheet.create({
 },
 
 propertyImage: {
-  width: "100%",   // 👈 به اندازه عرض کارت
-  height: 180,     // ارتفاع ثابت (می‌تونی تغییر بدی)
+  width: 110,   // 👈 به اندازه عرض کارت
+  height: 110,     // ارتفاع ثابت (می‌تونی تغییر بدی)
   resizeMode: "cover",
   borderRadius: 19, 
+  alignSelf: "center",
+
 },
 
 propertyContent: {
   padding: 10,
+   flex: 1,  
+    marginTop: -10, 
 },
 
 propertyTitle: {
-  fontSize: 16,
+  fontSize: 17,
   fontWeight: "bold",
   marginBottom: 6,
   color: "#333",
 },
 
 propertyInfo: {
-  fontSize: 14,
+  fontSize: 15,
   color: "#555",
   marginBottom: 4,
 },
@@ -192,6 +196,13 @@ propertyDate: {
   
 
 },
+propertyRow: {
+  flexDirection: "row",       // 👈 بچه‌ها کنار هم
+  alignItems: "flex-start",   // 👈 متن از بالا شروع بشه
+  padding: 10,
+},
+
+
 
 });
 

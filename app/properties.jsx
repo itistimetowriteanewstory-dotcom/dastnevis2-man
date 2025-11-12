@@ -79,17 +79,10 @@ export default function Properties() {
     >
       <TouchableOpacity activeOpacity={0.5}>
         <View style={styles.propertyCard}>
-          <View style={styles.header}>
-            <View style={styles.userInfo}>
-              <Image source={{ uri: item.user?.profileImage }} style={styles.avatar} />
-              <Text style={styles.username}>{item.user?.username}</Text>
-            </View>
-          </View>
+        
 
-          {item.image && (
-            <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="cover" />
-          )}
-
+          <View style={styles.propertyRow}>
+        
           <View style={styles.propertyContent}>
             <Text style={styles.propertyTitle}>{item.title}</Text>
             {item.location && <Text style={styles.propertyInfo}>ولایت: {item.location}</Text>}
@@ -105,14 +98,17 @@ export default function Properties() {
               <Text style={styles.propertyInfo}>نوع آگهی: گرو</Text>
             )}
 
-            <Text style={styles.caption} numberOfLines={2} ellipsizeMode="tail">
-              {item.description || item.caption}
-            </Text>
+          
+          
 
             <Text style={styles.propertyDate}>
               ثبت شده در تاریخ {formatPublishDate(item.createdAt)}
             </Text>
           </View>
+              {item.image && (
+            <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="cover" />
+          )}
+         </View>
         </View>
       </TouchableOpacity>
     </Link>

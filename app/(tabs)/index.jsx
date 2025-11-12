@@ -47,6 +47,29 @@ const provinces = [
   { label: "پکتیا", value: "پکتیا" },
   { label: "پروان", value: "پروان" },
   { label: "غزنی", value: "غزنی" },
+  { label: "پنجشیر", value: "پنجشیر" },
+  { label: "پکتیکا", value: "پکتیکا" },
+  { label: "بدخشان", value: "بدخشان" },
+  { label: "بغلان", value: "بغلان" },
+  { label: "فراه", value: "فراه" },
+  { label: "دایکندی", value: "دایکندی" },
+  { label: "فاریاب", value: "فاریاب" },
+  { label: "خوست", value: "خوست" },
+  { label: "کاپیسا", value: "کاپیسا" },
+  { label: "کنر", value: "کنر" },
+  { label: "کندز", value: "کندز" },
+  { label: "لغمان", value: "لغمان" },
+  { label: "لوگر", value: "لوگر" },
+  { label: "نیمروز", value: "نیمروز" },
+  { label: "نورستان", value: "نورستان" },
+  { label: "سمنگان", value: "سمنگان" },
+  { label: "سرپل", value: "سرپل" },
+  { label: "تخار", value: "تخار" },
+  { label: "ارزگان", value: "ارزگان" },
+  { label: "وردک", value: "وردک" },   // میدان وردک
+  { label: "زابل", value: "زابل" },
+  { label: "هلمند", value: "هلمند" },
+  { label: "جوزجان", value: "جوزجان" },
   // ... بقیه ولایت‌ها
 ];
 
@@ -134,30 +157,23 @@ const provinces = [
     >
       <TouchableOpacity activeOpacity={0.5}>
         <View style={styles.propertyCard}>
-  <View style={styles.header}>
-    <View style={styles.userInfo}>
-      <Image source={{ uri: item.user?.profileImage }} style={styles.avatar} />
-      <Text style={styles.username}>{item.user?.username}</Text>
-    </View>
-  </View>
 
-  {item.image && (
-    <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="cover" />
-  )}
-
+ <View style={styles.propertyRow}>
+  
   <View style={styles.propertyContent}>
     <Text style={styles.propertyTitle}>{item.title}</Text>
     {item.location && <Text style={styles.propertyInfo}>ولایت: {item.location}</Text>}
     {item.income && <Text style={styles.propertyInfo}>معاش: {item.income}</Text>}
 
-    <Text style={styles.caption} numberOfLines={2} ellipsizeMode="tail">
-      {item.description || item.caption}
-    </Text>
-
+   
     <Text style={styles.propertyDate}>
       ثبت شده در تاریخ {formatPublishDate(item.createdAt)}
     </Text>
   </View>
+  {item.image && (
+    <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="cover" />
+  )}
+</View>
 </View>
 
 
@@ -234,6 +250,7 @@ const provinces = [
             inputIOS: {
               padding: 10,
               color: COLORS.black,
+               fontSize: 16,
             },
              placeholder: {
              color: COLORS.placeholderText, 
@@ -241,6 +258,7 @@ const provinces = [
             inputAndroid: {
               padding: 10,
               color: COLORS.black,
+               fontSize: 16,
             },
           }}
           value={locationFilter}

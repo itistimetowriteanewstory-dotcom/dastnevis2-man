@@ -83,6 +83,12 @@ export default function PropertyDetails() {
 
     <ScrollView style={styles.container}>
    
+    {/* اطلاعات کاربر بالای عکس */}
+    <View style={styles.userBox}>
+      <Image source={{ uri: property.user?.profileImage }} style={styles.avatar} />
+      <Text style={styles.username}>{property.user?.username}</Text>
+     </View>
+
 
       {/* عکس ملک */}
       {property.image && (

@@ -75,7 +75,11 @@ export default function JobDetails() {
   return (
     <ScrollView style={styles.container}>
      
-       
+       <View style={styles.userBox}>
+  <Image source={{ uri: parsedUser?.profileImage }} style={styles.avatar} />
+  <Text style={styles.username}>{parsedUser?.username}</Text>
+</View>
+
       {/* تصویر اصلی */}
       <Image source={parsedJob.image} style={styles.jobImage} contentFit="cover" />
 

@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   button: {
-    backgroundColor: "#e17055", // رنگ اصلی دکمه
+    backgroundColor: "#f46a51ff", // رنگ اصلی دکمه
     paddingVertical: 20,
     borderRadius: 8,
     marginVertical: 10,
