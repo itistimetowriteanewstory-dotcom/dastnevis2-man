@@ -25,7 +25,7 @@ export default function Profile() {
         style={styles.helpButton}
         onPress={() => router.push("/help-and-rules")}
       >
-        <Ionicons name="help-circle-outline" size={20} color={COLORS.white} />
+        <Ionicons name="help-circle-outline" size={20} color={COLORS.textDark} />
         <Text style={styles.helpButtonText}>راهنما و قوانین</Text>
       </TouchableOpacity>
 
@@ -34,7 +34,7 @@ export default function Profile() {
         style={styles.helpButton}
         onPress={() => router.push("/SavedAdsScreen")}
       >
-        <Ionicons name="folder-open-outline" size={20} color={COLORS.white} />
+        <Ionicons name="folder-open-outline" size={20} color={COLORS.textDark} />
         <Text style={styles.helpButtonText}>آگهی‌های ذخیره‌شده</Text>
       </TouchableOpacity>
 
@@ -43,7 +43,7 @@ export default function Profile() {
         style={styles.helpButton}
         onPress={() => router.push("/UserAdsScreen")}
       >
-        <Ionicons name="briefcase-outline" size={20} color={COLORS.white} />
+        <Ionicons name="briefcase-outline" size={20} color={COLORS.textDark} />
         <Text style={styles.helpButtonText}>آگهی‌های من</Text>
       </TouchableOpacity>
     </View>

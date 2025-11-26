@@ -11,7 +11,7 @@ import { Image } from "expo-image";
 import { useAuthStore } from '../../store/authStore';
 import { useEffect, useState } from 'react';
 import styles from "../../assets/styles/home.styles";
-import RNPickerSelect from 'react-native-picker-select'; 
+
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../../colectionColor/colors';
 import { formatPublishDate } from '../../lib/utils';
@@ -19,6 +19,10 @@ import Loader from '../../component/Loader';
 import { Link, useRouter } from 'expo-router';
 import { apiFetch } from '../../store/apiClient';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams } from "expo-router";
+import { useFilterStore } from "../../store/fileStore";
+import { carFormStyles } from "../../assets/styles/CarFormStyles";
+
 
 export default function Jobs() {
   const { accessToken } = useAuthStore();
@@ -28,74 +32,57 @@ export default function Jobs() {
   const [page, setPage] = useState(1);
   const [addMore, setAddMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
+ 
   const [selectedType, setSelectedType] = useState("jobs");
   const [checking, setChecking] = useState(true);
+  const { index5, jobs1 } = useFilterStore();
+  const [showIcons, setShowIcons] = useState(false);
+
 
 
   const router = useRouter();
+  const params = useLocalSearchParams();
 
 
-const provinces = [
-  { label: "کابل", value: "کابل" },
-  { label: "هرات", value: "هرات" },
-  { label: "مزار شریف", value: "مزار شریف" },
-  { label: "قندهار", value: "قندهار" },
-  { label: "ننگرهار", value: "ننگرهار" },
-  { label: "بلخ", value: "بلخ" },
-  { label: "بامیان", value: "بامیان" },
-  { label: "پکتیا", value: "پکتیا" },
-  { label: "پروان", value: "پروان" },
-  { label: "غزنی", value: "غزنی" },
-  { label: "پنجشیر", value: "پنجشیر" },
-  { label: "پکتیکا", value: "پکتیکا" },
-  { label: "بدخشان", value: "بدخشان" },
-  { label: "بغلان", value: "بغلان" },
-  { label: "فراه", value: "فراه" },
-  { label: "دایکندی", value: "دایکندی" },
-  { label: "فاریاب", value: "فاریاب" },
-  { label: "خوست", value: "خوست" },
-  { label: "کاپیسا", value: "کاپیسا" },
-  { label: "کنر", value: "کنر" },
-  { label: "کندز", value: "کندز" },
-  { label: "لغمان", value: "لغمان" },
-  { label: "لوگر", value: "لوگر" },
-  { label: "نیمروز", value: "نیمروز" },
-  { label: "نورستان", value: "نورستان" },
-  { label: "سمنگان", value: "سمنگان" },
-  { label: "سرپل", value: "سرپل" },
-  { label: "تخار", value: "تخار" },
-  { label: "ارزگان", value: "ارزگان" },
-  { label: "وردک", value: "وردک" },   // میدان وردک
-  { label: "زابل", value: "زابل" },
-  { label: "هلمند", value: "هلمند" },
-  { label: "جوزجان", value: "جوزجان" },
-  // ... بقیه ولایت‌ها
-];
 
 
   const fetchJobs = async (pageNum = 1, refresh = false) => {
-    try {
-      if (refresh) setRefreshing(true);
-      else if (pageNum === 1) setLoading(true);
+  try {
+    if (refresh) setRefreshing(true);
+    else if (pageNum === 1) setLoading(true);
 
-      const res = await apiFetch(`/jobs?page=${pageNum}&limit=5`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+     const queryParams = new URLSearchParams({
+      page: pageNum,
+      limit: 5,
+      searchQuery,
+      location: index5.location || "",
+      income: jobs1.income || "",
+      workingHours: jobs1.workingHours || "",
+      paymentType: jobs1.paymentType || "",
+      type: selectedType || "",
+    });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "خطا در گرفتن آگهی‌های شغلی");
 
-      setJobs(pageNum === 1 || refresh ? data.jobs : [...jobs, ...data.jobs]);
-      setAddMore(pageNum < data.totalPages);
-      setPage(pageNum);
-    } catch (error) {
-      console.error("fetch error:", error);
-    } finally {
-      if (refresh) setRefreshing(false);
-      else setLoading(false);
-    }
-  };
+    const res = await apiFetch(`/jobs?${queryParams.toString()}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "خطا در گرفتن آگهی‌های شغلی");
+
+    setJobs(pageNum === 1 || refresh ? data.jobs : [...jobs, ...data.jobs]);
+    setAddMore(pageNum < data.totalPages);
+    setPage(pageNum);
+  } catch (error) {
+    console.error("fetch error:", error);
+  } finally {
+    if (refresh) setRefreshing(false);
+    else setLoading(false);
+  }
+};
+
+
 
   useEffect(() => {
       const checkToken = async () => {
@@ -139,18 +126,12 @@ const provinces = [
     }
   };
 
-  const filteredJobs = jobs.filter(job => {
-    const matchesTitle = job.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLocation = locationFilter
-      ? (job.location && job.location.toLowerCase().includes(locationFilter.toLowerCase()))
-      : true;
-    return matchesTitle && matchesLocation;
-  });
+ 
 
   const renderItem = ({ item }) => (
     <Link
       href={{
-        pathname: "/job-details",
+        pathname: "/details/job-details",
         params: { data: JSON.stringify(item) },
       }}
       asChild
@@ -183,107 +164,206 @@ const provinces = [
 
   if (loading) return <Loader />;
 
-  return (
-    <View style={styles.container}>
-      <FlatList
-        data={filteredJobs}
-        renderItem={renderItem}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => fetchJobs(1, true)}
-            colors={[COLORS.primary]}
-            tintColor={COLORS.primary}
-          />
-        }
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.1}
-        ListHeaderComponent={
-          <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
+ return (
+  <View style={styles.container}>
+    <FlatList
+      data={jobs}
+      renderItem={renderItem}
+      keyExtractor={(item) => item._id}
+      contentContainerStyle={styles.listContainer}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => fetchJobs(1, true)}
+          colors={[COLORS.primary]}
+          tintColor={COLORS.primary}
+        />
+      }
+      onEndReached={handleLoadMore}
+      onEndReachedThreshold={0.1}
+      ListHeaderComponent={
+  <View>
+{/* دکمه منو */}
+  <TouchableOpacity
+    style={carFormStyles.menuButton}
+    onPress={() => setShowIcons(!showIcons)}
+  >
+    <Ionicons name="menu-outline" size={28} color="black" />
+    <Text style={carFormStyles.menuText}>همه آگهی‌ها</Text>
+  </TouchableOpacity>
 
-            <TouchableOpacity
-      style={styles.button}
-      onPress={() => router.push('/properties')}
-    >
-      <Text style={styles.buttonText}>رفتن به صفحه آگهی های املاک</Text>
-    </TouchableOpacity>
+  {/* بخش آیکون‌ها فقط وقتی showIcons=true */}
+  {showIcons && (
+    <View style={carFormStyles.container}>
+      <View style={carFormStyles.row1}>
+        
+        {/* آیکون املاک */}
+        <TouchableOpacity
+          onPress={() => router.push("/page/properties")}
+          style={carFormStyles.touchable1}
+        >
+          <Ionicons name="home-outline" size={35} color={COLORS.primary} />
+          <View style={carFormStyles.underline} />
+          <Text style={carFormStyles.label}>املاک</Text>
+        </TouchableOpacity>
 
-           {/* اینجا دو ورودی کنار هم */}
-    <View style={{ flexDirection: "row", gap: 8 }}>
+        {/* آیکون وسایل نقلیه */}
+        <TouchableOpacity
+          onPress={() => router.push("/page/car")}
+          style={carFormStyles.touchable1}
+        >
+          <Ionicons name="car-outline" size={35} color={COLORS.primary} />
+          <View style={carFormStyles.underline} />
+          <Text style={carFormStyles.label}>وسایل نقلیه</Text>
+        </TouchableOpacity>
+
+        {/* آیکون پوشاک */}
+        <TouchableOpacity
+          onPress={() => router.push("/page/cloutes")}
+          style={carFormStyles.touchable1}
+        >
+          <Ionicons name="shirt-outline" size={35} color={COLORS.primary} />
+          <View style={carFormStyles.underline} />
+          <Text style={carFormStyles.label}>پوشاک</Text>
+        </TouchableOpacity>
+
+        {/* آیکون خانه و آشپزخانه */}
+        <TouchableOpacity
+          onPress={() => router.push("/page/kitchen")}
+          style={carFormStyles.touchable1}
+        >
+          <Ionicons name="cube-outline" size={35} color={COLORS.primary} />
+          <View style={carFormStyles.underline} />
+          <Text style={carFormStyles.label}>خانه و آشپزخانه</Text>
+        </TouchableOpacity>
+
+        {/* آیکون خوراکی‌ها */}
+        <TouchableOpacity
+          onPress={() => router.push("/page/eat")}
+          style={carFormStyles.touchable1}
+        >
+          <Ionicons name="fast-food-outline" size={35} color={COLORS.primary} />
+          <View style={carFormStyles.underline} />
+          <Text style={carFormStyles.label}>خوراکی‌ها</Text>
+        </TouchableOpacity>
+
+      </View>
+    </View>
+  )}
+
+
+  
+    {/* بخش ورودی متن و ولایت */}
+    <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: 16, marginBottom: 10 }}>
       <TextInput
-        style={{
-          flex: 2, // فضای بیشتر
-          backgroundColor: COLORS.background,
-           height: 60,
-          padding: 10,
-          borderRadius: 8,
-          borderWidth: 1,
-           fontSize: 15, 
-          borderColor: COLORS.textSecondary,
-        }}
+         style={carFormStyles.textInput}
         placeholder="کار مورد نظر خودرا بنویسید"
         placeholderTextColor={COLORS.placeholderText}
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
 
-      <View
-        style={{
-          flex: 1, // فضای کمتر
-          backgroundColor: COLORS.background,
-           height: 60,
-          borderRadius: 8,
-          borderWidth: 1,
-          borderColor: COLORS.textSecondary,
-          justifyContent: "center",
-        }}
-      >
-        <RNPickerSelect
-          onValueChange={(value) => setLocationFilter(value)}
-          items={provinces}
-          placeholder={{ label: "ولایت", value: null }}
-          useNativeAndroidPickerStyle={false}
-          style={{
-            inputIOS: {
-              padding: 10,
-              color: COLORS.black,
-               fontSize: 16,
-            },
-             placeholder: {
-             color: COLORS.placeholderText, 
-               },
-            inputAndroid: {
-              padding: 10,
-              color: COLORS.black,
-               fontSize: 16,
-            },
-          }}
-          value={locationFilter}
-        />
-       </View>
-         </View>
-          </View>
-        }
-        ListFooterComponent={
-          addMore && jobs.length > 0 ? (
-            <ActivityIndicator
-              style={styles.footerLoader}
-              size="small"
-              color={COLORS.primary}
-            />
-          ) : null
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name='briefcase-outline' size={60} color={COLORS.textSecondary} />
-            <Text style={styles.emptyText}> هنوز آگهی شغلی اضافه نشده</Text>
-          </View>
-        }
-      />
+      <View style={carFormStyles.touchable}>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "/page/select-location",
+              params: { section: "jobs" },
+            })
+          }
+        >
+          <Text
+            style={{
+              color: index5.location ? COLORS.black : COLORS.placeholderText,
+              fontSize: 16,
+            }}
+          >
+            {index5.location || "ولایت"}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
-  );
+
+    {/* فیلترها */}
+  <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: 16, marginBottom: 10 }}>
+      <TouchableOpacity
+       style={carFormStyles.touchable}
+        onPress={() =>
+          router.push({
+            pathname: "/filter",
+            params: { type: "income1" },
+          })
+        }
+      >
+        <Text>{jobs1.income || "income"}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+       style={carFormStyles.touchable}
+        onPress={() =>
+          router.push({
+            pathname: "/filter",
+            params: { type: "workingHours1" },
+          })
+        }
+      >
+        <Text>{jobs1.workingHours || "hours"}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={carFormStyles.touchable}
+        onPress={() =>
+          router.push({
+            pathname: "/filter",
+            params: { type: "paymentType1" },
+          })
+        }
+      >
+        <Text>{jobs1.paymentType || "payment"}</Text>
+      </TouchableOpacity>
+    </View>
+
+    {/* دکمه جستجو */}
+    {(searchQuery.length > 0 ||
+      index5.location ||
+      jobs1.income ||
+      jobs1.workingHours ||
+      jobs1.paymentType) && (
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => fetchJobs(1, true)}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Ionicons name="search" size={22} color={COLORS.black} />
+          <Text style={styles.buttonText}>جستجو کنید</Text>
+        </View>
+      </TouchableOpacity>
+    )}
+  </View>
+}
+
+      ListFooterComponent={
+        addMore && jobs.length > 0 ? (
+          <ActivityIndicator
+            style={styles.footerLoader}
+            size="small"
+            color={COLORS.primary}
+          />
+        ) : null
+      }
+      ListEmptyComponent={
+        <View style={styles.emptyContainer}>
+          <Ionicons
+            name="briefcase-outline"
+            size={60}
+            color={COLORS.textSecondary}
+          />
+          <Text style={styles.emptyText}>هنوز آگهی شغلی اضافه نشده</Text>
+        </View>
+      }
+    />
+  </View>
+);
 }
 

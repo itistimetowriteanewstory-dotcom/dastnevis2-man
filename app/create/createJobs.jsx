@@ -7,7 +7,7 @@ import COLORS from '../../colectionColor/colors';
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import {useAuthStore} from "../../store/authStore";
-
+import { useFilterStore } from "../../store/fileStore";
 import RNPickerSelect from 'react-native-picker-select'; 
 import { apiFetch } from '../../store/apiClient';
 
@@ -25,7 +25,7 @@ const [workingHours, setWorkingHours] = useState("");
 const [paymentType, setPaymentType] = useState("");
 
 
-
+const { createJobs1,  setCreateJobs1 } = useFilterStore();
 
 
    const router = useRouter();
@@ -75,7 +75,7 @@ if(!result.canceled) {
 
    const handleSubmit = async () => {
   // بررسی کامل بودن فیلدها
-  if (!title || !caption || !imageBase64 || !phoneNumber || !location || !income || !workingHours || !paymentType) {
+  if (!title || !caption || !imageBase64 || !phoneNumber || !createJobs1.location || !createJobs1.income || !createJobs1.workingHours || !createJobs1.paymentType) {
     Alert.alert("خطا", "لطفاً همه‌ی خانه هارا پر کنید");
     return;
   }
@@ -106,10 +106,10 @@ if(!result.canceled) {
         image: imageDataUri,
         phoneNumber,
         jobtitle,
-        income,
-        location,
-        workingHours,
-        paymentType,
+        income: createJobs1.income,
+        location: createJobs1.location,
+        workingHours: createJobs1.workingHours,
+        paymentType: createJobs1.paymentType,
       }),
     });
 
@@ -144,10 +144,12 @@ if(!result.canceled) {
     setImageBase64(null);
     setPhoneNumber("");
     setJobtitle("");
-    setIncome("");
-    setLocation("");
-    setWorkingHours("");
-    setPaymentType("");
+     setCreateJobs1({
+       location: "",
+       income: "",
+       workingHours: "",
+       paymentType: "",
+       });
     router.push("/");
 
   } catch (error) {
@@ -232,16 +234,27 @@ if(!result.canceled) {
   />
 </View>
 
-{/* job title */}
-<View style={styles.formGroup}>
-  <Text style={styles.label}>ولایت </Text>
-  <TextInput
+  {/* location */}
+        <View style={styles.formGroup}>
+  <Text style={styles.label}>ولایت</Text>
+  <TouchableOpacity
     style={styles.inputContainer}
-    placeholder="ولایت خود را بنویسید"
-    placeholderTextColor={COLORS.placeholderText}
-    value={location}
-    onChangeText={setLocation}
-  />
+    onPress={() =>
+      router.push({
+        pathname: "/page/select-location",
+        params: { section: "createJobs" }, // 👈 مسیر برگشت
+      })
+    }
+  >
+    <Text
+      style={{
+        color: createJobs1.location ? COLORS.black : COLORS.placeholderText,
+        fontSize: 16,
+      }}
+    >
+      {createJobs1.location || "ولایت خود را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
 </View>
 
 {/* job title */}
@@ -256,101 +269,74 @@ if(!result.canceled) {
   />
 </View>
 
-{/* income */}
+   {/* model */}
 <View style={styles.formGroup}>
-  <Text style={styles.label}>معاش</Text>
-  <TextInput
+  <Text style={styles.label} >income</Text>
+  <TouchableOpacity
     style={styles.inputContainer}
-    placeholder="معاشی که برای کار درنظر دارید را بنویسید"
-    placeholderTextColor={COLORS.placeholderText}
-    value={income}
-    onChangeText={setIncome}
-  
-  />
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "income" },
+      })
+    }
+  >
+    <Text
+      style={{
+        color: createJobs1.income ? COLORS.black : COLORS.placeholderText,
+        fontSize: 16,
+      }}
+    >
+      {createJobs1.income || "مدل را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
 </View>
 
+
+ {/* model */}
 <View style={styles.formGroup}>
-  <Text style={styles.label}>ساعت کاری</Text>
-  <RNPickerSelect
-    onValueChange={(value) => setWorkingHours(value)}
-    value={workingHours}
-    placeholder={{
-      label: "ساعت کاری را انتخاب کنید",
-      value: null,
-    }}
-    items={[
-      { label: "تمام وقت 12 ساعت", value: "تمام وقت 12 ساعت" },
-      { label: "پاره وقت 7 ساعت", value: "پاره وقت 7 ساعت"},
-      { label: "کارآموزی کمتر از 7 ساعت", value: "کار آموزی کمتر از 7 ساعت"},
-      { label: "توافقی", value: "توافقی"},
-    ]}
-    useNativeAndroidPickerStyle={false}
-    style={{
-      inputIOS: {
-        backgroundColor: COLORS.inputBackground,
-        color: COLORS.black,
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        marginBottom: 8,
-      },
-      inputAndroid: {
-        backgroundColor: COLORS.inputBackground,
-        color: COLORS.black,
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        marginBottom: 8,
-      },
-      placeholder: {
-        color: COLORS.placeholderText,
-      },
-    }}
-  />
+  <Text style={styles.label} >working hours</Text>
+  <TouchableOpacity
+    style={styles.inputContainer}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "workingHours" },
+      })
+    }
+  >
+    <Text
+      style={{
+        color: createJobs1.workingHours ? COLORS.black : COLORS.placeholderText,
+        fontSize: 16,
+      }}
+    >
+      {createJobs1.workingHours || "مدل را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
 </View>
 
+{/* model */}
 <View style={styles.formGroup}>
-  <Text style={styles.label}>شیوه پرداخت</Text>
-  <RNPickerSelect
-    onValueChange={(value) => setPaymentType(value)}
-    value={paymentType}
-    placeholder={{
-      label: "شیوه پرداخت را انتخاب کنید",
-      value: null,
-    }}
-    items={[
-      { label: "ماهانه", value: "ماهانه"},
-      { label: "هفتگی", value: "هفتگی" },
-      { label: "روزانه", value: "روزانه"},
-      { label: "پروژه‌ای", value: "پروژه‌ای"},
-    ]}
-    useNativeAndroidPickerStyle={false}
-    style={{
-      inputIOS: {
-        backgroundColor: COLORS.inputBackground,
-        color: COLORS.black,
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        marginBottom: 8,
-      },
-      inputAndroid: {
-        backgroundColor: COLORS.inputBackground,
-        color: COLORS.black,
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        marginBottom: 8,
-      },
-      placeholder: {
-        color: COLORS.placeholderText,
-      },
-    }}
-  />
+  <Text style={styles.label} >paymentType</Text>
+  <TouchableOpacity
+    style={styles.inputContainer}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "paymentType" },
+      })
+    }
+  >
+    <Text
+      style={{
+        color: createJobs1.paymentType ? COLORS.black : COLORS.placeholderText,
+        fontSize: 16,
+      }}
+    >
+      {createJobs1.paymentType || "مدل را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
 </View>
 
 
@@ -361,13 +347,13 @@ if(!result.canceled) {
   disabled={loading}
 >
   {loading ? (
-    <ActivityIndicator color={COLORS.white} />
+    <ActivityIndicator color={COLORS.black} />
   ) : (
     <>
       <Ionicons
         name="cloud-upload-outline"
         size={20}
-        color={COLORS.white}
+        color={COLORS.black}
         style={styles.buttonIcon}
       />
       <Text style={styles.buttonText}>کار خودرا ثبت کنید</Text>

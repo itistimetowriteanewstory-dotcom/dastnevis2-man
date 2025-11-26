@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.inputBackground,
     borderRadius: 12,
     borderWidth: 1,
+    height: 48,
     borderColor: COLORS.border,
     paddingHorizontal: 12,
      textAlign: 'right',
@@ -111,13 +112,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   button: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.background,
     borderRadius: 12,
     height: 50,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginTop: 16,
+    borderColor: COLORS.border,  
+    borderWidth: 1,
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -125,12 +128,13 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   buttonText: {
-    color: COLORS.white,
+    color: COLORS.textDark,
     fontSize: 16,
     fontWeight: "600",
   },
   buttonIcon: {
     marginRight: 8,
+    color: COLORS.textDark,
   },
 });
 

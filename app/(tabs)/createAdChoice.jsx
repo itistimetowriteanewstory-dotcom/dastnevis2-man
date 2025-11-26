@@ -1,30 +1,71 @@
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import COLORS from "../../colectionColor/colors";
 
 export default function CreateAdChoice() {
   const router = useRouter();
-  const screenWidth = Dimensions.get("window").width; // 👈 گرفتن عرض گوشی
+
 
   return (
     <View style={styles.container}>
-      {/* عنوان بالای صفحه */}
-      <Text style={styles.title}>نوع آگهی خود را انتخاب کنید.</Text>
+      <Text style={styles.title}>نوع آگهی خود را انتخاب کنید</Text>
 
-      {/* دکمه ثبت آگهی شغلی */}
-      <TouchableOpacity
-        style={[styles.button, { marginHorizontal: 20, alignSelf: "stretch" }]} // 👈 دکمه تمام عرض با کمی فاصله از کناره‌ها
-        onPress={() => router.push("/create/createJobs")}
-      >
-        <Text style={styles.buttonText}>ثبت آگهی شغلی</Text>
-      </TouchableOpacity>
+      <View style={styles.iconGrid}>
+        {/* شغل */}
+        <TouchableOpacity
+          style={styles.iconBox}
+          onPress={() => router.push("/create/createJobs")}
+        >
+          <Ionicons name="briefcase-outline" size={40} color={COLORS.primary} />
+          <Text style={styles.iconLabel}>ثبت آگهی شغلی</Text>
+        </TouchableOpacity>
 
-      {/* دکمه ثبت آگهی ملک */}
-      <TouchableOpacity
-        style={[styles.button, { marginHorizontal: 20, alignSelf: "stretch" }]}
-        onPress={() => router.push("/create/createProperty")}
-      >
-        <Text style={styles.buttonText}>ثبت آگهی ملک</Text>
-      </TouchableOpacity>
+        {/* ملک */}
+        <TouchableOpacity
+          style={styles.iconBox}
+          onPress={() => router.push("/create/createProperty")}
+        >
+          <Ionicons name="home-outline" size={40} color={COLORS.primary} />
+          <Text style={styles.iconLabel}>ثبت آگهی ملک</Text>
+        </TouchableOpacity>
+
+        {/* وسایل نقلیه */}
+        <TouchableOpacity
+          style={styles.iconBox}
+          onPress={() => router.push("/create/createCar")}
+        >
+          <Ionicons name="car-outline" size={40} color={COLORS.primary} />
+          <Text style={styles.iconLabel}>ثبت آگهی وسایل نقلیه</Text>
+        </TouchableOpacity>
+
+        {/* خانه و آشپزخانه */}
+        <TouchableOpacity
+          style={styles.iconBox}
+          onPress={() => router.push("/create/createHome")}
+        >
+          <Ionicons name="cube-outline" size={40} color={COLORS.primary} />
+          <Text style={styles.iconLabel}>لوازم خانه و آشپزخانه</Text>
+        </TouchableOpacity>
+
+        {/* پوشاک */}
+        <TouchableOpacity
+          style={styles.iconBox}
+          onPress={() => router.push("/create/createCloutes")}
+        >
+          <Ionicons name="shirt-outline" size={40} color={COLORS.primary} />
+          <Text style={styles.iconLabel}>ثبت آگهی پوشاک</Text>
+        </TouchableOpacity>
+
+        {/* خوراکی‌ها */}
+        <TouchableOpacity
+          style={styles.iconBox}
+          onPress={() => router.push("/create/createEat")}
+        >
+          <Ionicons name="fast-food-outline" size={40} color={COLORS.primary} />
+          <Text style={styles.iconLabel}>ثبت آگهی خوراک</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -32,36 +73,34 @@ export default function CreateAdChoice() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9e6ba", // رنگ پس‌زمینه
-    padding: 5,
-    alignItems: "center",
-    justifyContent: "flex-start", // 👈 عنوان بالا باشه
+    backgroundColor: COLORS.background,
+    paddingTop: 30,
+    paddingHorizontal: 16,
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
-    marginVertical: 30,
-    color: "#573e30ff",
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  iconGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  iconBox: {
+    width: "30%",
+    alignItems: "center",
+    marginVertical: 16,
+  },
+  iconLabel: {
+    marginTop: 8,
+    fontSize: 14,
+    color: COLORS.textPrimary,
     textAlign: "center",
   },
-  button: {
-    backgroundColor: "#f46a51ff", // رنگ اصلی دکمه
-    paddingVertical: 20,
-    borderRadius: 8,
-    marginVertical: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 3, // سایه برای اندروید
-    shadowColor: "#000", // سایه برای iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "600",
-  },
+
 });
 
 

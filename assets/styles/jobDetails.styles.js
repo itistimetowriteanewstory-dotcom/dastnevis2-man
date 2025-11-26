@@ -109,6 +109,7 @@ userBox: {
     color: COLORS.textDark,
     marginBottom: 6,
     lineHeight: 22,
+    marginLeft: 8,
   },
 
   caption: {
@@ -119,10 +120,12 @@ userBox: {
   },
 
   saveButton: {
-  backgroundColor: COLORS.primary,
+  backgroundColor: "#ffffffff",
   paddingVertical: 8,
   paddingHorizontal: 16,
   borderRadius: 8,
+  borderColor: COLORS.border,  
+  borderWidth: 1,
   width: 170, 
   height: 60,
   alignItems: "center",     // متن افقی وسط
@@ -139,7 +142,7 @@ buttonRow: {
 
 
 saveButtonText: {
-  color: COLORS.white,
+  color: COLORS.textDark,
   fontSize: 18,
   fontWeight: 'bold',
   textAlign: "center",

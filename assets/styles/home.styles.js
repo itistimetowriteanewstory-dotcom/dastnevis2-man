@@ -123,12 +123,12 @@ const styles = StyleSheet.create({
   },
 
   propertyCard: {
-  backgroundColor: "#faeccdff",
+  backgroundColor: "#f9f9f9",
   borderRadius: 10,
   marginBottom: 12,
   overflow: "hidden", // باعث میشه گوشه‌های گرد روی عکس هم اعمال بشه
   borderWidth: 1,
-  borderColor: "#e2d6c1",
+  borderColor: "#d1d1d6",
  
 },
 
@@ -167,20 +167,20 @@ propertyDate: {
 },
 
  button: {
-    backgroundColor: COLORS.primary,   // رنگ پس‌زمینه
+    backgroundColor: COLORS.background,   // رنگ پس‌زمینه
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#999',          // رنگ بوردر
+           // رنگ بوردر
     alignItems: 'center',
-    marginTop: 8,
+   
     marginBottom: 8,
-     
+    marginLeft: 10,
+     width: 150, 
 
   },
   buttonText: {
-    color: 'white',                // رنگ متن
+   color: COLORS.black,
     fontSize: 18,                 // سایز متن
     fontWeight: 'bold',
     marginRight: 20,

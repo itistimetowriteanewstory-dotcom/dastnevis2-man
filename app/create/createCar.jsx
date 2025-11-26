@@ -1,0 +1,357 @@
+import { useState } from 'react';
+import { View, Text, KeyboardAvoidingView, Platform, ScrollView, TextInput, TouchableOpacity, Alert, Image, ActivityIndicator, Modal } from 'react-native';
+import { useRouter } from "expo-router";
+import styles from "../../assets/styles/create.styles";
+import { Ionicons } from "@expo/vector-icons";
+import COLORS from '../../colectionColor/colors';
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import { useAuthStore } from "../../store/authStore";
+import { apiFetch } from '../../store/apiClient';
+import { useFilterStore } from "../../store/fileStore";
+
+export default function CreateCar() {
+  const [title, setTitle] = useState("");           
+  const [caption, setCaption] = useState("");       
+  const [image, setImage] = useState(null);         
+  const [imageBase64, setImageBase64] = useState(null); 
+  const [loading, setLoading] = useState(false);    
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [carcard, setCarcard] = useState("");
+  const [price, setPrice] = useState("");
+  
+  
+  const { createCar1, setCreateCar1 } = useFilterStore();
+
+
+  const router = useRouter();
+  const { accessToken } = useAuthStore();
+
+  // انتخاب عکس
+  const pickImage = async () => {
+    try {
+      if (Platform.OS !== "web") {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("عدم دسترسی", "برای اضافه کردن عکس ابتدا اجازه دسترسی به گالری را دهید");
+          return;
+        }
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.3,
+        base64: true,
+      });
+
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+        if (result.assets[0].base64) {
+          setImageBase64(result.assets[0].base64);
+        } else {
+          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          setImageBase64(base64);
+        }
+      }
+    } catch (error) {
+      console.error("خطا: موقع انتخاب عکس", error);
+      Alert.alert("خطا", "مشکلی در انتخاب عکس وجود دارد");
+    }
+  };
+
+  // ارسال فرم
+  const handleSubmit = async () => {
+    if (!title || !caption || !imageBase64 || !phoneNumber || !createCar1.location) {
+      Alert.alert("خطا", "لطفاً همه‌ی خانه‌های ضروری را پر کنید");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const uriParts = image.split(".");
+      const fileExtension = uriParts[uriParts.length - 1];
+      const imageType = fileExtension
+        ? `image/${fileExtension.toLowerCase()}`
+        : "image/jpeg";
+
+      const imageDataUri = `data:${imageType};base64,${imageBase64}`;
+
+      const response = await apiFetch("/car", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          caption,
+          image: imageDataUri,
+          phoneNumber,
+          carcard,
+          price,
+          location: createCar1.location,
+          model: createCar1.model,
+          brand: createCar1.brand,
+          fuelType: createCar1.fuelType,
+          adType: createCar1.adType,
+
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = "مشکلی پیش آمد";
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (e) {
+          console.error("خطا در خواندن پاسخ:", e);
+        }
+        Alert.alert("خطا", errorMessage);
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      Alert.alert("موفقیت", "آگهی خودرو با موفقیت اضافه شد");
+      // پاک کردن فرم
+      setTitle("");
+      setCaption("");
+      setImage(null);
+      setImageBase64(null);
+      setPhoneNumber("");
+      setCarcard("");
+      setPrice("");
+      setCreateCar1({
+      location: "",
+      model: "",
+      brand: "",
+      fuelType: "",
+      adType: "",
+      });
+      router.push("/page/car");
+
+    } catch (error) {
+      console.error("خطا در ارسال پست:", error);
+      Alert.alert("خطا", error.message || "ارسال با مشکل مواجه شد");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+  <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+    <ScrollView contentContainerStyle={styles.container} style={styles.scrollViewStyle}>
+      <View style={styles.card}>
+        {/* header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>وسیله نقلیه خود را ثبت کنید</Text>
+          <Text style={styles.subtitle}>
+            با معرفی خودرو یا وسیله نقلیه خود، امکان خرید و فروش آسان‌تر و سریع‌تر را فراهم کنید.
+          </Text>
+        </View>
+
+        <View style={styles.form}>
+          {/* title */}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>عنوان آگهی</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="مثال: فروش یک تویوتا کرولا مدل 2015"
+                placeholderTextColor={COLORS.placeholderText}
+                value={title}
+                onChangeText={setTitle}
+              />
+            </View>
+          </View>
+
+          {/* image */}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>عکس وسیله</Text>
+            <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+              {image ? (
+                <Image source={{ uri: image }} style={styles.previewImage} />
+              ) : (
+                <View style={styles.placeholderContainer}>
+                  <Ionicons name="image-outline" size={40} color={COLORS.textSecondary} />
+                  <Text style={styles.placeholderText}>برای اضافه کردن عکس کلیک کنید</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* caption */}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>توضیحات</Text>
+            <TextInput
+              style={styles.textArea}
+              placeholder="توضیحات مربوط به وسیله را اینجا بنویسید"
+              placeholderTextColor={COLORS.placeholderText}
+              value={caption}
+              onChangeText={setCaption}
+              multiline
+            />
+          </View>
+
+          {/* phone number */}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>نمبر تلفون</Text>
+            <TextInput
+              style={styles.inputContainer}
+              placeholder="نمبر تلفون خود را وارد کنید"
+              placeholderTextColor={COLORS.placeholderText}
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              keyboardType="numeric"
+            />
+          </View>
+
+     {/* location */}
+        <View style={styles.formGroup}>
+  <Text style={styles.label}>ولایت</Text>
+  <TouchableOpacity
+    style={styles.inputContainer}
+    onPress={() =>
+      router.push({
+        pathname: "/page/select-location",
+        params: { section: "car" }, 
+      })
+    }
+  >
+    <Text
+      style={{
+        color: createCar1.location ? COLORS.black : COLORS.placeholderText,
+        fontSize: 16,
+      }}
+    >
+      {createCar1.location || "ولایت خود را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
+</View>
+
+    {/* adType */}
+<View style={styles.formGroup}>
+  <Text style={styles.label}>نوع وسیله</Text>
+  <TouchableOpacity
+    style={styles.inputContainer}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "car1AdType" }, // 👈 دیگه returnTo لازم نیست چون با router.back برمی‌گردیم
+      })
+    }
+  >
+    <Text>{createCar1.adType || "نوع آگهی"}</Text>
+  </TouchableOpacity>
+</View>
+
+
+
+{/* model */}
+<View style={styles.formGroup}>
+  <Text style={styles.label}>مدل</Text>
+  <TouchableOpacity
+    style={styles.inputContainer}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "car1Model" },
+      })
+    }
+  >
+    <Text>{createCar1.model || "مدل را انتخاب کنید"}</Text>
+  </TouchableOpacity>
+</View>
+
+{/* brand */}
+<View style={styles.formGroup}>
+  <Text style={styles.label}>برند</Text>
+  <TouchableOpacity
+    style={styles.inputContainer}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "car1Brand" },
+      })
+    }
+  >
+    <Text>{createCar1.brand || "برند را انتخاب کنید"}</Text>
+  </TouchableOpacity>
+</View>
+
+{/* fuelType */}
+<View style={styles.formGroup}>
+  <Text style={styles.label}>نوع سوخت</Text>
+  <TouchableOpacity
+    style={styles.inputContainer}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "car1FuelType" },
+      })
+    }
+  >
+    <Text>{createCar1.fuelType || "نوع سوخت را انتخاب کنید"}</Text>
+  </TouchableOpacity>
+</View>
+
+
+
+
+       
+
+          {/* carcard */}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>منطقه</Text>
+            <TextInput
+              style={styles.inputContainer}
+              placeholder="منطقه ای که در آن زندهگی میکنید را بنویسید"
+              placeholderTextColor={COLORS.placeholderText}
+              value={carcard}
+              onChangeText={setCarcard}
+            />
+          </View>
+
+          {/* price */}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>قیمت</Text>
+            <TextInput
+              style={styles.inputContainer}
+              placeholder="قیمت مورد نظر خود را وارد کنید"
+              placeholderTextColor={COLORS.placeholderText}
+              value={price}
+              onChangeText={setPrice}
+            
+            />
+          </View>
+
+          {/* submit button */}
+          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color={COLORS.black} />
+            ) : (
+              <>
+                <Ionicons
+                  name="cloud-upload-outline"
+                  size={20}
+                  color={COLORS.black}
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.buttonText}>وسیله نقلیه خود را ثبت کنید</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
+  </KeyboardAvoidingView>
+);
+}

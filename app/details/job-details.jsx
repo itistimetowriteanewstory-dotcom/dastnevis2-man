@@ -2,18 +2,18 @@
 import { View, Text, ScrollView, TouchableOpacity, Linking, Platform, Alert } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
-import styles from '../assets/styles/jobDetails.styles'; 
-import { formatPublishDate } from '../lib/utils';
+import styles from '../../assets/styles/jobDetails.styles'; 
+import { formatPublishDate } from '../../lib/utils';
 import { Ionicons } from "@expo/vector-icons";
-import COLORS from "../colectionColor/colors";
+import COLORS from "../../colectionColor/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 
-import { apiFetch } from "../store/apiClient";
+import { apiFetch } from "../../store/apiClient";
 
 
 // ✅ گرفتن توکن از استور
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../../store/authStore";
 
 export default function JobDetails() {
   // گرفتن هر دو پارامتر

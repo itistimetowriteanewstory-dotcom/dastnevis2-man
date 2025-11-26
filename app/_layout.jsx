@@ -9,10 +9,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiFetch } from "../store/apiClient";
 import { ActivityIndicator, View } from "react-native";
 
+
+
+
 export default function RootLayout() {
 
   const router = useRouter();
   const segments = useSegments();
+
+  
 
   const { checkAuth, user, accessToken, refreshToken, logout, isChecking } = useAuthStore();
 
@@ -20,6 +25,15 @@ export default function RootLayout() {
   useEffect(() => {
     const initAuth = async () => {
       await checkAuth();
+
+       const storedAccess = await AsyncStorage.getItem("accessToken");
+    const storedRefresh = await AsyncStorage.getItem("refreshToken");
+
+          // حالت: هیچ توکنی ذخیره نشده → اولین ورود
+    if (!storedAccess && !storedRefresh) {
+      router.replace("/(auth)");
+      return;
+    }
 
       // اگر accessToken نداشتیم، تلاش برای گرفتن توکن جدید
       if (!accessToken && refreshToken) {
@@ -94,11 +108,19 @@ useEffect(() => {
 
    if (isChecking) {
     return (
-      <SafeAreaProvider>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center",  backgroundColor: "#f9e6ba",}}>
-          <ActivityIndicator size="large" color="#e17055" />
-        </View>
+     <SafeAreaProvider>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f9f9f9",
+            }}
+          >
+            <ActivityIndicator size="large" color="#000000" />
+          </View>
       </SafeAreaProvider>
+
     );
   }
 

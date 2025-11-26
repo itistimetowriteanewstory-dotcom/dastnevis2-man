@@ -2,13 +2,13 @@ import { View, Text, ScrollView, TouchableOpacity, Linking, Platform, Alert } fr
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import COLORS from "../colectionColor/colors";
-import { formatPublishDate } from "../lib/utils";
-import styles from "../assets/styles/jobDetails.styles";
+import COLORS from "../../colectionColor/colors";
+import { formatPublishDate } from "../../lib/utils";
+import styles from "../../assets/styles/jobDetails.styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
-import { useAuthStore } from "../store/authStore";
-import { apiFetch } from "../store/apiClient";
+import { useAuthStore } from "../../store/authStore";
+import { apiFetch } from "../../store/apiClient";
 
 export default function PropertyDetails() {
   const { data } = useLocalSearchParams();

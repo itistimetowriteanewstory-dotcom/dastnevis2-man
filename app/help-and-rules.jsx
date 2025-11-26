@@ -1,6 +1,7 @@
 
 import React from "react";
 import { View, Text, StyleSheet, ScrollView, Linking, TouchableOpacity } from "react-native";
+import COLORS from '../colectionColor/colors';
 
 export default function HelpAndRulesScreen() {
   const reportEmail = "dastnevis.site@gmail.com";
@@ -59,20 +60,20 @@ export default function HelpAndRulesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f9e6ba", padding: 16 },
+  container: { flex: 1, backgroundColor: COLORS.background , padding: 16 },
   reportBox: {
-    backgroundColor: "#f9e6ba",
+    backgroundColor: COLORS.background,
     padding: 16,
     borderRadius: 8,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#ecb22bf0",
+    borderColor: COLORS.border,
   },
    footer: {
     marginTop: 30,
     paddingVertical: 20,
     borderTopWidth: 1,
-    borderTopColor: "#ecb22bf0",
+    borderTopColor: COLORS.textDark,
     alignItems: "center",
   },
   footerText: {

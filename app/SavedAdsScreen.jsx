@@ -14,6 +14,15 @@ export default function SavedAdsScreen() {
   const router = useRouter();
   const accessToken = useAuthStore((state) => state.accessToken);
 
+  const adTypeRoutes = {
+  job: "/details/job-details",
+  property: "/details/property-details",
+  car: "/details/car-details",
+  cloute: "/details/cloutes-details",
+  eat: "/details/eat-details",
+  homeAndKitchen: "/details/kitchen-details",
+};
+
   // 📌 گرفتن لیست ذخیره‌ها
   const fetchSavedAds = async () => {
     try {
@@ -90,16 +99,27 @@ export default function SavedAdsScreen() {
         contentContainerStyle={{ paddingBottom: 20 }}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => {
-              if (!item.ad) {
-                Alert.alert("خطا", "این آگهی دیگر موجود نیست");
-                return;
-              }
-              router.push({
-                pathname: item.adType === "job" ? "/job-details" : "/property-details",
-                params: { data: JSON.stringify(item.ad) }
-              });
-            }}
+          onPress={() => {
+           if (!item.ad) {
+           Alert.alert("خطا", "این آگهی دیگر موجود نیست");
+           return;
+            }
+
+            const route = adTypeRoutes[item.adType];
+
+           if (!route) {
+           Alert.alert("خطا", "صفحه جزئیات برای این نوع آگهی تعریف نشده");
+            return;
+           }
+
+           router.push({
+           pathname: route,
+           params: {
+            data: JSON.stringify(item.ad),
+           user: JSON.stringify(item.ad.user),
+           },
+          });
+          }}
           >
             <View style={styles.card}>
               <View style={{ flex: 1, marginRight: 10 }}>
@@ -128,7 +148,7 @@ export default function SavedAdsScreen() {
               </View>
 
               <TouchableOpacity onPress={() => removeSavedAd(item.ad?._id)}>
-                <Ionicons name="trash-outline" size={24} color="red" />
+                <Ionicons name="trash-outline" size={24} color={COLORS.primary} />
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
@@ -149,7 +169,7 @@ export default function SavedAdsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9e6ba", // پس‌زمینه سفید
+    backgroundColor: "white", // پس‌زمینه سفید
     padding: 12,
   },
   center: {
@@ -168,9 +188,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#faeccdff", // کمی تیره‌تر از سفید
+    backgroundColor: "white", // کمی تیره‌تر از سفید
     padding: 12,
     borderRadius: 8,
+     borderColor: COLORS.border,  
+     borderWidth: 1,
     marginBottom: 12,
     // سایه برای iOS
     shadowColor: "#000",
