@@ -28,6 +28,9 @@ const COLORS = {
   white: "#ffffff",
   black: "#000000",
   inputBackground1: "#eee",
+  grenn: "#79854dff",
+  bluee: "#2788ceff",
+  redsalamom: "#db5c31ff",
 };
 
 

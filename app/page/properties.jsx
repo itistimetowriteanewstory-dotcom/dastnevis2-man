@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, Modal, ActivityIndicator, RefreshControl, TextInput } from 'react-native'
 import { Image } from "expo-image";
 import { useAuthStore } from '../../store/authStore';
 import { useEffect, useState } from 'react';
@@ -8,11 +8,12 @@ import COLORS from '../../colectionColor/colors';
 import { formatPublishDate } from '../../lib/utils';
 import Loader from '../../component/Loader';
 import { Link } from 'expo-router';
-import RNPickerSelect from 'react-native-picker-select'; 
+
 import { apiFetch } from "../../store/apiClient";
 import { useFilterStore } from "../../store/fileStore";
 import { useRouter } from "expo-router";
 import { carFormStyles } from "../../assets/styles/CarFormStyles";
+
 
 export default function Properties() {
   const {accessToken} = useAuthStore();
@@ -21,11 +22,27 @@ export default function Properties() {
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [addMore, setAddMore] = useState(true);
-  const [locationFilter, setLocationFilter] = useState("");
+  const [showPropertyFilters, setShowPropertyFilters] = useState(false);
+
   const [adType, setAdType] = useState("all"); // 👈 نوع آگهی
+  const [showPropertySearchButton, setShowPropertySearchButton] = useState(false);
 
  const {  property3 } = useFilterStore();
  const router = useRouter();
+
+ const propertyTypeOptions = [
+  { label: "فروش", value: "sale" },
+  { label: "کرایه", value: "rent" },
+  { label: "گرو", value: "mortgage" },
+  { label: "گرو و کرایه", value: "rent_mortgage" },
+];
+
+const propertyTypeLabels = propertyTypeOptions.reduce((acc, item) => {
+  acc[item.value] = item.label;
+  return acc;
+}, {});
+
+
 
   const fetchProperties = async (pageNum = 1, refresh = false) => {
   try {
@@ -35,7 +52,7 @@ export default function Properties() {
   const query = new URLSearchParams({
   page: pageNum,
   limit: 5,
-  adType: property3.propertyType || "",
+  type: property3.propertyType || "",
   location: property3.location || "",
   price: property3.price || "",
   rentPrice: property3.rentPrice || "",
@@ -74,7 +91,42 @@ export default function Properties() {
     }
   };
 
-  
+  useEffect(() => {
+  if (
+    property3.propertyType ||
+    property3.location ||
+    property3.price ||
+    property3.rentPrice ||
+    property3.mortgagePrice ||
+    property3.area
+  ) {
+    setShowPropertySearchButton(true);
+  } else {
+    setShowPropertySearchButton(false);
+  }
+}, [
+  property3.propertyType,
+  property3.location,
+  property3.price,
+  property3.rentPrice,
+  property3.mortgagePrice,
+  property3.area
+]);
+
+
+let payload = {};
+
+if (property3.propertyType === "sale") {
+  payload.price = property3.price;
+} else if (property3.propertyType === "rent") {
+  payload.rentPrice = property3.rentPrice;
+} else if (property3.propertyType === "mortgage") {
+  payload.mortgagePrice = property3.mortgagePrice;
+} else if (property3.propertyType === "rent_mortgage") {
+  payload.rentPrice = property3.rentPrice;
+  payload.mortgagePrice = property3.mortgagePrice;
+}
+
 
   const renderItem = ({ item }) => (
     <Link
@@ -112,9 +164,11 @@ export default function Properties() {
               ثبت شده در تاریخ {formatPublishDate(item.createdAt)}
             </Text>
           </View>
-              {item.image && (
-            <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="cover" />
-          )}
+             {item.images && item.images.length > 0 ? (
+            <Image source={{ uri: item.images[0] }} style={styles.propertyImage} contentFit="contain" />
+             ) : item.image ? (
+            <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="contain" />
+            ) : null}
          </View>
         </View>
       </TouchableOpacity>
@@ -125,6 +179,205 @@ export default function Properties() {
 
  return (
   <View style={styles.container}>
+
+      <Modal
+      visible={showPropertyFilters}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowPropertyFilters(false)}
+    >
+      <View style={{ flex: 1, justifyContent: "flex-start", backgroundColor: "rgba(0,0,0,0.3)" }}>
+        <View
+          style={{
+            height: "100%", // نصف صفحه
+            backgroundColor: "white",
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            padding: 16,
+          }}
+        >
+          {/* دکمه بستن */}
+          <TouchableOpacity onPress={() => setShowPropertyFilters(false)} style={{ alignSelf: "flex-start", marginBottom: 15, }}>
+             <Ionicons name="close" size={35} color={COLORS.black} />
+          </TouchableOpacity>
+
+        <View style={{ marginBottom: 10, flexDirection: "row", flexWrap: "wrap", gap: 8,}}>
+          <TouchableOpacity
+             style={carFormStyles.touchable}
+            onPress={() =>
+              router.push({ pathname: "/filter", params: { type: "propertyType1" } })
+            }
+          >
+            <Text
+          style={{ color: property3.propertyType ? COLORS.black : COLORS.placeholderText, fontSize: 17 }}
+            >
+            {propertyTypeLabels[property3.propertyType] || "نوع آگهی"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ردیف دوم: ولایت + متراژ + فیلدهای شرطی */}
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+          
+          {/* ولایت */}
+          <TouchableOpacity
+            style={carFormStyles.touchable}
+            onPress={() =>
+              router.push({ pathname: "/page/select-location", params: { section: "property1" } })
+            }
+          >
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{
+                color: property3.location ? COLORS.black : COLORS.placeholderText,
+                fontSize: 17,
+              }}
+            >
+              {property3.location || "ولایت"}
+            </Text>
+          </TouchableOpacity>
+
+          {/* متراژ */}
+          <TouchableOpacity
+            style={carFormStyles.touchable}
+            onPress={() =>
+              router.push({ pathname: "/filter", params: { type: "area1" } })
+            }
+          >
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{
+                color: property3.area ? COLORS.black : COLORS.placeholderText,
+                fontSize: 16,
+              }}
+            >
+              {property3.area || "متراژ"}
+            </Text>
+          </TouchableOpacity>
+
+          {/* شرطی‌ها */}
+          {property3.propertyType === "sale" && (
+            <TouchableOpacity
+              style={carFormStyles.touchable}
+              onPress={() =>
+                router.push({ pathname: "/filter", params: { type: "price1" } })
+              }
+            >
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{
+                  color: property3.price ? COLORS.black : COLORS.placeholderText,
+                  fontSize: 16,
+                }}
+              >
+                {property3.price || "قیمت فروش"}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {property3.propertyType === "rent" && (
+            <TouchableOpacity
+              style={carFormStyles.touchable}
+              onPress={() =>
+                router.push({ pathname: "/filter", params: { type: "rentPrice1" } })
+              }
+            >
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{
+                  color: property3.rentPrice ? COLORS.black : COLORS.placeholderText,
+                  fontSize: 16,
+                }}
+              >
+                {property3.rentPrice || "کرایه"}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {property3.propertyType === "mortgage" && (
+            <TouchableOpacity
+              style={carFormStyles.touchable}
+              onPress={() =>
+                router.push({ pathname: "/filter", params: { type: "mortgagePrice1" } })
+              }
+            >
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{
+                  color: property3.mortgagePrice ? COLORS.black : COLORS.placeholderText,
+                  fontSize: 16,
+                }}
+              >
+                {property3.mortgagePrice || "گرو"}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {property3.propertyType === "rent_mortgage" && (
+            <>
+              <TouchableOpacity
+                style={carFormStyles.touchable}
+                onPress={() =>
+                  router.push({ pathname: "/filter", params: { type: "rentPrice1" } })
+                }
+              >
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{
+                    color: property3.rentPrice ? COLORS.black : COLORS.placeholderText,
+                    fontSize: 16,
+                  }}
+                >
+                  {property3.rentPrice || "کرایه"}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={carFormStyles.touchable}
+                onPress={() =>
+                  router.push({ pathname: "/filter", params: { type: "mortgagePrice1" } })
+                }
+              >
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{
+                    color: property3.mortgagePrice ? COLORS.black : COLORS.placeholderText,
+                    fontSize: 16,
+                  }}
+                >
+                  {property3.mortgagePrice || "گرو"}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+
+      
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              fetchProperties(1, true);
+              setShowPropertySearchButton(false);
+              setShowPropertyFilters(false)
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Ionicons name="search" size={22} color={COLORS.white} />
+              <Text style={styles.buttonText}>جستجو کنید</Text>
+            </View>
+          </TouchableOpacity>
+       
+
+          </View>
+          </View>
+          </Modal>
     <FlatList 
       data={properties}
       renderItem={renderItem}
@@ -141,102 +394,22 @@ export default function Properties() {
       }
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.1}
-      
-   ListHeaderComponent={
-  <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
-
-    {/* ردیف اول: نوع آگهی و ولایت */}
-   <View style={carFormStyles.row}>
-      {/* نوع آگهی */}
-      <TouchableOpacity
-       style={carFormStyles.touchable}
-        onPress={() => router.push({ pathname: "/filter", params: { type: "propertyType1" } })}
-      >
-        <Text>{property3.propertyType || "نوع آگهی"}</Text>
-      </TouchableOpacity>
-
-      {/* ولایت */}
-      <TouchableOpacity
-       style={carFormStyles.touchable}
-        onPress={() => router.push({ pathname: "/page/select-location", params: { section: "property1" } })}
-      >
-        <Text style={{ color: property3.location ? COLORS.black : COLORS.placeholderText, fontSize: 16 }}>
-          {property3.location || "ولایت"}
+      stickyHeaderIndices={[0]}
+  ListHeaderComponent={
+  <>
+    {/* دکمه باز/بستن فیلترها */}
+    <TouchableOpacity
+      style={styles.filterToggleButton}
+      onPress={() => setShowPropertyFilters(!showPropertyFilters)}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+        <Ionicons name="filter" size={22} color={COLORS.black} />
+        <Text style={styles.buttonText1}>
+          {showPropertyFilters ? "بستن فیلترها" : "نمایش فیلترها"}
         </Text>
-      </TouchableOpacity>
-    </View>
-
-    {/* ردیف دوم: فیلدهای شرطی */}
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-      
-      {/* اگر فروش انتخاب شده → قیمت فروش */}
-      {property3.propertyType === "فروش" && (
-        <TouchableOpacity
-          style={carFormStyles.touchable}
-          onPress={() => router.push({ pathname: "/filter", params: { type: "price1" } })}
-        >
-          <Text>{property3.price || "قیمت فروش"}</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* اگر کرایه انتخاب شده → کرایه */}
-      {property3.propertyType === "کرایه" && (
-        <TouchableOpacity
-          style={carFormStyles.touchable}
-          onPress={() => router.push({ pathname: "/filter", params: { type: "rentPrice1" } })}
-        >
-          <Text>{property3.rentPrice || "کرایه"}</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* اگر گرو انتخاب شده → گرو */}
-      {property3.propertyType === "گرو" && (
-        <TouchableOpacity
-         style={carFormStyles.touchable}
-          onPress={() => router.push({ pathname: "/filter", params: { type: "mortgagePrice1" } })}
-        >
-          <Text>{property3.mortgagePrice || "گرو"}</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* اگر گرو و کرایه انتخاب شده → هر دو */}
-      {property3.propertyType === "گرو و کرایه" && (
-        <>
-          <TouchableOpacity
-             style={carFormStyles.touchable}
-            onPress={() => router.push({ pathname: "/filter", params: { type: "rentPrice1" } })}
-          >
-            <Text>{property3.rentPrice || "کرایه"}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-           style={carFormStyles.touchable}
-            onPress={() => router.push({ pathname: "/filter", params: { type: "mortgagePrice1" } })}
-          >
-            <Text>{property3.mortgagePrice || "گرو"}</Text>
-          </TouchableOpacity>
-        </>
-      )}
-
-      {/* متراژ همیشه نمایش داده بشه */}
-      <TouchableOpacity
-        style={carFormStyles.touchable}
-        onPress={() => router.push({ pathname: "/filter", params: { type: "area1" } })}
-      >
-        <Text>{property3.area || "متراژ"}</Text>
-      </TouchableOpacity>
-    </View>
-
-    {/* دکمه جستجو */}
-    {(property3.propertyType || property3.location || property3.price || property3.rentPrice || property3.mortgagePrice || property3.area) && (
-      <TouchableOpacity style={styles.button} onPress={() => fetchProperties(1, true)}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Ionicons name="search" size={22} color={COLORS.black} />
-          <Text style={styles.buttonText}>جستجو کنید</Text>
-        </View>
-      </TouchableOpacity>
-    )}
-  </View>
+      </View>
+    </TouchableOpacity>
+  </>
 }
 
 

@@ -29,6 +29,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   
+  size: {
+fontSize: 13,
+  },
   jobCard: {
     backgroundColor: COLORS.cardBackground,
     borderRadius: 16,
@@ -86,7 +89,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: COLORS.textPrimary,
-    marginBottom: 6,
+    marginBottom: 7,
   },
 
   caption: {
@@ -122,27 +125,53 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
 
-  propertyCard: {
+  
+ 
+  //propertyCard: {
+ // backgroundColor: "#f9f9f9",
+ // borderRadius: 10,
+//  marginBottom: 12,
+ // overflow: "hidden", // باعث میشه گوشه‌های گرد روی عکس هم اعمال بشه
+ // borderWidth: 1,
+ // borderColor: "#d1d1d6",
+ 
+//},
+
+propertyCard: {
   backgroundColor: "#f9f9f9",
   borderRadius: 10,
-  marginBottom: 12,
-  overflow: "hidden", // باعث میشه گوشه‌های گرد روی عکس هم اعمال بشه
-  borderWidth: 1,
-  borderColor: "#d1d1d6",
- 
+  marginBottom: 0,
+  overflow: "hidden", // گوشه‌های گرد روی عکس اعمال میشه
+  borderBottomWidth: 1, // فقط خط پایین
+  borderBottomColor: "#d1d1d6", // رنگ خط پایین
 },
 
+filterToggleButton: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "flex-start", // محتوا سمت چپ
+  paddingVertical: 10,
+  paddingHorizontal: 10,
+  borderWidth: 1,
+  borderColor: COLORS.border,
+  borderRadius: 8,
+  backgroundColor: COLORS.inputBackground,
+  width: "100%",
+  alignSelf: "flex-start", // خود دکمه سمت چپ کانتینر
+  marginBottom: 10,
+},
+
+
 propertyImage: {
-  width: 110,   // 👈 به اندازه عرض کارت
-  height: 110,     // ارتفاع ثابت (می‌تونی تغییر بدی)
-  resizeMode: "cover",
+  width: 120,   // 👈 به اندازه عرض کارت
+  height: 120,     // ارتفاع ثابت (می‌تونی تغییر بدی)
   borderRadius: 19, 
   alignSelf: "center",
 
 },
 
 propertyContent: {
-  padding: 10,
+  padding: 5,
    flex: 1,  
     marginTop: -10, 
 },
@@ -150,7 +179,8 @@ propertyContent: {
 propertyTitle: {
   fontSize: 17,
   fontWeight: "bold",
-  marginBottom: 6,
+  marginBottom: 15,
+  marginTop: 10,
   color: "#333",
 },
 
@@ -167,7 +197,7 @@ propertyDate: {
 },
 
  button: {
-    backgroundColor: COLORS.background,   // رنگ پس‌زمینه
+    backgroundColor: COLORS.grenn,   // رنگ پس‌زمینه
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -175,17 +205,26 @@ propertyDate: {
     alignItems: 'center',
    
     marginBottom: 8,
-    marginLeft: 10,
-     width: 150, 
+    marginLeft: 0,
+     width: 140, 
 
   },
   buttonText: {
+   color: COLORS.white,
+    fontSize: 16,                 // سایز متن
+    fontWeight: 'bold',
+    marginRight: 20,
+
+  },
+
+   buttonText1: {
    color: COLORS.black,
     fontSize: 18,                 // سایز متن
     fontWeight: 'bold',
     marginRight: 20,
 
   },
+
   headerRow: {
   flexDirection: "row",
   justifyContent: "space-between",

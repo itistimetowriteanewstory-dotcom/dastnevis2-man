@@ -1,159 +1,185 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, KeyboardAvoidingView, Platform, ScrollView, TextInput, TouchableOpacity, Alert, Image, ActivityIndicator, Modal} from 'react-native';
 import { useRouter } from "expo-router";
 import styles from "../../assets/styles/create.styles";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from '../../colectionColor/colors';
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
+
 import {useAuthStore} from "../../store/authStore";
 import { useFilterStore } from "../../store/fileStore";
-import RNPickerSelect from 'react-native-picker-select'; 
+
 import { apiFetch } from '../../store/apiClient';
+import { useLocalSearchParams } from "expo-router";
+
 
 export default function Create() {
   const [title, setTitle] = useState("");           
 const [caption, setCaption] = useState("");       
-const [image, setImage] = useState(null);         
-const [imageBase64, setImageBase64] = useState(null); 
+ const [images, setImages] = useState([null, null, null, null, null]);
+  const [imagesBase64, setImagesBase64] = useState([null, null, null, null, null]);
 const [loading, setLoading] = useState(false);    
 const [phoneNumber, setPhoneNumber] = useState("");
 const [jobtitle, setJobtitle] = useState("");
-const [income, setIncome] = useState("");
-const [location, setLocation] = useState("");
-const [workingHours, setWorkingHours] = useState("");
-const [paymentType, setPaymentType] = useState("");
+
 
 
 const { createJobs1,  setCreateJobs1 } = useFilterStore();
+
+const { id } = useLocalSearchParams();
 
 
    const router = useRouter();
    const {accessToken} = useAuthStore();
    //console.log(token);
 
-   const pickImage = async () => {
-    try {
-       if(Platform.OS !== "web") {
-    const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if(status !== "granted") {
-      Alert.alert("عدم دسترسی", "برای اضافه کردن عکس ابتدا اجازه دسترسی به دوربین را دهید");
-      return;
-    }
-   }
-// launch image library
-const result = await ImagePicker.launchImageLibraryAsync({
-  mediaTypes: "images",
-  allowsEditing: true,
-  aspect: [4, 3],
-  quality: 0.3,
-  base64: true,
-})
+  const pickImage = async (index) => {
+          try {
+            if (Platform.OS !== "web") {
+              const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+              if (status !== "granted") {
+                Alert.alert("عدم دسترسی", "برای اضافه کردن عکس ابتدا اجازه دسترسی به گالری را دهید");
+                return;
+              }
+            }
+        
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: false,
+              aspect: [4, 3],
+              quality: 0.3,
+              base64: true,
+            });
+        
+            if (!result.canceled) {
+              const uri = result.assets[0].uri;
+              const base64 = result.assets[0].base64;
+        
+              const newImages = [...images];
+              const newImagesBase64 = [...imagesBase64];
+              newImages[index] = uri;
+              newImagesBase64[index] = base64;
+        
+              setImages(newImages);
+              setImagesBase64(newImagesBase64);
+            }
+          } catch (error) {
+            console.error("خطا در انتخاب عکس:", error);
+            Alert.alert("خطا", "مشکلی در انتخاب عکس پیش آمد");
+          }
+        };
 
-if(!result.canceled) {
-  
-  setImage(result.assets[0].uri)
-  // if based64 is provided, use it
-  if(result.assets[0].base64){
-    setImageBase64(result.assets[0].base64);
-  }else{
-    // otherwise , convert to base64
-    const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri,{
-      encoding: FileSystem.EncodingType.Base64,
+        const fetchAdById = async (id) => {
+  try {
+    const response = await apiFetch(`/jobs/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
     });
-    setImageBase64(base64);
-  }
-}
 
-   } catch (error) {
-     console.error("خطا: موقع انتخاب عکس", error);
-     Alert.alert("خطا", "مشکلی در انتخاب عکس مورد نظر شما وجود دارد");  
-
+    if (!response.ok) {
+      throw new Error("خطا در گرفتن آگهی");
     }
-   };
 
-   const handleSubmit = async () => {
-  // بررسی کامل بودن فیلدها
-  if (!title || !caption || !imageBase64 || !phoneNumber || !createJobs1.location || !createJobs1.income || !createJobs1.workingHours || !createJobs1.paymentType) {
-    Alert.alert("خطا", "لطفاً همه‌ی خانه هارا پر کنید");
-    return;
+    return await response.json();
+  } catch (error) {
+    console.error("خطا در fetchAdById:", error);
+    Alert.alert("خطا", "مشکلی در گرفتن اطلاعات آگهی پیش آمد");
+    return null;
   }
+};
+
+
+ const handleSubmit = async () => {
+  if (
+  !title ||
+  !caption ||
+  !phoneNumber ||
+  !createJobs1.location ||
+  !createJobs1.income ||
+  !createJobs1.workingHours ||
+  !createJobs1.paymentType
+) {
+  Alert.alert("خطا", "لطفاً همه‌ی خانه‌ها را پر کنید");
+  return;
+}
 
   try {
     setLoading(true);
 
-    // استخراج نوع فایل از URI یا پیش‌فرض jpeg
-    const uriParts = image.split(".");
-    const fileExtension = uriParts[uriParts.length - 1];
-    const imageType = fileExtension
-      ? `image/${fileExtension.toLowerCase()}`
-      : "image/jpeg";
+    // آماده‌سازی عکس‌ها
+    let imageDataUris = [];
 
-    // ساخت داده‌ی تصویر به صورت Data URI
-    const imageDataUri = `data:${imageType};base64,${imageBase64}`;
+    for (let i = 0; i < images.length; i++) {
+      const base64 = imagesBase64[i];
+      const uri = images[i];
 
-    // ارسال درخواست POST به سرور
-    const response = await apiFetch("/jobs", {
-      method: "POST",
+      if (base64 && uri) {
+        // عکس جدید انتخاب شده
+        const uriParts = uri.split(".");
+        const fileExtension = uriParts[uriParts.length - 1];
+        const imageType = fileExtension ? `image/${fileExtension.toLowerCase()}` : "image/jpeg";
+        imageDataUris.push(`data:${imageType};base64,${base64}`);
+      } else if (uri && uri.startsWith("http")) {
+        // عکس قبلی از سرور (لینک Cloudinary)
+        imageDataUris.push(uri);
+      }
+    }
+
+    const payload = {
+      title,
+      caption,
+      images: imageDataUris, // ترکیب عکس‌های قبلی + جدید
+      phoneNumber,
+      jobtitle,
+      income: createJobs1.income,
+      location: createJobs1.location,
+      workingHours: createJobs1.workingHours,
+      paymentType: createJobs1.paymentType,
+    };
+
+    const url = id ? `/jobs/${id}` : "/jobs";
+    const method = id ? "PUT" : "POST";
+
+    const response = await apiFetch(url, {
+      method,
       headers: {
-        Authorization: `Bearer ${accessToken}`, // اصلاح حروف بزرگ
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        title,
-        caption,
-        image: imageDataUri,
-        phoneNumber,
-        jobtitle,
-        income: createJobs1.income,
-        location: createJobs1.location,
-        workingHours: createJobs1.workingHours,
-        paymentType: createJobs1.paymentType,
-      }),
+      body: JSON.stringify(payload),
     });
-
-   if (!response.ok) {
-  let errorMessage = "مشکلی پیش آمد";
-  try {
-    const errorData = await response.json();
-    if (errorData.message) {
-      errorMessage = errorData.message;
-    }
-  } catch (e) {
-    console.error("خطا در خواندن پاسخ:", e);
-  }
-  Alert.alert("خطا", errorMessage);
-  setLoading(false);
-  return;
-}
-
-
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "مشکلی در ارسال اطلاعات پیش آمد");
+      Alert.alert("خطا", data.message || "مشکلی پیش آمد");
+      return;
     }
 
-    // موفقیت‌آمیز بودن ارسال
-    Alert.alert("موفقیت","شغل با موفقیت اضافه شد ");
-    setTitle("");
-    setCaption("");
-    setImage(null);
-    setImageBase64(null);
-    setPhoneNumber("");
-    setJobtitle("");
-     setCreateJobs1({
-       location: "",
-       income: "",
-       workingHours: "",
-       paymentType: "",
-       });
+    Alert.alert("موفقیت", id ? "آگهی با موفقیت ویرایش شد" : "شغل با موفقیت اضافه شد");
+
+setTitle("");
+setCaption("");
+setPhoneNumber("");
+setJobtitle("");
+
+setImages([null, null, null, null, null]);
+setImagesBase64([null, null, null, null, null]);
+
+setCreateJobs1({
+  location: "",
+  income: "",
+  workingHours: "",
+  paymentType: "",
+});
+
     router.push("/");
 
   } catch (error) {
-    console.error("خطا در ارسال پست:", error);
+    console.error("خطا در ارسال:", error);
     Alert.alert("خطا", error.message || "ارسال با مشکل مواجه شد");
   } finally {
     setLoading(false);
@@ -161,6 +187,36 @@ if(!result.canceled) {
 };
 
 
+useEffect(() => {
+  if (id) {
+    fetchAdById(id).then(data => {
+      if (!data) return;
+
+      setTitle(data.title || "");
+      setCaption(data.caption || "");
+      setPhoneNumber(data.phoneNumber || "");
+      setJobtitle(data.jobtitle || "");
+
+      // همیشه آرایه رو به طول 5 تنظیم کن
+      const imgs = data.images || [];
+      const paddedImages = [...imgs];
+      while (paddedImages.length < 5) {
+        paddedImages.push(null);
+      }
+      setImages(paddedImages);
+
+      // base64 رو خالی بذار چون سرور لینک میده
+      setImagesBase64([null, null, null, null, null]);
+
+      setCreateJobs1({
+        location: data.location || "",
+        income: data.income || "",
+        workingHours: data.workingHours || "",
+        paymentType: data.paymentType || "",
+      });
+    });
+  }
+}, [id]);
 
 
   return (
@@ -191,22 +247,23 @@ if(!result.canceled) {
 </View>
 
 { /* image */}
-<View style={styles.formGroup}>
-  <Text style={styles.label}>یک عکسی مربوط به شغل درخواست شده را اضافه کنید</Text>
-  <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-    {image ? (
-      <Image source={{ uri: image }} style={styles.previewImage} />
-    ) : (
-      <View style={styles.placeholderContainer}>
-        <Ionicons
-          name="image-outline"
-          size={40}
-          color={COLORS.textSecondary}
-        />
-        <Text style={styles.placeholderText}>برای اضافه کردن عکس لطفا کلیک کنید</Text>
-      </View>
-    )}
-  </TouchableOpacity>
+    <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+  {images.map((img, index) => (
+    <TouchableOpacity
+      key={index}
+      style={styles.imagePickerBox}
+      onPress={() => pickImage(index)}
+    >
+      {img ? (
+        <Image source={{ uri: img }} style={styles.previewImage} />
+      ) : (
+        <View style={styles.placeholderContainer}>
+          <Ionicons name="image-outline" size={30} color={COLORS.textSecondary} />
+          <Text style={styles.placeholderText}>انتخاب عکس {index + 1}</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  ))}
 </View>
 { /* caption */}
 <View style={styles.formGroup}>
@@ -234,28 +291,7 @@ if(!result.canceled) {
   />
 </View>
 
-  {/* location */}
-        <View style={styles.formGroup}>
-  <Text style={styles.label}>ولایت</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/page/select-location",
-        params: { section: "createJobs" }, // 👈 مسیر برگشت
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createJobs1.location ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createJobs1.location || "ولایت خود را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
+  
 
 {/* job title */}
 <View style={styles.formGroup}>
@@ -269,58 +305,25 @@ if(!result.canceled) {
   />
 </View>
 
-   {/* model */}
-<View style={styles.formGroup}>
-  <Text style={styles.label} >income</Text>
+<View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
+  {/* location */}
   <TouchableOpacity
-    style={styles.inputContainer}
+    style={styles.halfBox}
     onPress={() =>
       router.push({
-        pathname: "/filter",
-        params: { type: "income" },
+        pathname: "/page/select-location",
+        params: { section: "createJobs" },
       })
     }
   >
-    <Text
-      style={{
-        color: createJobs1.income ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createJobs1.income || "مدل را انتخاب کنید"}
+    <Text style={{ color: createJobs1.location ? COLORS.black : COLORS.placeholderText, fontSize: 16 }}>
+      {createJobs1.location || "ولایت خود را انتخاب کنید"}
     </Text>
   </TouchableOpacity>
-</View>
 
-
- {/* model */}
-<View style={styles.formGroup}>
-  <Text style={styles.label} >working hours</Text>
+  {/* paymentType */}
   <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/filter",
-        params: { type: "workingHours" },
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createJobs1.workingHours ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createJobs1.workingHours || "مدل را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
-
-{/* model */}
-<View style={styles.formGroup}>
-  <Text style={styles.label} >paymentType</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
+    style={styles.halfBox}
     onPress={() =>
       router.push({
         pathname: "/filter",
@@ -328,13 +331,40 @@ if(!result.canceled) {
       })
     }
   >
-    <Text
-      style={{
-        color: createJobs1.paymentType ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createJobs1.paymentType || "مدل را انتخاب کنید"}
+    <Text style={{ color: createJobs1.paymentType ? COLORS.black : COLORS.placeholderText }}>
+      {createJobs1.paymentType || "یک دسته بندی را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
+
+  {/* income */}
+  <TouchableOpacity
+    style={styles.halfBox}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "income" },
+      })
+    }
+  >
+    <Text style={{ color: createJobs1.income ? COLORS.black : COLORS.placeholderText }}>
+      {createJobs1.income || "محدوده معاش را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
+
+
+
+  {/* workingHours */}
+  <TouchableOpacity
+    style={styles.halfBox}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "workingHours" },
+      })
+    }
+  >
+    <Text style={{ color: createJobs1.workingHours ? COLORS.black : COLORS.placeholderText }}>
+      {createJobs1.workingHours || "یک ساعت کاری انتخاب کنید"}
     </Text>
   </TouchableOpacity>
 </View>
@@ -356,7 +386,9 @@ if(!result.canceled) {
         color={COLORS.black}
         style={styles.buttonIcon}
       />
-      <Text style={styles.buttonText}>کار خودرا ثبت کنید</Text>
+     <Text style={styles.buttonText}>
+     {id ? "ویرایش آگهی" : "کار خود را ثبت کنید"}
+     </Text>
     </>
   )}
 </TouchableOpacity>

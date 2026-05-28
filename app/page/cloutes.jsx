@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Modal, RefreshControl, TextInput } from 'react-native';
 import { Image } from "expo-image";
 import { useAuthStore } from '../../store/authStore';
 import { useEffect, useState } from 'react';
@@ -21,6 +21,8 @@ export default function CloutesList() {
   const [page, setPage] = useState(1);
   const [addMore, setAddMore] = useState(true);
   const [titleFilter, setTitleFilter] = useState("");
+  const [showCloutesSearchButton, setShowCloutesSearchButton] = useState(false);
+ const [showCloutesFilters, setShowCloutesFilters] = useState(false);
 
   const { Cloutes2 } = useFilterStore();
 
@@ -72,6 +74,26 @@ const router = useRouter();
     }
   };
 
+  useEffect(() => {
+  if (
+    Cloutes2?.cloutesModel ||
+    Cloutes2?.cloutesTexture ||
+    Cloutes2?.cloutesStatus ||
+    Cloutes2?.location ||
+    titleFilter
+  ) {
+    setShowCloutesSearchButton(true);
+  } else {
+    setShowCloutesSearchButton(false);
+  }
+}, [
+  Cloutes2?.cloutesModel,
+  Cloutes2?.cloutesTexture,
+  Cloutes2?.cloutesStatus,
+  Cloutes2?.location,
+  titleFilter
+]);
+
  
   const renderItem = ({ item }) => (
     <Link
@@ -94,9 +116,11 @@ const router = useRouter();
                 ثبت شده در تاریخ {formatPublishDate(item.createdAt)}
               </Text>
             </View>
-            {item.image && (
-              <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="cover" />
-            )}
+             {item.images && item.images.length > 0 ? (
+            <Image source={{ uri: item.images[0] }} style={styles.propertyImage} contentFit="contain" />
+             ) : item.image ? (
+            <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="contain" />
+            ) : null}
           </View>
         </View>
       </TouchableOpacity>
@@ -107,6 +131,131 @@ const router = useRouter();
 
   return (
     <View style={styles.container}>
+
+      {/* مودال فیلترها */}
+    <Modal
+      visible={showCloutesFilters}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowCloutesFilters(false)}
+    >
+      <View style={{ flex: 1, justifyContent: "flex-start", backgroundColor: "rgba(0,0,0,0.3)" }}>
+        <View
+          style={{
+            height: "100%", // نصف صفحه
+            backgroundColor: "white",
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            padding: 16,
+          }}
+        >
+          {/* دکمه بستن */}
+          <TouchableOpacity onPress={() => setShowCloutesFilters(false)} style={{ alignSelf: "flex-start", marginBottom: 15, }}>
+             <Ionicons name="close" size={35} color={COLORS.black} />
+          </TouchableOpacity>
+
+  {/* Inputs row */}
+        <View style={carFormStyles.row}>
+          <TextInput
+            style={carFormStyles.textInput}
+            placeholder="عنوان پوشاک را بنویسید"
+            placeholderTextColor={COLORS.placeholderText}
+            value={titleFilter}
+            onChangeText={setTitleFilter}
+          />
+
+          <TouchableOpacity
+            style={carFormStyles.touchable}
+            onPress={() =>
+              router.push({
+                pathname: "/page/select-location",
+                params: { section: "clothes2" },
+              })
+            }
+          >
+            <Text
+              style={{
+                color: Cloutes2.location ? COLORS.black : COLORS.placeholderText,
+                fontSize: 16,
+              }}
+            >
+              {Cloutes2.location || "ولایت"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* فیلدهای مدل، جنس پارچه، وضعیت */}
+        <View style={carFormStyles.row}>
+          <TouchableOpacity
+            style={carFormStyles.touchable}
+            onPress={() =>
+              router.push({ pathname: "/filter", params: { type: "cloutesModel" } })
+            }
+          >
+            <Text
+              style={{
+                color: Cloutes2.cloutesModel ? COLORS.black : COLORS.placeholderText,
+                fontSize: 16,
+              }}
+            >
+              {Cloutes2.cloutesModel || "مدل"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={carFormStyles.touchable}
+            onPress={() =>
+              router.push({ pathname: "/filter", params: { type: "cloutesTexture" } })
+            }
+          >
+            <Text
+              style={{
+                color: Cloutes2.cloutesTexture ? COLORS.black : COLORS.placeholderText,
+                fontSize: 16,
+              }}
+            >
+              {Cloutes2.cloutesTexture || "جنس پارچه"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={carFormStyles.touchable}
+            onPress={() =>
+              router.push({ pathname: "/filter", params: { type: "cloutesStatus" } })
+            }
+          >
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{
+                color: Cloutes2.cloutesStatus ? COLORS.black : COLORS.placeholderText,
+                fontSize: 16,
+              }}
+            >
+              {Cloutes2.cloutesStatus || "وضعیت"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* دکمه جستجو */}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              fetchItems(1, true);
+              setShowCloutesSearchButton(false);
+              setShowCloutesFilters(false)
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Ionicons name="search" size={22} color={COLORS.white} />
+              <Text style={styles.buttonText}>جستجو کنید</Text>
+            </View>
+          </TouchableOpacity>
+     
+
+          </View>
+          </View>
+          </Modal>
       <FlatList
         data={items}
         renderItem={renderItem}
@@ -123,87 +272,22 @@ const router = useRouter();
         }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.1}
-       ListHeaderComponent={
-  <View style={{ marginBottom: 12 }}>
-    {/* Inputs row */}
-    <View style={carFormStyles.row}>
-      <TextInput
-        style={carFormStyles.textInput}
-        placeholder="عنوان پوشاک را بنویسید"
-        placeholderTextColor={COLORS.placeholderText}
-        value={titleFilter}
-        onChangeText={setTitleFilter}
-      />
-        <TouchableOpacity
-                 style={carFormStyles.touchable}
-                onPress={() =>
-                  router.push({
-                    pathname: "/page/select-location",
-                    params: { section: "clothes2" },
-                  })
-                }
-              >
-                <Text style={{ color: Cloutes2.location ? COLORS.black : COLORS.placeholderText, fontSize: 16 }}>
-                  {Cloutes2.location || "ولایت"}
-                </Text>
-              </TouchableOpacity>
-    </View>
-
-<View style={carFormStyles.row}>
-
+        stickyHeaderIndices={[0]}
+     ListHeaderComponent={
+  <>
+    {/* دکمه باز/بستن فیلترها */}
     <TouchableOpacity
-   style={carFormStyles.touchable}
-  onPress={() =>
-    router.push({
-      pathname: "/filter",
-      params: { type: "cloutesModel" }, // 👈 مسیر برگشت
-    })
-  }
->
-  <Text>{Cloutes2.cloutesModel || "مدل"}</Text>
-</TouchableOpacity>
-
-
- <TouchableOpacity
-    style={carFormStyles.touchable}
-  onPress={() =>
-    router.push({
-      pathname: "/filter",
-      params: { type: "cloutesTexture" }, // 👈 مسیر برگشت
-    })
-  }
->
-  <Text>{Cloutes2.cloutesTexture || "جنس پارچه"}</Text>
-</TouchableOpacity>
-
-<TouchableOpacity
-   style={carFormStyles.touchable}
-  onPress={() =>
-    router.push({
-      pathname: "/filter",
-      params: { type: "cloutesStatus" }, // 👈 مسیر برگشت
-    })
-  }
->
-  <Text>{Cloutes2.cloutesStatus || "وضعیت"}</Text>
-</TouchableOpacity>
-</View>
- 
-
-    {/* Search button */}
-    {(Cloutes2?.cloutesModel ||
-      Cloutes2?.cloutesTexture ||
-      Cloutes2?.cloutesStatus ||
-      Cloutes2?.location || 
-      titleFilter) && (
-      <TouchableOpacity style={styles.button} onPress={() => fetchItems(1, true)}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Ionicons name="search" size={22} color={COLORS.black} />
-          <Text style={styles.buttonText}>جستجو کنید</Text>
-        </View>
-      </TouchableOpacity>
-    )}
-  </View>
+      style={styles.filterToggleButton}
+      onPress={() => setShowCloutesFilters(!showCloutesFilters)}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+        <Ionicons name="filter" size={22} color={COLORS.black} />
+        <Text style={styles.buttonText1}>
+          {showCloutesFilters ? "بستن فیلترها" : "نمایش فیلترها"}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  </>
 }
 
         ListFooterComponent={

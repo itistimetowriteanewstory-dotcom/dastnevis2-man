@@ -10,7 +10,7 @@ export const carFormStyles = StyleSheet.create({
   textInput: {
     flex: 3,
     backgroundColor: COLORS.background,
-    height: 60,
+    height: 50,
     borderRadius: 8,
     borderWidth: 1,
     fontSize: 16,
@@ -20,7 +20,7 @@ export const carFormStyles = StyleSheet.create({
   touchable: {
     flex: 1,
     backgroundColor: COLORS.inputBackground1,
-    height: 60,
+    height: 50,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: COLORS.textSecondary,
@@ -29,6 +29,16 @@ export const carFormStyles = StyleSheet.create({
   },
   touchableText: {
     fontSize: 16,
+  },
+   bottomBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    borderTopWidth: 0.5,
+    borderTopColor: '#ddd',
   },
 
   container: {

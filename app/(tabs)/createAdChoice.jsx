@@ -57,7 +57,7 @@ export default function CreateAdChoice() {
           <Text style={styles.iconLabel}>ثبت آگهی پوشاک</Text>
         </TouchableOpacity>
 
-        {/* خوراکی‌ها */}
+        {/* مواد غذایی‌ها */}
         <TouchableOpacity
           style={styles.iconBox}
           onPress={() => router.push("/create/createEat")}

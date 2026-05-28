@@ -5,7 +5,8 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  TextInput
+  TextInput,
+  Modal
 } from 'react-native';
 import { Image } from "expo-image";
 import { useAuthStore } from '../../store/authStore';
@@ -32,12 +33,12 @@ export default function Jobs() {
   const [page, setPage] = useState(1);
   const [addMore, setAddMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
- 
+  const [showFilters, setShowFilters] = useState(false);
   const [selectedType, setSelectedType] = useState("jobs");
   const [checking, setChecking] = useState(true);
   const { index5, jobs1 } = useFilterStore();
-  const [showIcons, setShowIcons] = useState(false);
-
+  
+  const [showSearchButton, setShowSearchButton] = useState(false);
 
 
   const router = useRouter();
@@ -54,7 +55,7 @@ export default function Jobs() {
      const queryParams = new URLSearchParams({
       page: pageNum,
       limit: 5,
-      searchQuery,
+      title: searchQuery,
       location: index5.location || "",
       income: jobs1.income || "",
       workingHours: jobs1.workingHours || "",
@@ -68,7 +69,10 @@ export default function Jobs() {
     });
 
 
+
+
     const data = await res.json();
+    
     if (!res.ok) throw new Error(data.message || "خطا در گرفتن آگهی‌های شغلی");
 
     setJobs(pageNum === 1 || refresh ? data.jobs : [...jobs, ...data.jobs]);
@@ -89,7 +93,7 @@ export default function Jobs() {
     try {
       const refreshToken = await AsyncStorage.getItem("refreshToken");
       if (!refreshToken) {
-        router.replace("/login"); // مستقیم به login
+        router.replace("/(auth)/login"); // مستقیم به login
         return;
       }
 
@@ -108,7 +112,7 @@ export default function Jobs() {
         router.replace("/(auth)/login");
       }
     } catch (err) {
-      router.replace("/(auth)login");
+      router.replace("/(auth)/login");
     } finally {
       setChecking(false);
     }
@@ -120,13 +124,27 @@ export default function Jobs() {
 
   }, []);
 
+  useEffect(() => {
+  if (
+    searchQuery.length > 0 ||
+    index5.location ||
+    jobs1.income ||
+    jobs1.workingHours ||
+    jobs1.paymentType
+  ) {
+    setShowSearchButton(true);
+  } else {
+    setShowSearchButton(false);
+  }
+}, [searchQuery, index5.location, jobs1.income, jobs1.workingHours, jobs1.paymentType]);
+
+
   const handleLoadMore = async () => {
     if (addMore && !loading && !refreshing) {
       await fetchJobs(page + 1);
     }
   };
 
- 
 
   const renderItem = ({ item }) => (
     <Link
@@ -151,9 +169,12 @@ export default function Jobs() {
       ثبت شده در تاریخ {formatPublishDate(item.createdAt)}
     </Text>
   </View>
-  {item.image && (
-    <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="cover" />
-  )}
+    {item.images && item.images.length > 0 ? (
+    <Image source={{ uri: item.images[0] }} style={styles.propertyImage} contentFit="contain" />
+  ) : item.image ? (
+    <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="contain" />
+  ) : null}
+
 </View>
 </View>
 
@@ -165,205 +186,166 @@ export default function Jobs() {
   if (loading) return <Loader />;
 
  return (
-  <View style={styles.container}>
-    <FlatList
-      data={jobs}
-      renderItem={renderItem}
-      keyExtractor={(item) => item._id}
-      contentContainerStyle={styles.listContainer}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={() => fetchJobs(1, true)}
-          colors={[COLORS.primary]}
-          tintColor={COLORS.primary}
-        />
-      }
-      onEndReached={handleLoadMore}
-      onEndReachedThreshold={0.1}
-      ListHeaderComponent={
-  <View>
-{/* دکمه منو */}
-  <TouchableOpacity
-    style={carFormStyles.menuButton}
-    onPress={() => setShowIcons(!showIcons)}
-  >
-    <Ionicons name="menu-outline" size={28} color="black" />
-    <Text style={carFormStyles.menuText}>همه آگهی‌ها</Text>
-  </TouchableOpacity>
+ <View style={styles.container}>
 
-  {/* بخش آیکون‌ها فقط وقتی showIcons=true */}
-  {showIcons && (
-    <View style={carFormStyles.container}>
-      <View style={carFormStyles.row1}>
-        
-        {/* آیکون املاک */}
-        <TouchableOpacity
-          onPress={() => router.push("/page/properties")}
-          style={carFormStyles.touchable1}
+    {/* مودال فیلترها */}
+    <Modal
+      visible={showFilters}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowFilters(false)}
+    >
+      <View style={{ flex: 1, justifyContent: "flex-start", backgroundColor: "rgba(0,0,0,0.3)" }}>
+        <View
+          style={{
+            height: "100%", // نصف صفحه
+            backgroundColor: "white",
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            padding: 16,
+          }}
         >
-          <Ionicons name="home-outline" size={35} color={COLORS.primary} />
-          <View style={carFormStyles.underline} />
-          <Text style={carFormStyles.label}>املاک</Text>
-        </TouchableOpacity>
+          {/* دکمه بستن */}
+          <TouchableOpacity onPress={() => setShowFilters(false)} style={{ alignSelf: "flex-start", marginBottom: 15, }}>
+             <Ionicons name="close" size={35} color={COLORS.black} />
+          </TouchableOpacity>
 
-        {/* آیکون وسایل نقلیه */}
-        <TouchableOpacity
-          onPress={() => router.push("/page/car")}
-          style={carFormStyles.touchable1}
-        >
-          <Ionicons name="car-outline" size={35} color={COLORS.primary} />
-          <View style={carFormStyles.underline} />
-          <Text style={carFormStyles.label}>وسایل نقلیه</Text>
-        </TouchableOpacity>
+          {/* ورودی متن و ولایت */}
+          <View style={{ flexDirection: "row", gap: 8, marginBottom: 10 }}>
+            <TextInput
+              style={carFormStyles.textInput}
+              placeholder="کار مورد نظر خودرا بنویسید"
+              placeholderTextColor={COLORS.placeholderText}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
 
-        {/* آیکون پوشاک */}
-        <TouchableOpacity
-          onPress={() => router.push("/page/cloutes")}
-          style={carFormStyles.touchable1}
-        >
-          <Ionicons name="shirt-outline" size={35} color={COLORS.primary} />
-          <View style={carFormStyles.underline} />
-          <Text style={carFormStyles.label}>پوشاک</Text>
-        </TouchableOpacity>
+            <View style={carFormStyles.touchable}>
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({ pathname: "/page/select-location", params: { section: "jobs" } })
+                }
+              >
+                <Text
+                  style={{
+                    color: index5.location ? COLORS.black : COLORS.placeholderText,
+                    fontSize: 16,
+                  }}
+                >
+                  {index5.location || "ولایت"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-        {/* آیکون خانه و آشپزخانه */}
-        <TouchableOpacity
-          onPress={() => router.push("/page/kitchen")}
-          style={carFormStyles.touchable1}
-        >
-          <Ionicons name="cube-outline" size={35} color={COLORS.primary} />
-          <View style={carFormStyles.underline} />
-          <Text style={carFormStyles.label}>خانه و آشپزخانه</Text>
-        </TouchableOpacity>
+          {/* فیلترها */}
+          <View style={{ flexDirection: "row", gap: 8, marginBottom: 10 }}>
+            <TouchableOpacity
+              style={carFormStyles.touchable}
+              onPress={() => router.push({ pathname: "/filter", params: { type: "income1" } })}
+            >
+              <Text
+               numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ color: jobs1.income ? COLORS.black : COLORS.placeholderText }}>
+                {jobs1.income || "معاش"}
+              </Text>
+            </TouchableOpacity>
 
-        {/* آیکون خوراکی‌ها */}
-        <TouchableOpacity
-          onPress={() => router.push("/page/eat")}
-          style={carFormStyles.touchable1}
-        >
-          <Ionicons name="fast-food-outline" size={35} color={COLORS.primary} />
-          <View style={carFormStyles.underline} />
-          <Text style={carFormStyles.label}>خوراکی‌ها</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={carFormStyles.touchable}
+              onPress={() => router.push({ pathname: "/filter", params: { type: "paymentType1" } })}
+            >
+              <Text
+               numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ color: jobs1.paymentType ? COLORS.black : COLORS.placeholderText }}>
+                {jobs1.paymentType || "دسته بندی"}
+              </Text>
+            </TouchableOpacity>
 
+            <TouchableOpacity
+              style={carFormStyles.touchable}
+              onPress={() => router.push({ pathname: "/filter", params: { type: "workingHours1" } })}
+            >
+              <Text
+               numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ color: jobs1.workingHours ? COLORS.black : COLORS.placeholderText }}>
+                {jobs1.workingHours || "ساعت کاری"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+       
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                fetchJobs(1, true);
+                setShowSearchButton(false);
+                setShowFilters(false); // بستن مودال بعد از جستجو
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Ionicons name="search" size={20} color={COLORS.white} />
+                <Text style={styles.buttonText}>جستجو کنید</Text>
+              </View>
+            </TouchableOpacity>
+      
+        </View>
       </View>
-    </View>
-  )}
+    </Modal>
 
-
-  
-    {/* بخش ورودی متن و ولایت */}
-    <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: 16, marginBottom: 10 }}>
-      <TextInput
-         style={carFormStyles.textInput}
-        placeholder="کار مورد نظر خودرا بنویسید"
-        placeholderTextColor={COLORS.placeholderText}
-        value={searchQuery}
-        onChangeText={setSearchQuery}
+  <FlatList
+    data={jobs}
+    renderItem={renderItem}
+    keyExtractor={(item) => item._id}
+    contentContainerStyle={styles.listContainer}
+    showsVerticalScrollIndicator={false}
+    refreshControl={
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={() => fetchJobs(1, true)}
+        colors={[COLORS.primary]}
+        tintColor={COLORS.primary}
       />
+    }
+    onEndReached={handleLoadMore}
+    onEndReachedThreshold={0.1}
 
-      <View style={carFormStyles.touchable}>
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: "/page/select-location",
-              params: { section: "jobs" },
-            })
-          }
-        >
-          <Text
-            style={{
-              color: index5.location ? COLORS.black : COLORS.placeholderText,
-              fontSize: 16,
-            }}
-          >
-            {index5.location || "ولایت"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-
-    {/* فیلترها */}
-  <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: 16, marginBottom: 10 }}>
+    // فقط index=0 (عنوان + سرچ + فیلترها) ثابت می‌ماند
+    stickyHeaderIndices={[0]}
+      ListHeaderComponent={
+          <>
+    {/* دکمه باز/بستن فیلترها */}
+    <View>
       <TouchableOpacity
-       style={carFormStyles.touchable}
-        onPress={() =>
-          router.push({
-            pathname: "/filter",
-            params: { type: "income1" },
-          })
-        }
-      >
-        <Text>{jobs1.income || "income"}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-       style={carFormStyles.touchable}
-        onPress={() =>
-          router.push({
-            pathname: "/filter",
-            params: { type: "workingHours1" },
-          })
-        }
-      >
-        <Text>{jobs1.workingHours || "hours"}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={carFormStyles.touchable}
-        onPress={() =>
-          router.push({
-            pathname: "/filter",
-            params: { type: "paymentType1" },
-          })
-        }
-      >
-        <Text>{jobs1.paymentType || "payment"}</Text>
-      </TouchableOpacity>
-    </View>
-
-    {/* دکمه جستجو */}
-    {(searchQuery.length > 0 ||
-      index5.location ||
-      jobs1.income ||
-      jobs1.workingHours ||
-      jobs1.paymentType) && (
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => fetchJobs(1, true)}
+        style={styles.filterToggleButton}
+        onPress={() => setShowFilters(true)} // فقط باز کردن مودال
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Ionicons name="search" size={22} color={COLORS.black} />
-          <Text style={styles.buttonText}>جستجو کنید</Text>
+          <Ionicons name="filter" size={22} color={COLORS.black} />
+          <Text style={styles.buttonText1}>نمایش فیلترها</Text>
         </View>
       </TouchableOpacity>
-    )}
-  </View>
+    </View>
+
+  </>
 }
 
-      ListFooterComponent={
-        addMore && jobs.length > 0 ? (
-          <ActivityIndicator
-            style={styles.footerLoader}
-            size="small"
-            color={COLORS.primary}
-          />
-        ) : null
-      }
-      ListEmptyComponent={
-        <View style={styles.emptyContainer}>
-          <Ionicons
-            name="briefcase-outline"
-            size={60}
-            color={COLORS.textSecondary}
-          />
-          <Text style={styles.emptyText}>هنوز آگهی شغلی اضافه نشده</Text>
-        </View>
-      }
-    />
-  </View>
+    ListFooterComponent={
+      addMore && jobs.length > 0 ? (
+        <ActivityIndicator style={styles.footerLoader} size="small" color={COLORS.primary} />
+      ) : null
+    }
+    ListEmptyComponent={
+      <View style={styles.emptyContainer}>
+        <Ionicons name="briefcase-outline" size={60} color={COLORS.textSecondary} />
+        <Text style={styles.emptyText}>هنوز آگهی شغلی اضافه نشده</Text>
+      </View>
+    }
+  />
+</View>
 );
 }
 

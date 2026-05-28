@@ -117,7 +117,7 @@ useEffect(() => {
               backgroundColor: "#f9f9f9",
             }}
           >
-            <ActivityIndicator size="large" color="#000000" />
+            <ActivityIndicator size={50} color="#000000" />
           </View>
       </SafeAreaProvider>
 

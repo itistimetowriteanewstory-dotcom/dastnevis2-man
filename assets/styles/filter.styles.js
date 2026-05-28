@@ -9,8 +9,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   card: {
-    width: "89%", // عرض 80 درصد
-    height: "45%", // ارتفاع 60 درصد
+    width: "95%", // عرض 80 درصد
+    height: "50%", // ارتفاع 60 درصد
     backgroundColor: "#f7f7f7", // کمی تیره‌تر از سفید
     borderRadius: 12,
     padding: 20,
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     marginTop: 140,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600",
     textAlign: "center", // بالا وسط
     marginBottom: 16,
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 19,
     color: "#333",
     textAlign: "center",
   },

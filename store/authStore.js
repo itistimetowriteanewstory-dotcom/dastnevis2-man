@@ -59,26 +59,26 @@ isChecking: false,
   login: async (email, password) => {
     set({ isLoading: true });
     try {
-      console.log("🔎 Fetching:","/auth/login");
+   //   console.log("🔎 Fetching:","/auth/login");
       const response = await apiFetch("/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-       const rawText = await response.clone().text();
-    console.log("🔎 Raw login response body:", rawText);
+    //   const rawText = await response.clone().text();
+     //  console.log("🔎 Raw login response body:", rawText);
 
       
 
 
 
-         console.log("🔎 Login response status:", response.status);
-         console.log("🔎 Login response headers:", response.headers);
+       //  console.log("🔎 Login response status:", response.status);
+      //   console.log("🔎 Login response headers:", response.headers);
 
 
       const data = await response.json();
-       console.log("🔎 Parsed login data:", data);
+    //   console.log("🔎 Parsed login data:", data);
 
       if (!response.ok) throw new Error(data.message || "Login failed");
 

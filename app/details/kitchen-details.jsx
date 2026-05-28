@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Linking, Platform, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Linking, Platform, Alert, Modal, FlatList, Dimensions} from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import styles from '../../assets/styles/jobDetails.styles'; // می‌تونی یه فایل جدید بسازی مثل kitchenDetails.styles
@@ -6,12 +6,20 @@ import { formatPublishDate } from '../../lib/utils';
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../colectionColor/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../store/apiClient";
 import { useAuthStore } from "../../store/authStore";
+import { styles1 } from '../../assets/styles/modal.style';
+
 
 export default function KitchenDetails() {
   const { data, user } = useLocalSearchParams();
+   const [visible, setVisible] = useState(false);
+   const [imageIndex, setImageIndex] = useState(0);
+   const flatListRef = useRef(null);
+   const { width } = Dimensions.get("window");
+
+
   const parsedItem = typeof data === 'string' ? JSON.parse(data) : data;
   const parsedUser = user
     ? (typeof user === 'string' ? JSON.parse(user) : user)
@@ -61,6 +69,15 @@ export default function KitchenDetails() {
     }
   };
 
+   useEffect(() => {
+      if (visible && flatListRef.current) {
+        // وقتی مودال باز شد، اندیس عکس رو صفر کن
+        setImageIndex(0);
+        // بعد لیست رو به عکس اول ببر
+        flatListRef.current.scrollToIndex({ index: 0, animated: false });
+      }
+    }, [visible]);
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.userBox}>
@@ -68,28 +85,44 @@ export default function KitchenDetails() {
         <Text style={styles.username}>{parsedUser?.username}</Text>
       </View>
 
-      <Image source={parsedItem.image} style={styles.jobImage} contentFit="cover" />
+       {/* تصویر اصلی */}
+    {parsedItem.images?.length > 0 ? (
+  <TouchableOpacity onPress={() => { setVisible(true); setImageIndex(0); }}>
+    <Image source={{ uri: parsedItem.images[0] }} style={styles.mainImage} />
+  </TouchableOpacity>
+) : parsedItem.image ? (
+  <TouchableOpacity onPress={() => { setVisible(true); setImageIndex(0); }}>
+    <Image source={{ uri: parsedItem.image }} style={styles.mainImage} />
+  </TouchableOpacity>
+) : null}
+
 
       <View style={styles.details}>
         <View style={styles.infoBox}>
           <Text style={styles.title}>{parsedItem.title}</Text>
           <View style={styles.separator} />
 
-          {parsedItem.location && (
-            <>
-              <View style={styles.infoRow}>
-                <Ionicons name="location-outline" size={20} color={COLORS.primary} style={styles.icon} />
-                <Text style={styles.info}>ولایت: {parsedItem.location}</Text>
-              </View>
-              <View style={styles.separator} />
-            </>
-          )}
-
-          {parsedItem.category && (
+         {parsedItem.location && (
   <>
     <View style={styles.infoRow}>
-      <Ionicons name="list-outline" size={20} color={COLORS.primary} style={styles.icon} />
-      <Text style={styles.info}>دسته‌بندی: {parsedItem.category}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="location-outline" size={20} color={COLORS.primary} style={styles.icon} />
+        <Text style={styles.info}>ولایت</Text>
+      </View>
+      <Text style={styles.info1}>{parsedItem.location}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
+
+{parsedItem.category && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="list-outline" size={20} color={COLORS.primary} style={styles.icon} />
+        <Text style={styles.info}>دسته‌بندی</Text>
+      </View>
+      <Text style={styles.info1}>{parsedItem.category}</Text>
     </View>
     <View style={styles.separator} />
   </>
@@ -97,21 +130,27 @@ export default function KitchenDetails() {
 
 
 
-          {parsedItem.texture && (
-            <>
-              <View style={styles.infoRow}>
-                <Ionicons name="layers-outline" size={20} color={COLORS.primary} style={styles.icon} />
-                <Text style={styles.info}>جنس: {parsedItem.texture}</Text>
-              </View>
-              <View style={styles.separator} />
-            </>
-          )}
-
-          {parsedItem.status && (
+{parsedItem.texture && (
   <>
     <View style={styles.infoRow}>
-      <Ionicons name="checkmark-circle-outline" size={20} color={COLORS.primary} style={styles.icon} />
-      <Text style={styles.info}>وضعیت: {parsedItem.status}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="layers-outline" size={20} color={COLORS.primary} style={styles.icon} />
+        <Text style={styles.info}>جنس</Text>
+      </View>
+      <Text style={styles.info1}>{parsedItem.texture}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
+
+{parsedItem.status && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="checkmark-circle-outline" size={20} color={COLORS.primary} style={styles.icon} />
+        <Text style={styles.info}>وضعیت</Text>
+      </View>
+      <Text style={styles.info1}>{parsedItem.status}</Text>
     </View>
     <View style={styles.separator} />
   </>
@@ -121,33 +160,56 @@ export default function KitchenDetails() {
 {parsedItem.model && (
   <>
     <View style={styles.infoRow}>
-      <Ionicons name="cube-outline" size={20} color={COLORS.primary} style={styles.icon} />
-      <Text style={styles.info}>مدل: {parsedItem.model}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="cube-outline" size={20} color={COLORS.primary} style={styles.icon} />
+        <Text style={styles.info}>مدل</Text>
+      </View>
+      <Text style={styles.info1}>{parsedItem.model}</Text>
     </View>
     <View style={styles.separator} />
   </>
 )}
 
 
-          {parsedItem.dimensions && (
-            <>
-              <View style={styles.infoRow}>
-                <Ionicons name="resize-outline" size={20} color={COLORS.primary} style={styles.icon} />
-                <Text style={styles.info}>ابعاد: {parsedItem.dimensions}</Text>
-              </View>
-              <View style={styles.separator} />
-            </>
-          )}
+{parsedItem.dimensions && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="resize-outline" size={20} color={COLORS.primary} style={styles.icon} />
+        <Text style={styles.info}>ابعاد</Text>
+      </View>
+      <Text style={styles.info1}>{parsedItem.dimensions}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
 
-          {parsedItem.price && (
-            <>
-              <View style={styles.infoRow}>
-                <Ionicons name="pricetag-outline" size={20} color={COLORS.primary} style={styles.icon} />
-                <Text style={styles.info}>قیمت: {parsedItem.price}</Text>
-              </View>
-              <View style={styles.separator} />
-            </>
-          )}
+{parsedItem.price && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="pricetag-outline" size={20} color={COLORS.primary} style={styles.icon} />
+        <Text style={styles.info}>قیمت</Text>
+      </View>
+      <Text style={styles.info1}>{parsedItem.price}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
+
+{parsedItem.address && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="pin-outline" size={20} color={COLORS.primary} style={styles.icon} />
+        <Text style={styles.info}>آدرس</Text>
+      </View>
+      <Text style={styles.info1}>{parsedItem.address}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
+
 
           {parsedItem.caption && (
             <View style={styles.descriptionBox}>
@@ -173,7 +235,7 @@ export default function KitchenDetails() {
 
           <TouchableOpacity
             onPress={saveItem}
-            style={[styles.saveButton, saved && { backgroundColor: "gray" }]}
+            style={[styles.saveButton1, saved && { backgroundColor: "gray" }]}
           >
             <Text style={styles.saveButtonText}>
               {saved ? "ذخیره شد" : "ذخیره کنید"}
@@ -181,6 +243,52 @@ export default function KitchenDetails() {
           </TouchableOpacity>
         </View>
       </View>
+
+         <Modal visible={visible} transparent={true} onRequestClose={() => setVisible(false)}>
+  <View style={styles1.container}>
+    
+    {/* Header: دکمه بستن */}
+    <TouchableOpacity onPress={() => setVisible(false)} style={styles1.closeButton}>
+      <Text style={styles1.closeButtonText}>✕</Text>
+    </TouchableOpacity>
+
+    {/* Body: لیست عکس‌ها */}
+    <FlatList
+      ref={flatListRef}
+      data={(parsedItem.images?.length > 0 
+        ? parsedItem.images 
+        : parsedItem.image 
+        ? [parsedItem.image] 
+        : []
+      )}
+      horizontal
+      pagingEnabled
+      initialScrollIndex={imageIndex}
+      getItemLayout={(data, index) => ({
+        length: width,
+        offset: width * index,
+        index,
+      })}
+      renderItem={({ item }) => (
+        <View style={styles1.imageWrapper}>
+          <Image source={{ uri: item }} style={styles1.image} />
+        </View>
+      )}
+      onMomentumScrollEnd={(e) => {
+        const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
+        setImageIndex(newIndex);
+      }}
+    />
+
+    {/* Footer: شمارنده عکس‌ها */}
+    <View style={styles1.footer}>
+      <Text style={styles1.footerText}>
+        {imageIndex + 1} / {parsedItem.images?.length || 1}
+      </Text>
+    </View>
+  </View>
+</Modal>
+
 
       <SafeAreaView edges={["bottom"]} style={{ paddingBottom: 80 }} />
     </ScrollView>

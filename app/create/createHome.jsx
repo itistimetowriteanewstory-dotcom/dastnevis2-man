@@ -21,120 +21,125 @@ import * as FileSystem from "expo-file-system";
 import { useAuthStore } from "../../store/authStore";
 import { apiFetch } from '../../store/apiClient';
 import { useFilterStore } from "../../store/fileStore";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect } from "react";
 
 export default function CreateHomeAndKitchen() {
   const [title, setTitle] = useState("");            
   const [caption, setCaption] = useState("");        
-  const [image, setImage] = useState(null);          
-  const [imageBase64, setImageBase64] = useState(null); 
+  const [images, setImages] = useState([null, null, null, null, null]);
+  const [imagesBase64, setImagesBase64] = useState([null, null, null, null, null]);
   const [loading, setLoading] = useState(false);    
   const [phoneNumber, setPhoneNumber] = useState("");
   const [price, setPrice] = useState("");
+  const [address, setAddress] = useState("");
+
+
   const router = useRouter();
   const { accessToken } = useAuthStore();
   const { createKitchen1,  setCreateKitchen1 } = useFilterStore();
 
-  // انتخاب عکس
-  const pickImage = async () => {
-    try {
-      if (Platform.OS !== "web") {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          Alert.alert("عدم دسترسی", "برای اضافه کردن عکس ابتدا اجازه دسترسی به گالری را دهید");
-          return;
-        }
-      }
+  const { id } = useLocalSearchParams();
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "images",
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.3,
-        base64: true,
-      });
 
-      if (!result.canceled) {
-        setImage(result.assets[0].uri);
-        if (result.assets[0].base64) {
-          setImageBase64(result.assets[0].base64);
-        } else {
-          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
-            encoding: FileSystem.EncodingType.Base64,
+  const pickImage = async (index) => {
+        try {
+          if (Platform.OS !== "web") {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== "granted") {
+              Alert.alert("عدم دسترسی", "برای اضافه کردن عکس ابتدا اجازه دسترسی به گالری را دهید");
+              return;
+            }
+          }
+      
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            aspect: [4, 3],
+            quality: 0.3,
+            base64: true,
           });
-          setImageBase64(base64);
+      
+          if (!result.canceled) {
+            const uri = result.assets[0].uri;
+            const base64 = result.assets[0].base64;
+      
+            const newImages = [...images];
+            const newImagesBase64 = [...imagesBase64];
+            newImages[index] = uri;
+            newImagesBase64[index] = base64;
+      
+            setImages(newImages);
+            setImagesBase64(newImagesBase64);
+          }
+        } catch (error) {
+          console.error("خطا در انتخاب عکس:", error);
+          Alert.alert("خطا", "مشکلی در انتخاب عکس پیش آمد");
         }
-      }
-    } catch (error) {
-      console.error("خطا: موقع انتخاب عکس", error);
-      Alert.alert("خطا", "مشکلی در انتخاب عکس وجود دارد");
-    }
-  };
+      };
+const handleSubmit = async () => {
+  if (!title || !caption || !phoneNumber || !createKitchen1.location || !createKitchen1.category || !address) {
+    Alert.alert("خطا", "لطفاً همه‌ی خانه‌های ضروری را پر کنید");
+    return;
+  }
 
-  // ارسال فرم
-  const handleSubmit = async () => {
-    if (!title || !caption || !imageBase64 || !phoneNumber || !createKitchen1.location || !createKitchen1.category) {
-      Alert.alert("خطا", "لطفاً همه‌ی خانه‌های ضروری را پر کنید");
+  try {
+    setLoading(true);
+
+    const imageDataUris = [];
+    for (let i = 0; i < images.length; i++) {
+      const base64 = imagesBase64[i];
+      const uri = images[i];
+
+      if (base64 && uri) {
+        const uriParts = uri.split(".");
+        const fileExtension = uriParts[uriParts.length - 1];
+        const imageType = fileExtension ? `image/${fileExtension.toLowerCase()}` : "image/jpeg";
+        imageDataUris.push(`data:${imageType};base64,${base64}`);
+      } else if (uri && uri.startsWith("http")) {
+        imageDataUris.push(uri); // عکس قبلی
+      }
+    }
+
+    const response = await apiFetch(id ? `/kitchen/${id}` : "/kitchen", {
+      method: id ? "PUT" : "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title,
+        caption,
+        images: imageDataUris,
+        phoneNumber,
+        price,
+        address,
+        location: createKitchen1.location,
+        texture: createKitchen1.texture,
+        model: createKitchen1.model,
+        status: createKitchen1.status,
+        category: createKitchen1.category,
+        dimensions: createKitchen1.dimensions,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      Alert.alert("خطا", errorData.message || "مشکلی پیش آمد");
       return;
     }
 
-    try {
-      setLoading(true);
-
-      const uriParts = image.split(".");
-      const fileExtension = uriParts[uriParts.length - 1];
-      const imageType = fileExtension
-        ? `image/${fileExtension.toLowerCase()}`
-        : "image/jpeg";
-
-      const imageDataUri = `data:${imageType};base64,${imageBase64}`;
-
-      const response = await apiFetch("/kitchen", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title,
-          caption,
-          image: imageDataUri,
-          phoneNumber,
-          price,
-           location: createKitchen1.location,
-          texture: createKitchen1.texture,
-          model: createKitchen1.model,
-          status: createKitchen1.status,
-          category: createKitchen1.category,
-          dimensions: createKitchen1.dimensions,
-          
-        }),
-      });
-
-      if (!response.ok) {
-        let errorMessage = "مشکلی پیش آمد";
-        try {
-          const errorData = await response.json();
-          if (errorData.message) {
-            errorMessage = errorData.message;
-          }
-        } catch (e) {
-          console.error("خطا در خواندن پاسخ:", e);
-        }
-        Alert.alert("خطا", errorMessage);
-        setLoading(false);
-        return;
-      }
-
       const data = await response.json();
 
-      Alert.alert("موفقیت", "آگهی لوازم خانه و آشپزخانه با موفقیت اضافه شد");
+      Alert.alert("موفقیت", id ? "آگهی خانه/آشپزخانه با موفقیت ویرایش شد" : "آگهی خانه/آشپزخانه با موفقیت اضافه شد");
       // پاک کردن فرم
       setTitle("");
       setCaption("");
-      setImage(null);
-      setImageBase64(null);
+      setImages([null, null, null, null, null]);
+      setImagesBase64([null, null, null, null, null]);
       setPhoneNumber("");
       setPrice("");
+      setAddress("");
       setCreateKitchen1({
        location: "",
        texture: "",
@@ -152,6 +157,57 @@ export default function CreateHomeAndKitchen() {
       setLoading(false);
     }
  };
+
+ useEffect(() => {
+  if (id) {
+    const fetchHome = async () => {
+      try {
+        const response = await apiFetch(`/kitchen/${id}`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (!response.ok) {
+          console.error("خطا در گرفتن آگهی خانه/آشپزخانه");
+          return;
+        }
+
+        const data = await response.json();
+
+        // پر کردن فرم با داده‌های قبلی
+        setTitle(data.title || "");
+        setCaption(data.caption || "");
+        setPhoneNumber(data.phoneNumber || "");
+        setPrice(data.price || "");
+        setAddress(data.address || "");
+
+        // تنظیم تصاویر با طول ثابت ۵
+        if (data.images && Array.isArray(data.images)) {
+          const paddedImages = [...data.images];
+          while (paddedImages.length < 5) paddedImages.push(null);
+          setImages(paddedImages);
+          setImagesBase64([null, null, null, null, null]);
+        }
+
+        // تنظیم فیلترها
+        setCreateKitchen1({
+          location: data.location || "",
+          texture: data.texture || "",
+          model: data.model || "",
+          status: data.status || "",
+          category: data.category || "",
+          dimensions: data.dimensions || "",
+        });
+      } catch (error) {
+        console.error("خطا در گرفتن اطلاعات آگهی:", error);
+      }
+    };
+
+    fetchHome();
+  }
+}, [id]);
+
+
 return (
   <KeyboardAvoidingView
     style={{ flex: 1 }}
@@ -182,20 +238,24 @@ return (
             </View>
           </View>
 
-          {/* image */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>عکس وسیله</Text>
-            <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-              {image ? (
-                <Image source={{ uri: image }} style={styles.previewImage} />
-              ) : (
-                <View style={styles.placeholderContainer}>
-                  <Ionicons name="image-outline" size={40} color={COLORS.textSecondary} />
-                  <Text style={styles.placeholderText}>برای اضافه کردن عکس کلیک کنید</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
+           <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+  {images.map((img, index) => (
+    <TouchableOpacity
+      key={index}
+      style={styles.imagePickerBox}
+      onPress={() => pickImage(index)}
+    >
+      {img ? (
+        <Image source={{ uri: img }} style={styles.previewImage} />
+      ) : (
+        <View style={styles.placeholderContainer}>
+          <Ionicons name="image-outline" size={30} color={COLORS.textSecondary} />
+          <Text style={styles.placeholderText}>انتخاب عکس {index + 1}</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  ))}
+</View>
 
           {/* caption */}
           <View style={styles.formGroup}>
@@ -223,143 +283,6 @@ return (
             />
           </View>
 
-            {/* location */}
-        <View style={styles.formGroup}>
-  <Text style={styles.label}>ولایت</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/page/select-location",
-        params: { section: "kitchen" }, // 👈 مسیر برگشت
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createKitchen1.location ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createKitchen1.location || "ولایت خود را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
-
-           {/* model */}
-<View style={styles.formGroup}>
-  <Text style={styles.label}> categoryل</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/filter",
-        params: { type: "kitchen2Category" },
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createKitchen1.category ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createKitchen1.category || "مدل را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
-
-         {/* model */}
-<View style={styles.formGroup}>
-  <Text style={styles.label}>مدل</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/filter",
-        params: { type: "kitchen2Model" },
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createKitchen1.model ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createKitchen1.model || "مدل را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
-
-        {/* status */}
-<View style={styles.formGroup}>
-  <Text style={styles.label}>وضعیت</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/filter",
-        params: { type: "kitchen2Status" },
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createKitchen1.status ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createKitchen1.status || "وضعیت را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
-
-         {/* texture */}
-<View style={styles.formGroup}>
-  <Text style={styles.label}>جنس/پارچه</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/filter",
-        params: { type: "kitchen2Texture"},
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createKitchen1.texture ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createKitchen1.texture || "جنس/پارچه را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
-
-           {/* texture */}
-<View style={styles.formGroup}>
-  <Text style={styles.label}> dimensionه</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/filter",
-        params: { type: "kitchen2Dimensions"},
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createKitchen1.dimensions ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createKitchen1.dimensions || "ابعاد را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
 
           {/* price */}
           <View style={styles.formGroup}>
@@ -373,6 +296,118 @@ return (
            
             />
           </View>
+
+           {/* price */}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>آدرس و منطقه</Text>
+            <TextInput
+              style={styles.inputContainer}
+              placeholder="آدرس و منطقه خودرا بنویسید"
+              placeholderTextColor={COLORS.placeholderText}
+              value={address}
+              onChangeText={setAddress}
+           
+            />
+          </View>
+
+          <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
+  {/* location */}
+  <TouchableOpacity
+    style={styles.halfBox}
+    onPress={() =>
+      router.push({
+        pathname: "/page/select-location",
+        params: { section: "kitchen" },
+      })
+    }
+  >
+    <Text style={{ color: createKitchen1.location ? COLORS.black : COLORS.placeholderText }}>
+      {createKitchen1.location || "ولایت خویش را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
+
+
+  {/* category */}
+  <TouchableOpacity
+    style={styles.halfBox}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "kitchen2Category" },
+      })
+    }
+  >
+    <Text style={{ color: createKitchen1.category ? COLORS.black : COLORS.placeholderText }}>
+      {createKitchen1.category || "یک دسته بندی انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
+
+
+  {/* model */}
+  <TouchableOpacity
+    style={styles.halfBox}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "kitchen2Model" },
+      })
+    }
+  >
+    <Text style={{ color: createKitchen1.model ? COLORS.black : COLORS.placeholderText }}>
+      {createKitchen1.model || "سال ساخت وسیله را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
+
+
+  {/* status */}
+  <TouchableOpacity
+    style={styles.halfBox}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "kitchen2Status" },
+      })
+    }
+  >
+    <Text style={{ color: createKitchen1.status ? COLORS.black : COLORS.placeholderText }}>
+      {createKitchen1.status || "وضعیت وسیله را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
+
+
+  {/* texture */}
+  <TouchableOpacity
+    style={styles.halfBox}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "kitchen2Texture" },
+      })
+    }
+  >
+    <Text style={{ color: createKitchen1.texture ? COLORS.black : COLORS.placeholderText }}>
+      {createKitchen1.texture || "جنس وسیله را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
+
+
+  {/* dimensions */}
+  <TouchableOpacity
+    style={styles.halfBox}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "kitchen2Dimensions" },
+      })
+    }
+  >
+    <Text style={{ color: createKitchen1.dimensions ? COLORS.black : COLORS.placeholderText }}>
+      {createKitchen1.dimensions || "ابعاد وسیله را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
+</View>
+
+
 
           {/* submit button */}
           <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>

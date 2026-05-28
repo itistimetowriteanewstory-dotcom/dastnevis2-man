@@ -54,7 +54,7 @@ export default function UserAdsScreen() {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const carsData = await carsRes.json();
-      if (!carsRes.ok) throw new Error(carsData.message || "خطا در بارگذاری خودروها");
+      if (!carsRes.ok) throw new Error(carsData.message || "خطا در بارگذاری موترها");
 
       const cloutesRes = await apiFetch("/cloutes/user", {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -72,7 +72,7 @@ export default function UserAdsScreen() {
      headers: { Authorization: `Bearer ${accessToken}` },
      });
       const eatsData = await eatsRes.json();
-      if (!eatsRes.ok) throw new Error(eatsData.message || "خطا در بارگذاری خوراکی‌ها");
+      if (!eatsRes.ok) throw new Error(eatsData.message || "خطا در بارگذاری مواد غذایی‌ها");
 
 
 
@@ -135,7 +135,7 @@ export default function UserAdsScreen() {
     }
   };
 
-  // 📌 حذف خودرو
+  // 📌 حذف موتر
   const handleDeleteCar = async (carId) => {
     try {
       setDeleteId(carId);
@@ -144,12 +144,12 @@ export default function UserAdsScreen() {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "خطا در حذف خودرو");
+      if (!res.ok) throw new Error(data.message || "خطا در حذف موتر");
 
       setCars((prev) => prev.filter((c) => c._id !== carId));
-      Alert.alert("موفق", "خودرو حذف شد");
+      Alert.alert("موفق", "موتر حذف شد");
     } catch (error) {
-      Alert.alert("خطا", error.message || "مشکلی در حذف خودرو پیش آمد");
+      Alert.alert("خطا", error.message || "مشکلی در حذف موتر پیش آمد");
     } finally {
       setDeleteId(null);
     }
@@ -202,12 +202,12 @@ const handleDeleteEat = async (eatId) => {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "خطا در حذف خوراکی");
+    if (!res.ok) throw new Error(data.message || "خطا در حذف مواد غذایی");
 
     setEats((prev) => prev.filter((e) => e._id !== eatId));
-    Alert.alert("موفق", "خوراکی حذف شد");
+    Alert.alert("موفق", "مواد غذایی حذف شد");
   } catch (error) {
-    Alert.alert("خطا", error.message || "مشکلی در حذف خوراکی پیش آمد");
+    Alert.alert("خطا", error.message || "مشکلی در حذف مواد غذایی پیش آمد");
   } finally {
     setDeleteId(null);
   }
@@ -229,28 +229,28 @@ const handleDeleteEat = async (eatId) => {
   };
 
   const confirmDeleteCar = (carId) => {
-    Alert.alert("حذف خودرو؟", "آیا مطمئن هستید؟", [
+    Alert.alert("حذف موتر؟", "آیا مطمئن هستید؟", [
       { text: "لغو", style: "cancel" },
       { text: "حذف", style: "destructive", onPress: () => handleDeleteCar(carId) },
     ]);
   };
 
    const confirmDeleteCloute = (clouteId) => {
-    Alert.alert("حذف خودرو؟", "آیا مطمئن هستید؟", [
+    Alert.alert("حذف موتر؟", "آیا مطمئن هستید؟", [
       { text: "لغو", style: "cancel" },
       { text: "حذف", style: "destructive", onPress: () => handleDeleteCloute(clouteId) },
     ]);
   };
 
   const confirmDeleteKitchen = (kitchenId) => {
-    Alert.alert("حذف خودرو؟", "آیا مطمئن هستید؟", [
+    Alert.alert("حذف موتر؟", "آیا مطمئن هستید؟", [
       { text: "لغو", style: "cancel" },
       { text: "حذف", style: "destructive", onPress: () => handleDeleteKitchen(kitchenId) },
     ]);
   };
 
   const confirmDeleteEat = (eatId) => {
-    Alert.alert("حذف خودرو؟", "آیا مطمئن هستید؟", [
+    Alert.alert("حذف موتر؟", "آیا مطمئن هستید؟", [
       { text: "لغو", style: "cancel" },
       { text: "حذف", style: "destructive", onPress: () => handleDeleteEat(eatId) },
     ]);
@@ -298,7 +298,13 @@ const handleDeleteEat = async (eatId) => {
         }
         renderItem={({ item }) => (
           <View style={styles.jobItem}>
-            <Image source={{ uri: item.image }} style={styles.jobImage} />
+           {item.images && item.images.length > 0 ? (
+          <Image source={{ uri: item.images[0] }} style={styles.jobImage} contentFit="contain" />
+          ) : item.image ? (
+          <Image source={{ uri: item.image }} style={styles.jobImage} contentFit="contain" />
+          ) : null}
+
+
             <View style={styles.jobInfo}>
               <Text style={styles.jobTitle}>{item.title}</Text>
 
@@ -316,7 +322,7 @@ const handleDeleteEat = async (eatId) => {
                 </>
               )}
 
-              {/* نمایش اطلاعات خودرو */}
+              {/* نمایش اطلاعات موتر */}
               {item.adType === "car" && (
                 <>
                   {item.brand && <Text style={styles.jobTitle}>برند: {item.brand}</Text>}
@@ -351,7 +357,7 @@ const handleDeleteEat = async (eatId) => {
                 {new Date(item.createdAt).toLocaleDateString()}
               </Text>
             </View>
-
+ <View style={{ flexDirection: "row" }}>
             {/* دکمه حذف */}
             <TouchableOpacity
               style={styles.deleteButton}
@@ -377,6 +383,27 @@ const handleDeleteEat = async (eatId) => {
                 <Ionicons name="trash-outline" size={25} color={COLORS.primary} />
               )}
             </TouchableOpacity>
+<TouchableOpacity
+  style={styles.editButton}
+  onPress={() =>
+    item.adType === "job"
+      ? router.push({ pathname: "/create/createJobs", params: { id: item._id } })
+      : item.adType === "property"
+      ? router.push({ pathname: "/create/createProperty", params: { id: item._id } })
+      : item.adType === "car"
+      ? router.push({ pathname: "/create/createCar", params: { id: item._id } })
+      : item.adType === "cloute"
+      ? router.push({ pathname: "/create/createCloutes", params: { id: item._id } })
+      : item.adType === "kitchen"
+      ? router.push({ pathname: "/create/createHome", params: { id: item._id } })
+      : router.push({ pathname: "/create/createEat", params: { id: item._id } })
+  }
+>
+  <Ionicons name="create-outline" size={25} color={COLORS.primary} />
+</TouchableOpacity>
+
+
+           </View>
           </View>
         )}
         ListEmptyComponent={

@@ -10,23 +10,31 @@ export default function FilterPage() {
   const {
     setCreateCar1,
     setCreateCloutes2,
-    setCreateProperty3,
+   // setCreateProperty3,
     setCar1,
     setCloutes2,
     setCreateKitchen1,
     setKitchen1,
     setCreateJobs1,
     setJobs1,
-    setProperty3,
+   // setProperty3,
   } = useFilterStore();
+
+  const setCreateProperty3 = useFilterStore(
+  state => state.setCreateProperty3
+);
+
+const setProperty3 = useFilterStore(
+  state => state.setProperty3
+);
 
   // 👇 گزینه‌ها برای هر نوع فیلتر
   const filterOptions = {
     // ماشین
-    car1Model: ["2025", "2024", "2023","2022", "2021", "2020","2019", "2018", "2017","2016","2015", "2014", "2013"],
-    car1AdType: ["موتر", "موتر سیکلیت", "اتوبوس"],
-    car1FuelType: ["برق", "دیزل", "پترول", "گاز"],
-    car1Brand: ["تویوتا", "لندکروز", "بی‌ام‌و", "بنز", "هوندا", "هیوندای","فورد", "فولکس واگن", "آئودی","نیسان", "تسلا","شورولت",
+    car1Model: ["بدون فیلتر", "2025", "2024", "2023","2022", "2021", "2020","2019", "2018", "2017","2016","2015", "2014", "2013"],
+    car1AdType: ["بدون فیلتر","موتر", "موتر سیکلیت", "تونس", "سراچه"],
+    car1FuelType: ["بدون فیلتر","برق", "دیزل", "پترول", "گاز"],
+    car1Brand: ["بدون فیلتر","تویوتا", "لندکروز", "بی‌ام‌و", "بنز", "هوندا", "هیوندای","فورد", "فولکس واگن", "آئودی","نیسان", "تسلا","شورولت",
   "کیا",
   "پورشه",
   "لکسوس",
@@ -37,25 +45,48 @@ export default function FilterPage() {
   "جگوار",
  ],
 
-     kitchen2Model: ["2025", "2024", "2023","2022", "2021", "2020","2019", "2018", "2017","2016","2015", "2014", "2013"],
-    kitchen2Category: ["خانه", "آشپزخانه", "اتاق خواب", "حمام و دستشویی"],
-    kitchen2Texture: ["آهن", "مس", "چوب", "MDF", "استیل","آلمینیوم", "پلاستیک", "سرامیک","شیشه", "چدن", "سیلیکون", "پشم", "ابریشم","پنبه", "نایلون", "پلی استر"],
-    kitchen2Status: ["نو", "دسته دو (کار کرده)"],
-    kitchen2Dimensions: [ "از 30 سانتی‌متر تا 50 سانتی‌متر","از 50 سانتی‌متر تا 100 سانتی‌متر","از 100 سانتی‌متر تا 150 سانتی‌متر","از 150 سانتی‌متر تا 200 سانتی‌متر","2 متری","4 متر","6 متری","9 متری","12 متری","24 متری"],
-
-      model:  ["2025", "2024", "2023","2022", "2021", "2020","2019", "2018", "2017","2016","2015", "2014", "2013"],
-     category: ["خانه", "آشپزخانه", "اتاق خواب", "حمام و دستشویی"],
-     status: ["نو", "دسته دو (کار کرده)"],
-     dimensions: [ "از 30 سانتی‌متر تا 50 سانتی‌متر","از 50 سانتی‌متر تا 100 سانتی‌متر","از 100 سانتی‌متر تا 150 سانتی‌متر","از 150 سانتی‌متر تا 200 سانتی‌متر","2 متری","4 متر","6 متری","9 متری","12 متری","24 متری"],
-     texture:  ["آهن", "مس", "چوب", "MDF", "استیل","آلمینیوم", "پلاستیک", "سرامیک","شیشه", "چدن", "سیلیکون", "پشم", "ابریشم","پنبه", "نایلون", "پلی استر"],
+     kitchen2Model: ["بدون فیلتر","2025", "2024", "2023","2022", "2021", "2020","2019", "2018", "2017","2016","2015", "2014", "2013"],
+    kitchen2Category: ["بدون فیلتر","خانه", "آشپزخانه", "اتاق خواب", "حمام و دستشویی"],
+    kitchen2Texture: ["بدون فیلتر","آهن", "مس", "چوب", "MDF", "استیل","آلمینیوم", "پلاستیک", "سرامیک","شیشه", "چدن", "سیلیکون", "پشم", "ابریشم","پنبه", "نایلون", "پلی استر"],
+    kitchen2Status: ["بدون فیلتر","نو", "دسته دو (کار کرده)"],
+    kitchen2Dimensions: [
+  "بدون فیلتر",
+  "بین ۳۰ تا ۵۰ سانتی‌متر",
+  "بین ۵۰ تا ۱۰۰ سانتی‌متر",
+  "بین ۱۰۰ تا ۱۵۰ سانتی‌متر",
+  "بین ۱۵۰ تا ۲۰۰ سانتی‌متر",
+  "۲ متری",
+  "۴ متر",
+  "۶ متری",
+  "۹ متری",
+  "۱۲ متری",
+  "۲۴ متری"
+],
+      model:  ["بدون فیلتر","2025", "2024", "2023","2022", "2021", "2020","2019", "2018", "2017","2016","2015", "2014", "2013"],
+     category: ["بدون فیلتر","خانه", "آشپزخانه", "اتاق خواب", "حمام و دستشویی"],
+     status: ["بدون فیلتر","نو", "دسته دو (کار کرده)"],
+     dimensions: [
+  "بدون فیلتر",
+  "بین ۳۰ تا ۵۰ سانتی‌متر",
+  "بین ۵۰ تا ۱۰۰ سانتی‌متر",
+  "بین ۱۰۰ تا ۱۵۰ سانتی‌متر",
+  "بین ۱۵۰ تا ۲۰۰ سانتی‌متر",
+  "۲ متری",
+  "۴ متر",
+  "۶ متری",
+  "۹ متری",
+  "۱۲ متری",
+  "۲۴ متری"
+],
+     texture:  ["بدون فیلتر","آهن", "مس", "چوب", "MDF", "استیل","آلمینیوم", "پلاستیک", "سرامیک","شیشه", "چدن", "سیلیکون", "پشم", "ابریشم","پنبه", "نایلون", "پلی استر"],
     // لباس
-    cloutes1Texture: ["پنبه", "ابریشم", "پشم", "مخمل", "نخ"],
-    cloutes1Model:["مردانه", "زنانه", "بچگانه"],
-    cloutes1Status: ["نو", "دسته دو (کار کرده)"],
+    cloutes1Texture: ["بدون فیلتر","پنبه", "ابریشم", "پشم", "مخمل", "نخ"],
+    cloutes1Model:["بدون فیلتر","مردانه", "زنانه", "بچگانه"],
+    cloutes1Status: ["بدون فیلتر","نو", "دسته دو (کار کرده)"],
     
-    cloutesTexture: ["پنبه", "ابریشم", "پشم", "مخمل", "نخ"],
-    cloutesModel: ["مردانه", "زنانه", "بچگانه"],
-    cloutesStatus:["نو", "دسته دو (کار کرده)"],
+    cloutesTexture: ["بدون فیلتر","پنبه", "ابریشم", "پشم", "مخمل", "نخ"],
+    cloutesModel: ["بدون فیلتر","مردانه", "زنانه", "بچگانه"],
+    cloutesStatus:["بدون فیلتر","نو", "دسته دو (کار کرده)"],
    
   propertyType: [
   { label: "فروش", value: "sale" },
@@ -63,43 +94,193 @@ export default function FilterPage() {
   { label: "گرو", value: "mortgage" },
   { label: "گرو و کرایه", value: "rent_mortgage" },
 ],
-    area: [
-  "از 30 متر مربع تا 50 متر مربع",
-  "از 50 متر مربع تا 70 متر مربع",
-  "از 70 متر مربع تا 100 متر مربع",
-  "از 100 متر مربع تا 150 متر مربع",
-  "از 150 متر مربع تا 200 متر مربع",
+   area:  [
+  "بدون فیلتر",
+  "بین ۳۰ تا ۵۰ متر",
+  "بین ۵۰ تا ۷۰ متر",
+  "بین ۷۰ تا ۱۰۰ متر",
+  "بین ۱۰۰ تا ۱۵۰ متر",
+  "بین ۱۵۰ تا ۲۰۰ متر",
 ],
 
-    rentPrice: ["1000 afgahni", "2000afgahni", "3000af"],
-    mortgagePrice: ["1000", "2000", "3000"],
-    price: ["1000", "2000", "3000", "4000"],
+   rentPrice: ["بدون فیلتر"," ۱ تا ۲ هزار افغانی", " ۲ تا ۳ هزار افغانی"
+    , " ۳ تا ۴ هزار افغانی"
+    , " ۴ تا ۵ هزار افغانی"
+    , " ۵ تا ۶ هزار افغانی"
+    , " ۶ تا ۷ هزار افغانی"
+    , " ۷ تا ۸ هزار افغانی"
+    , " ۸ تا ۹ هزار افغانی"
+    , " ۹ تا ۱۰ هزار افغانی"
+    , " ۱۰ تا ۱۳ هزار افغانی"
+    , " ۱۳ تا ۱۶ هزار افغانی"
+    , " ۱۶ تا ۱۸ هزار افغانی"
+    , " ۱۸ تا ۲۰ هزار افغانی"
+    , " ۲۰ تا ۲۵ هزار افغانی"
+    , " ۲۵ تا ۳۰ هزار افغانی"
+    , " ۳۰ تا ۴۰ هزار افغانی"
+
+   ],
+   mortgagePrice:[
+  "بدون فیلتر",
+  " ۱۰ تا ۲۰ هزار افغانی",
+  " ۲۰ تا ۳۰ هزار افغانی",
+  " ۳۰ تا ۴۰ هزار افغانی",
+  " ۴۰ تا ۵۰ هزار افغانی",
+  " ۵۰ تا ۶۰ هزار افغانی",
+  " ۶۰ تا ۷۰ هزار افغانی",
+  " ۷۰ تا ۸۰ هزار افغانی",
+  " ۸۰ تا ۹۰ هزار افغانی",
+  " ۱۰۰ تا ۱۲۰ هزار افغانی",
+  " ۱۲۰ تا ۱۵۰ هزار افغانی",
+  " ۱۵۰ تا ۲۰۰ هزار افغانی"
+],
+    price:  [
+  "بدون فیلتر",
+  " ۱۰۰ تا ۲۰۰ هزار افغانی",
+  " ۲۰۰ تا ۳۰۰ هزار افغانی",
+  " ۳۰۰ تا ۴۰۰ هزار افغانی",
+  " ۴۰۰ تا ۵۰۰ هزار افغانی",
+  " ۵۰۰ تا ۶۰۰ هزار افغانی",
+  " ۶۰۰ تا ۷۰۰ هزار افغانی",
+  " ۷۰۰ تا ۸۰۰ هزار افغانی",
+  " ۸۰۰ تا ۹۰۰ هزار افغانی",
+  " ۱۰۰۰ تا ۱۲۰۰ هزار افغانی",
+  " ۱۲۰۰ تا ۱۵۰۰ هزار افغانی",
+  " ۱۵۰۰ تا ۲۰۰۰ هزار افغانی"
+],
 
 
-    propertyType1: ["فروش", "کرایه", "گرو", "گرو و کرایه"],
-    area1: ["50 متر", "100 متر", "200 متر"],
-    rentPrice1: ["1000 afgahni", "2000afgahni", "3000af"],
-    mortgagePrice1: ["1000", "2000", "3000"],
-    price1: ["1000", "2000", "3000", "4000"],
+  propertyType1: [
+    { label: "فروش", value: "sale" },
+    { label: "کرایه", value: "rent" },
+    { label: "گرو", value: "mortgage" },
+    { label: "گرو و کرایه", value: "rent_mortgage" }
+     ],
+
+
+    area1:  [
+  "بدون فیلتر",
+  "بین ۳۰ تا ۵۰ متر",
+  "بین ۵۰ تا ۷۰ متر",
+  "بین ۷۰ تا ۱۰۰ متر",
+  "بین ۱۰۰ تا ۱۵۰ متر",
+  "بین ۱۵۰ تا ۲۰۰ متر",
+],
+    rentPrice1: ["بدون فیلتر"," ۱ تا ۲ هزار افغانی", " ۲ تا ۳ هزار افغانی"
+    , " ۳ تا ۴ هزار افغانی"
+    , " ۴ تا ۵ هزار افغانی"
+    , " ۵ تا ۶ هزار افغانی"
+    , " ۶ تا ۷ هزار افغانی"
+    , " ۷ تا ۸ هزار افغانی"
+    , " ۸ تا ۹ هزار افغانی"
+    , " ۹ تا ۱۰ هزار افغانی"
+    , " ۱۰ تا ۱۳ هزار افغانی"
+    , " ۱۳ تا ۱۶ هزار افغانی"
+    , " ۱۶ تا ۱۸ هزار افغانی"
+    , " ۱۸ تا ۲۰ هزار افغانی"
+    , " ۲۰ تا ۲۵ هزار افغانی"
+    , " ۲۵ تا ۳۰ هزار افغانی"
+    , " ۳۰ تا ۴۰ هزار افغانی"
+
+   ],
+    mortgagePrice1:[
+  "بدون فیلتر",
+  " ۱۰ تا ۲۰ هزار افغانی",
+  " ۲۰ تا ۳۰ هزار افغانی",
+  " ۳۰ تا ۴۰ هزار افغانی",
+  " ۴۰ تا ۵۰ هزار افغانی",
+  " ۵۰ تا ۶۰ هزار افغانی",
+  " ۶۰ تا ۷۰ هزار افغانی",
+  " ۷۰ تا ۸۰ هزار افغانی",
+  " ۸۰ تا ۹۰ هزار افغانی",
+  " ۱۰۰ تا ۱۲۰ هزار افغانی",
+  " ۱۲۰ تا ۱۵۰ هزار افغانی",
+  " ۱۵۰ تا ۲۰۰ هزار افغانی"
+],
+    price1:  [
+  "بدون فیلتر",
+  " ۱۰۰ تا ۲۰۰ هزار افغانی",
+  " ۲۰۰ تا ۳۰۰ هزار افغانی",
+  " ۳۰۰ تا ۴۰۰ هزار افغانی",
+  " ۴۰۰ تا ۵۰۰ هزار افغانی",
+  " ۵۰۰ تا ۶۰۰ هزار افغانی",
+  " ۶۰۰ تا ۷۰۰ هزار افغانی",
+  " ۷۰۰ تا ۸۰۰ هزار افغانی",
+  " ۸۰۰ تا ۹۰۰ هزار افغانی",
+  " ۱۰۰۰ تا ۱۲۰۰ هزار افغانی",
+  " ۱۲۰۰ تا ۱۵۰۰ هزار افغانی",
+  " ۱۵۰۰ تا ۲۰۰۰ هزار افغانی"
+],
 
     // car1
-    carModel: ["2025", "2023", "2020"],
-    carAdType: ["موتر", "موتر سیکلیت", "اتوبوس"],
+    carModel: ["بدون فیلتر","2025", "2024", "2023","2022", "2021", "2020","2019", "2018", "2017","2016","2015", "2014", "2013"],
+    carAdType: ["بدون فیلتر","موتر", "موتر سیکلیت", "تونس", "سراچه"],
 
-    income: ["1000", "2000", "3000", "4000", "5000"],
-    workingHours: ["12 hours", "7hours", "karamoz", "project"],
-    paymentType: ["monthly", "weekly", "daylay", "yearly"],
+    income: [
+    "بدون فیلتر",
+    " ۵ تا ۶ هزار افغانی",
+  " ۶ تا ۷ هزار افغانی",
+  " ۷ تا ۸ هزار افغانی",
+  " ۸ تا ۹ هزار افغانی",
+  " ۹ تا ۱۰ هزار افغانی",
+  " ۱۰ تا ۱۲ هزار افغانی",
+  " ۱۲ تا ۱۵ هزار افغانی",
+  " ۱۵ تا ۱۷ هزار افغانی",
+  " ۱۷ تا ۲۰ هزار افغانی",
+  " ۲۰ تا ۲۵ هزار افغانی",
+  " ۲۵ تا ۳۰ هزار افغانی",
+  " ۳۰ تا ۳۵ هزار افغانی",
+  " ۳۵ تا ۴۰ هزار افغانی",
+  " ۴۵ تا ۵۰ هزار افغانی",
+  " ۵۰ تا ۶۰ هزار افغانی"
+],
+    workingHours: ["بدون فیلتر","8 الی 12 ساعت", "5 الی 8 ساعت", "کار آموزی", "پروژه ای"],
+    paymentType: ["بدون فیلتر","اداری و مدیریت", "سرایداری و نظافت", "خدمات فروشگاه و نظافت",
+      "معماری, عمران و ساختمانی",
+      "رایانه و فناوری",
+      "مالی و حساب داری",
+      "صنعتی, فنی و مهندسی",
+      "آموزشی",
+      "حمل و نقل",
+      "درمانی, زیبای و بهداشتی",
+      "هنری و رسانه",
+    ],
 
 
-    income1: ["1000", "2000", "3000", "4000", "5000"],
-    workingHours1: ["12 hours", "7hours", "karamoz", "project"],
-    paymentType1: ["monthly", "weekly", "daylay", "yearly"],
-
+    income1: [
+  "بدون فیلتر",
+  " ۵ تا ۶ هزار افغانی",
+  " ۶ تا ۷ هزار افغانی",
+  " ۷ تا ۸ هزار افغانی",
+  " ۸ تا ۹ هزار افغانی",
+  " ۹ تا ۱۰ هزار افغانی",
+  " ۱۰ تا ۱۲ هزار افغانی",
+  " ۱۲ تا ۱۵ هزار افغانی",
+  " ۱۵ تا ۱۷ هزار افغانی",
+  " ۱۷ تا ۲۰ هزار افغانی",
+  " ۲۰ تا ۲۵ هزار افغانی",
+  " ۲۵ تا ۳۰ هزار افغانی",
+  " ۳۰ تا ۳۵ هزار افغانی",
+  " ۳۵ تا ۴۰ هزار افغانی",
+  " ۴۵ تا ۵۰ هزار افغانی",
+  " ۵۰ تا ۶۰ هزار افغانی"
+   ],
+    workingHours1: ["بدون فیلتر","8 الی 12 ساعت", "5 الی 8 ساعت", "کار آموزی", "پروژه ای"],
+    paymentType1: ["بدون فیلتر","اداری و مدیریت", "سرایداری و نظافت", "خدمات فروشگاه و نظافت",
+      "معماری, عمران و ساختمانی",
+      "رایانه و فناوری",
+      "مالی و حساب داری",
+      "صنعتی, فنی و مهندسی",
+      "آموزشی",
+      "حمل و نقل",
+      "درمانی, زیبای و بهداشتی",
+      "هنری و رسانه",
+    ],
   }; 
 
   // 👇 عنوان برای هر نوع فیلتر
   const filterTitles = {
-    car1Model: "مدل",
+    car1Model: "سال ساخت",
     car1AdType: "نوع آگهی",
     car1FuelType: "نوع سوخت",
     car1Brand: "برند", // 👈 اضافه شد
@@ -116,46 +297,46 @@ export default function FilterPage() {
     propertyType: "نوع ملک",
     area: "مساحت",
     rentPrice: "اجاره",
-    mortgagePrice: "mortgage",
-    price: "price",
+    mortgagePrice: "گرو",
+    price: "قیمت",
 
     propertyType1: "نوع ملک",
     area1: "مساحت",
     rentPrice1: "اجاره",
-    mortgagePrice1: "mortgage",
-    price1: "price",
+    mortgagePrice1: "گرو",
+    price1: "قیمت",
 
 
-    carModel: "مدل خودرو (فیلتر)",
-    carAdType: "نوع آگهی خودرو (فیلتر)",
+    carModel: "سال ساخت",
+    carAdType: "نوع وسیله",
 
  
-    kitchen2Model: "model",
-    kitchen2Category: "category",
-    kitchen2Texture: "texture",
-    kitchen2Status: "status",
-    kitchen2Dimensions: "demension",
+    kitchen2Model: "سال ساخت",
+    kitchen2Category: "دسته بندی",
+    kitchen2Texture: "جنس وسیله",
+    kitchen2Status: "وضعیت",
+    kitchen2Dimensions: "ابعاد",
 
-    model: "model",
-    category: "category",
-    texture: "texture",
-    status: "status",
-    dimensions: "demension",
+    model: "سال ساخت",
+    category: "دسته بندی",
+    texture: "جنس وسیله",
+    status: "وضعیت",
+    dimensions: "ابعاد",
 
-    income: "income",
-    workingHours: "workingHours",
-    paymentType: "paymentType",
+    income: "معاش",
+    workingHours: "ساعت کاری",
+    paymentType: "دسته بندی",
 
-    income1: "income",
-    workingHours1: "workingHours",
-    paymentType1: "paymentType",
+    income1: "معاش",
+    workingHours1: "ساعت کاری",
+    paymentType1: "دسته بندی",
 
   };
 
   const options = filterOptions[type] || [];
   const title = filterTitles[type] || "";
 
-  const handleSelect = (opt) => {
+ 
     // 👇 نگاشت type به setter درست
     const setters = {
       // ماشین
@@ -187,17 +368,25 @@ export default function FilterPage() {
       cloutesStatus: (val) => setCloutes2({ cloutesStatus: val }),
      
       // ملک
-      propertyType: (val) => setCreateProperty3({ propertyType: val }),
-      area: (val) => setCreateProperty3({ area: val }),
-      rentPrice: (val) => setCreateProperty3({rentPrice: val}),
-      mortgagePrice: (val) => setCreateProperty3({mortgagePrice: val}),
-      price: (val) => setCreateProperty3({price: val}),
+    // ملک
+   propertyType: (val) => setCreateProperty3({ propertyType: val }),
+   area: (val) => setCreateProperty3({ area: val }),
+   rentPrice: (val) => setCreateProperty3({rentPrice: val}),
+    mortgagePrice: (val) => setCreateProperty3({mortgagePrice: val}),
+     price: (val) => setCreateProperty3({price: val}),
 
-      propertyType1: (val) => setProperty3({ propertyType: val }),
-      area1: (val) => setProperty3({ area: val }),
-      rentPrice1: (val) => setProperty3({rentPrice: val}),
-      mortgagePrice1: (val) => setProperty3({mortgagePrice: val}),
-      price1: (val) => setProperty3({price: val}),
+
+
+    // ملک
+    propertyType1: (val) => setProperty3({ propertyType: val}),
+   area1: (val) => setProperty3({ area: val }),
+   rentPrice1: (val) => setProperty3({rentPrice: val}),
+    mortgagePrice1: (val) => setProperty3({mortgagePrice: val}),
+    price1: (val) => setProperty3({price: val}),
+
+
+
+
 
       // car1
       carModel: (val) => setCar1({ model: val }),
@@ -211,15 +400,48 @@ export default function FilterPage() {
       income1: (val) => setJobs1({income: val}),
       workingHours1: (val) => setJobs1({workingHours: val}),
       paymentType1: (val) => setJobs1({paymentType: val}),
+ }
+  
 
-    };
+//   const handleSelect = (opt) => {
 
-    if (setters[type]) setters[type](opt);
-  if (type === "propertyType") {
-    setCreateProperty3({ propertyType: opt.value }); //  ذخیره مقدار انگلیسی
+//  console.log("TYPE:", type);
+//   console.log("SELECTED:", opt);
+
+//   if (type === "propertyType") {
+//     setCreateProperty3(prev => ({
+//       ...prev,
+//       propertyType: opt.value, // فقط value
+//     }));
+//   } else if (type === "propertyType1") {
+//     setProperty3(prev => ({
+//       ...prev,
+//       propertyType: opt.value,
+//     }));
+//   } else if (setters[type]) {
+//     const val = typeof opt === "object" && opt.value ? opt.value : opt;
+//     setters[type](val);
+//   }
+
+
+//     router.back();
+//   };
+
+
+const handleSelect = (opt) => {
+ 
+
+  const val =
+    typeof opt === "object" && opt.value
+      ? opt.value
+      : opt;
+
+  if (setters[type]) {
+    setters[type](val);
   }
-    router.back();
-  };
+
+  router.back();
+};
 
   return (
    <View style={styles.container}>
@@ -239,5 +461,4 @@ export default function FilterPage() {
   </View>
 </View>
   );
-}
-
+} 

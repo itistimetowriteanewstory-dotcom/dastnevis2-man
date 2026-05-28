@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Modal, RefreshControl, TextInput } from 'react-native';
 import { Image } from "expo-image";
 import { useAuthStore } from '../../store/authStore';
 import { useEffect, useState } from 'react';
@@ -21,6 +21,8 @@ export default function EatList() {
   const [page, setPage] = useState(1);
   const [addMore, setAddMore] = useState(true);
   const [titleFilter, setTitleFilter] = useState("");
+  const [showEatSearchButton, setShowEatSearchButton] = useState(false);
+  const [showEatFilters, setShowEatFilters] = useState(false);
 
 
   const router = useRouter();
@@ -50,7 +52,7 @@ export default function EatList() {
 
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "خطا در گرفتن آگهی‌های خوراکی");
+      if (!res.ok) throw new Error(data.message || "خطا در گرفتن آگهی‌های مواد غذایی");
 
      setItems(pageNum === 1 || refresh ? (data.eats || []) : [...items, ...(data.eats || [])]);
       setAddMore(pageNum < data.totalPages);
@@ -73,7 +75,14 @@ export default function EatList() {
     }
   };
 
- 
+ useEffect(() => {
+  if (eat1?.location || titleFilter) {
+    setShowEatSearchButton(true);
+  } else {
+    setShowEatSearchButton(false);
+  }
+}, [eat1?.location, titleFilter]);
+
 
   const renderItem = ({ item }) => (
     <Link
@@ -95,9 +104,11 @@ export default function EatList() {
                 ثبت شده در تاریخ {formatPublishDate(item.createdAt)}
               </Text>
             </View>
-            {item.image && (
-              <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="cover" />
-            )}
+             {item.images && item.images.length > 0 ? (
+            <Image source={{ uri: item.images[0] }} style={styles.propertyImage} contentFit="contain" />
+             ) : item.image ? (
+            <Image source={{ uri: item.image }} style={styles.propertyImage} contentFit="contain" />
+            ) : null}
           </View>
         </View>
       </TouchableOpacity>
@@ -108,6 +119,78 @@ export default function EatList() {
 
   return (
     <View style={styles.container}>
+
+          {/* مودال فیلترها */}
+    <Modal
+      visible={showEatFilters}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowEatFilters(false)}
+    >
+      <View style={{ flex: 1, justifyContent: "flex-start", backgroundColor: "rgba(0,0,0,0.3)" }}>
+        <View
+          style={{
+            height: "100%", // نصف صفحه
+            backgroundColor: "white",
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            padding: 16,
+          }}
+        >
+          {/* دکمه بستن */}
+          <TouchableOpacity onPress={() => setShowEatFilters(false)} style={{ alignSelf: "flex-start", marginBottom: 15, }}>
+             <Ionicons name="close" size={35} color={COLORS.black} />
+          </TouchableOpacity>
+
+  {/* Inputs row */}
+        <View style={carFormStyles.row}>
+          <TextInput
+            style={carFormStyles.textInput}
+            placeholder="عنوان مواد غذایی را بنویسید"
+            placeholderTextColor={COLORS.placeholderText}
+            value={titleFilter}
+            onChangeText={setTitleFilter}
+          />
+          <TouchableOpacity
+            style={carFormStyles.touchable}
+            onPress={() =>
+              router.push({
+                pathname: "/page/select-location",
+                params: { section: "eat1" },
+              })
+            }
+          >
+            <Text
+              style={{
+                color: eat1.location ? COLORS.black : COLORS.placeholderText,
+                fontSize: 16,
+              }}
+            >
+              {eat1.location || "ولایت"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* دکمه جستجو */}
+        {showEatSearchButton && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              fetchItems(1, true);
+              setShowEatSearchButton(false);
+               setShowEatFilters(false)
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Ionicons name="search" size={22} color={COLORS.white} />
+              <Text style={styles.buttonText}>جستجو کنید</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
+          </View>
+          </View>
+          </Modal>
       <FlatList
         data={items}
         renderItem={renderItem}
@@ -124,47 +207,22 @@ export default function EatList() {
         }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.1}
-       ListHeaderComponent={
-  <View style={{ marginBottom: 12 }}>
-    {/* Inputs row */}
-   <View style={carFormStyles.row}>
-      <TextInput
-       style={carFormStyles.textInput}
-        placeholder="عنوان خوراکی را بنویسید"
-        placeholderTextColor={COLORS.placeholderText}
-        value={titleFilter}
-        onChangeText={setTitleFilter}
-      />
-      <TouchableOpacity
-        style={carFormStyles.touchable}
-        onPress={() =>
-          router.push({
-            pathname: "/page/select-location",
-            params: { section: "eat1" },
-          })
-        }
-      >
-        <Text
-          style={{
-            color: eat1.location ? COLORS.black : COLORS.placeholderText,
-            fontSize: 16,
-          }}
-        >
-          {eat1.location || "ولایت"}
+        stickyHeaderIndices={[0]}
+     ListHeaderComponent={
+  <>
+    {/* دکمه باز/بستن فیلترها */}
+    <TouchableOpacity
+      style={styles.filterToggleButton}
+      onPress={() => setShowEatFilters(!showEatFilters)}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+        <Ionicons name="filter" size={22} color={COLORS.black} />
+        <Text style={styles.buttonText1}>
+          {showEatFilters ? "بستن فیلترها" : "نمایش فیلترها"}
         </Text>
-      </TouchableOpacity>
-    </View>
-
-    {/* Search button */}
-    {(eat1?.location || titleFilter) && (
-      <TouchableOpacity style={styles.button} onPress={() => fetchItems(1, true)}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Ionicons name="search" size={22} color={COLORS.black} />
-          <Text style={styles.buttonText}>جستجو کنید</Text>
-        </View>
-      </TouchableOpacity>
-    )}
-  </View>
+      </View>
+    </TouchableOpacity>
+  </>
 }
 
 
@@ -180,7 +238,7 @@ export default function EatList() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name='fast-food-outline' size={60} color={COLORS.textSecondary} />
-            <Text style={styles.emptyText}> هنوز آگهی خوراکی اضافه نشده</Text>
+            <Text style={styles.emptyText}> هنوز آگهی مواد غذایی اضافه نشده</Text>
           </View>
         }
       />

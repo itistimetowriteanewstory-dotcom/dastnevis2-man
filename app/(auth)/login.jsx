@@ -45,7 +45,7 @@ const router = useRouter();
 
     if (result.accessToken) {
     await registerForPushNotificationsAsync(result.accessToken);
-    console.log("✅ registerForPushNotificationsAsync called");
+   
      router.replace("/(tabs)"); 
 
   }else {

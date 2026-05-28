@@ -26,7 +26,7 @@ export default function Signup() {
 
 //  if(!result.success) Alert.alert("Error", result.error );
 if (!result.success) {
-  console.log("خطا:", result.error); // برای تست
+  
   Alert.alert("خطا", result.error || "مشکلی پیش آمده است");
   return;
 }

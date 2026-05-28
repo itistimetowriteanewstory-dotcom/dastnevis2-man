@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Linking, Platform, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Linking, Platform, Modal, Alert, FlatList } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,12 +6,20 @@ import COLORS from "../../colectionColor/colors";
 import { formatPublishDate } from "../../lib/utils";
 import styles from "../../assets/styles/jobDetails.styles";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "../../store/authStore";
 import { apiFetch } from "../../store/apiClient";
+import { styles1 } from "../../assets/styles/modal.style";
+import { Dimensions } from "react-native";
+
 
 export default function PropertyDetails() {
   const { data } = useLocalSearchParams();
+  const [visible, setVisible] = useState(false);
+  const [imageIndex, setImageIndex] = useState(0);
+  const flatListRef = useRef(null);
+ const { width } = Dimensions.get("window");
+
 
    let property = null;
   try {
@@ -79,6 +87,16 @@ export default function PropertyDetails() {
     }
   };
 
+  useEffect(() => {
+  if (visible && flatListRef.current) {
+    // وقتی مودال باز شد، اندیس عکس رو صفر کن
+    setImageIndex(0);
+    // بعد لیست رو به عکس اول ببر
+    flatListRef.current.scrollToIndex({ index: 0, animated: false });
+  }
+}, [visible]);
+
+
   return (
 
     <ScrollView style={styles.container}>
@@ -90,14 +108,17 @@ export default function PropertyDetails() {
      </View>
 
 
-      {/* عکس ملک */}
-      {property.image && (
-        <Image
-          source={{ uri: property.image }}
-          style={styles.jobImage}
-          contentFit="cover"
-        />
-      )}
+ {property.images?.length > 0 ? (
+  <TouchableOpacity onPress={() => { setVisible(true); setImageIndex(0); }}>
+    <Image source={{ uri: property.images[0] }} style={styles.mainImage} />
+  </TouchableOpacity>
+) : property.image ? (
+  <TouchableOpacity onPress={() => { setVisible(true); setImageIndex(0); }}>
+    <Image source={{ uri: property.image }} style={styles.mainImage} />
+  </TouchableOpacity>
+) : null}
+
+
 
       {/* عنوان */}
    <View style={styles.infoBox}>
@@ -108,64 +129,95 @@ export default function PropertyDetails() {
       <View style={styles.details}>
         {property.location && (
           <>
-          <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-            <Ionicons name="location-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  ولایت: {property.location}</Text>
-          </View>
+         <View style={styles.infoRow}>
+   <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <Ionicons name="location-outline" size={20} color={COLORS.primary} />
+    <Text style={styles.info}>ولایت</Text>
+  </View>
+  <Text style={styles.info1}>{property.location}</Text>
+</View>
+
            <View style={styles.separator} />
           </>
         )}
 
        
-        {property.city && (
-           <>
-          <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-            <Ionicons name="home-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  منطقه: {property.city}</Text>
-          </View>
-           <View style={styles.separator} />
-          </>
-        )}
+     
 
-        {property.price && (
-          <>
-          <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-            <Ionicons name="cash-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  قیمت فروش: {property.price} </Text>
-          </View>
-            <View style={styles.separator} />
-          </>
-        )}
+{property.price && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="cash-outline" size={20} color={COLORS.primary} />
+        <Text style={styles.info}>قیمت فروش</Text>
+      </View>
+      <Text style={styles.info1}>{property.price}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
 
-        {property.rentPrice && (
-          <>
-          <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-            <Ionicons name="cash-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  کرایه: {property.rentPrice}</Text>
-          </View>
-           <View style={styles.separator} />
-          </>
-        )}
+{property.rentPrice && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="cash-outline" size={20} color={COLORS.primary} />
+        <Text style={styles.info}>کرایه</Text>
+      </View>
+      <Text style={styles.info1}>{property.rentPrice}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
 
-        {property.mortgagePrice && (
-          <>
-          <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-            <Ionicons name="business-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  گرو: {property.mortgagePrice}</Text>
-          </View>
-           <View style={styles.separator} />
-          </>
-        )}
+{property.mortgagePrice && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="business-outline" size={20} color={COLORS.primary} />
+        <Text style={styles.info}>گرو</Text>
+      </View>
+      <Text style={styles.info1}>{property.mortgagePrice}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
 
-        {property.area && (
-           <>
-          <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-            <Ionicons name="map-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.info}>  متراژ: {property.area}</Text>
-          </View>
-           <View style={styles.separator} />
-          </>
-        )}
+{property.area && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="map-outline" size={20} color={COLORS.primary} />
+        <Text style={styles.info}>متراژ</Text>
+      </View>
+      <Text style={styles.info1}>{property.area}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
+
+  {/* {property.city && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="home-outline" size={20} color={COLORS.primary} />
+        <Text style={styles.info}>آدرس</Text>
+      </View>
+      <Text
+    style={[styles.info1, { flexWrap: "wrap" }]}
+   >
+  {property.city}
+</Text>
+
+    </View>
+    <View style={styles.separator} />
+  </>
+)} */}
+
+
+
+
+
 
 
         {property.description && (
@@ -174,6 +226,22 @@ export default function PropertyDetails() {
           <Text style={styles.caption}>{property.description}</Text>
           </>
         )}
+
+{property.city && (
+  <>
+  <View style={styles.separator} />
+
+<View style={styles.addressHeader}>
+  <Text style={styles.sectionTitle}>آدرس</Text>
+</View>
+
+<Text style={styles.addressText}>
+  {property.city}
+</Text>
+  </>
+)}
+
+
          </View>
           </View>
         <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6 }}>
@@ -194,7 +262,7 @@ export default function PropertyDetails() {
       {/* دکمه ذخیره */}
      <TouchableOpacity
        onPress={saveProperty}
-       style={[styles.saveButton, saved && { backgroundColor: "gray" }]}
+       style={[styles.saveButton1, saved && { backgroundColor: "gray" }]}
       >
        <Text style={styles.saveButtonText}>
          {saved ? "ذخیره شد" : "ذخیره کنید"}
@@ -202,9 +270,58 @@ export default function PropertyDetails() {
      </TouchableOpacity>
       </View>
 
+
+<Modal visible={visible} transparent={true} onRequestClose={() => setVisible(false)}>
+  <View style={styles1.container}>
+    
+    {/* Header: دکمه بستن */}
+    <TouchableOpacity onPress={() => setVisible(false)} style={styles1.closeButton}>
+      <Text style={styles1.closeButtonText}>✕</Text>
+    </TouchableOpacity>
+
+    {/* Body: لیست عکس‌ها */}
+    <FlatList
+      ref={flatListRef}
+      data={(property.images?.length > 0 
+        ? property.images 
+        : property.image 
+        ? [property.image] 
+        : []
+      ).reverse()}
+      horizontal
+      inverted
+      pagingEnabled
+      initialScrollIndex={imageIndex}
+      getItemLayout={(data, index) => ({
+        length: width,
+        offset: width * index,
+        index,
+      })}
+      renderItem={({ item }) => (
+        <View style={styles1.imageWrapper}>
+          <Image source={{ uri: item }} style={styles1.image} />
+        </View>
+      )}
+      onMomentumScrollEnd={(e) => {
+        const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
+        setImageIndex(newIndex);
+      }}
+    />
+
+    {/* Footer: شمارنده عکس‌ها */}
+    <View style={styles1.footer}>
+      <Text style={styles1.footerText}>
+        {imageIndex + 1} / {property.images?.length || 1}
+      </Text>
+    </View>
+  </View>
+</Modal>
+
+
       <SafeAreaView edges={["bottom"]} style={{ paddingBottom: 80 }} />
     </ScrollView>
-    
+
+
   );
 }
 

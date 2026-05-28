@@ -20,117 +20,124 @@ import * as FileSystem from "expo-file-system";
 import { useAuthStore } from "../../store/authStore";
 import { apiFetch } from '../../store/apiClient';
 import { useFilterStore } from "../../store/fileStore";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect } from "react";
 
 export default function CreateEat() {
   const [title, setTitle] = useState("");            
   const [caption, setCaption] = useState("");        
-  const [image, setImage] = useState(null);          
-  const [imageBase64, setImageBase64] = useState(null); 
+  const [images, setImages] = useState([null, null, null, null, null]);
+  const [imagesBase64, setImagesBase64] = useState([null, null, null, null, null]);
   const [loading, setLoading] = useState(false);    
   const [phoneNumber, setPhoneNumber] = useState("");
   const [price, setPrice] = useState("");
-  const [location, setLocation] = useState("");
+  const [address, setAddress] = useState("");
+  
 
   const { createEat4, setCreateEat4 } = useFilterStore();
+
+  const { id } = useLocalSearchParams();
+
 
   const router = useRouter();
   const { accessToken } = useAuthStore();
 
-  // انتخاب عکس
-  const pickImage = async () => {
-    try {
-      if (Platform.OS !== "web") {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          Alert.alert("عدم دسترسی", "برای اضافه کردن عکس ابتدا اجازه دسترسی به گالری را دهید");
-          return;
+
+  const pickImage = async (index) => {
+      try {
+        if (Platform.OS !== "web") {
+          const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert("عدم دسترسی", "برای اضافه کردن عکس ابتدا اجازه دسترسی به گالری را دهید");
+            return;
+          }
         }
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "images",
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.3,
-        base64: true,
-      });
-
-      if (!result.canceled) {
-        setImage(result.assets[0].uri);
-        if (result.assets[0].base64) {
-          setImageBase64(result.assets[0].base64);
-        } else {
-          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          setImageBase64(base64);
+    
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: false,
+          aspect: [4, 3],
+          quality: 0.3,
+          base64: true,
+        });
+    
+        if (!result.canceled) {
+          const uri = result.assets[0].uri;
+          const base64 = result.assets[0].base64;
+    
+          const newImages = [...images];
+          const newImagesBase64 = [...imagesBase64];
+          newImages[index] = uri;
+          newImagesBase64[index] = base64;
+    
+          setImages(newImages);
+          setImagesBase64(newImagesBase64);
         }
+      } catch (error) {
+        console.error("خطا در انتخاب عکس:", error);
+        Alert.alert("خطا", "مشکلی در انتخاب عکس پیش آمد");
       }
-    } catch (error) {
-      console.error("خطا: موقع انتخاب عکس", error);
-      Alert.alert("خطا", "مشکلی در انتخاب عکس وجود دارد");
-    }
-  };
+    };
+  
 
-  // ارسال فرم
   const handleSubmit = async () => {
-    if (!title || !caption || !imageBase64 || !phoneNumber || !createEat4.location) {
-      Alert.alert("خطا", "لطفاً همه‌ی خانه‌های ضروری را پر کنید");
+  if (!title || !caption || !phoneNumber || !createEat4.location || !address) {
+    Alert.alert("خطا", "لطفاً همه‌ی خانه‌های ضروری را پر کنید");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const imageDataUris = [];
+    for (let i = 0; i < images.length; i++) {
+      const base64 = imagesBase64[i];
+      const uri = images[i];
+
+      if (base64 && uri) {
+        const uriParts = uri.split(".");
+        const fileExtension = uriParts[uriParts.length - 1];
+        const imageType = fileExtension ? `image/${fileExtension.toLowerCase()}` : "image/jpeg";
+        imageDataUris.push(`data:${imageType};base64,${base64}`);
+      } else if (uri && uri.startsWith("http")) {
+        imageDataUris.push(uri); // عکس قبلی
+      }
+    }
+
+    const response = await apiFetch(id ? `/eat/${id}` : "/eat", {
+      method: id ? "PUT" : "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title,
+        caption,
+        images: imageDataUris,
+        phoneNumber,
+        price,
+        address,
+        location: createEat4.location,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      Alert.alert("خطا", errorData.message || "مشکلی پیش آمد");
       return;
     }
 
-    try {
-      setLoading(true);
-
-      const uriParts = image.split(".");
-      const fileExtension = uriParts[uriParts.length - 1];
-      const imageType = fileExtension
-        ? `image/${fileExtension.toLowerCase()}`
-        : "image/jpeg";
-
-      const imageDataUri = `data:${imageType};base64,${imageBase64}`;
-
-      const response = await apiFetch("/eat", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title,
-          caption,
-          image: imageDataUri,
-          phoneNumber,
-          price,
-          location: createEat4.location,
-        }),
-      });
-
-      if (!response.ok) {
-        let errorMessage = "مشکلی پیش آمد";
-        try {
-          const errorData = await response.json();
-          if (errorData.message) {
-            errorMessage = errorData.message;
-          }
-        } catch (e) {
-          console.error("خطا در خواندن پاسخ:", e);
-        }
-        Alert.alert("خطا", errorMessage);
-        setLoading(false);
-        return;
-      }
-
       await response.json();
 
-      Alert.alert("موفقیت", "آگهی خوراکی با موفقیت اضافه شد");
+    Alert.alert("موفقیت", id ? "آگهی مواد غذایی با موفقیت ویرایش شد" : "آگهی مواد غذایی با موفقیت اضافه شد");
       // پاک کردن فرم
       setTitle("");
       setCaption("");
-      setImage(null);
-      setImageBase64(null);
+      setImages([null, null, null, null, null]);
+      setImagesBase64([null, null, null, null, null]);
       setPhoneNumber("");
       setPrice("");
+      setAddress("");
       setCreateEat4({
        location: "",
        });
@@ -144,6 +151,51 @@ export default function CreateEat() {
     }
   };
 
+  useEffect(() => {
+  if (id) {
+    const fetchEat = async () => {
+      try {
+        const response = await apiFetch(`/eat/${id}`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (!response.ok) {
+          console.error("خطا در گرفتن آگهی مواد غذایی");
+          return;
+        }
+
+        const data = await response.json();
+
+        // پر کردن فرم با داده‌های قبلی
+        setTitle(data.title || "");
+        setCaption(data.caption || "");
+        setPhoneNumber(data.phoneNumber || "");
+        setPrice(data.price || "");
+        setAddress(data.address || "");
+
+        // تنظیم تصاویر با طول ثابت ۵
+        if (data.images && Array.isArray(data.images)) {
+          const paddedImages = [...data.images];
+          while (paddedImages.length < 5) paddedImages.push(null);
+          setImages(paddedImages);
+          setImagesBase64([null, null, null, null, null]);
+        }
+
+        // تنظیم فیلترها
+        setCreateEat4({
+          location: data.location || "",
+        });
+      } catch (error) {
+        console.error("خطا در گرفتن اطلاعات آگهی:", error);
+      }
+    };
+
+    fetchEat();
+  }
+}, [id]);
+
+
   // 👇 بخش UI (return)
   return (
     <KeyboardAvoidingView
@@ -154,9 +206,9 @@ export default function CreateEat() {
         <View style={styles.card}>
           {/* header */}
           <View style={styles.header}>
-            <Text style={styles.title}>خوراکی خود را ثبت کنید</Text>
+            <Text style={styles.title}>مواد غذایی خود را ثبت کنید</Text>
             <Text style={styles.subtitle}>
-              با معرفی خوراکی خود، امکان خرید و فروش آسان‌تر و سریع‌تر را فراهم کنید.
+              با معرفی مواد غذایی خود، امکان خرید و فروش آسان‌تر و سریع‌تر را فراهم کنید.
             </Text>
           </View>
 
@@ -175,27 +227,31 @@ export default function CreateEat() {
               </View>
             </View>
 
-            {/* image */}
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>عکس خوراکی</Text>
-              <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-                {image ? (
-                  <Image source={{ uri: image }} style={styles.previewImage} />
-                ) : (
-                  <View style={styles.placeholderContainer}>
-                    <Ionicons name="image-outline" size={40} color={COLORS.textSecondary} />
-                    <Text style={styles.placeholderText}>برای اضافه کردن عکس کلیک کنید</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            </View>
+          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+  {images.map((img, index) => (
+    <TouchableOpacity
+      key={index}
+      style={styles.imagePickerBox}
+      onPress={() => pickImage(index)}
+    >
+      {img ? (
+        <Image source={{ uri: img }} style={styles.previewImage} />
+      ) : (
+        <View style={styles.placeholderContainer}>
+          <Ionicons name="image-outline" size={30} color={COLORS.textSecondary} />
+          <Text style={styles.placeholderText}>انتخاب عکس {index + 1}</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  ))}
+</View>
 
             {/* caption */}
             <View style={styles.formGroup}>
               <Text style={styles.label}>توضیحات</Text>
               <TextInput
                 style={styles.textArea}
-                placeholder="توضیحات مربوط به خوراکی را اینجا بنویسید"
+                placeholder="توضیحات مربوط به مواد غذایی را اینجا بنویسید"
                 placeholderTextColor={COLORS.placeholderText}
                 value={caption}
                 onChangeText={setCaption}
@@ -213,6 +269,18 @@ export default function CreateEat() {
                 value={phoneNumber}
                 onChangeText={setPhoneNumber}
                 keyboardType="numeric"
+              />
+            </View>
+
+               {/* phone number */}
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>آدرس و منطقه</Text>
+              <TextInput
+                style={styles.inputContainer}
+                placeholder="آدرس خودرا بنویسید"
+                placeholderTextColor={COLORS.placeholderText}
+                value={address}
+                onChangeText={setAddress}
               />
             </View>
 
@@ -264,7 +332,7 @@ export default function CreateEat() {
                     color={COLORS.black}
                     style={styles.buttonIcon}
                   />
-                  <Text style={styles.buttonText}>ثبت آگهی خوراکی</Text>
+                  <Text style={styles.buttonText}>ثبت آگهی مواد غذایی</Text>
                 </>
               )}
             </TouchableOpacity>

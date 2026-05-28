@@ -70,6 +70,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+
+  editButton: {
+  padding: 5,
+  justifyContent: "center",
+},
+
   logoutText: {
     color: COLORS.textDark,
     fontWeight: "600",

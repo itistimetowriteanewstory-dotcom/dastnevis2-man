@@ -65,6 +65,26 @@ const styles = StyleSheet.create({
      textAlign: 'right',
   writingDirection: 'rtl',
   },
+  
+   helperText: {
+    fontSize: 12,
+    color: COLORS.placeholderText, // یا مثلاً 'gray'
+    marginTop: 4,
+  },
+
+
+  
+  halfBox: {
+  width: '48%',        // نصف صفحه با کمی فاصله
+  padding: 12,
+  minHeight: 50,    
+  borderWidth: 1,
+  borderColor: COLORS.border,
+  borderRadius: 8,
+  marginBottom: 10,
+  backgroundColor: COLORS.inputBackground,
+},
+
   inputIcon: {
     marginRight: 10,
   },
@@ -84,6 +104,25 @@ const styles = StyleSheet.create({
     height: 100,
     color: COLORS.textDark,
   },
+
+    imagePickerBox: {
+    width: "30%",             // عرض هر باکس
+    height: 100,            // ارتفاع هر باکس
+    borderWidth: 1,         // خط دور باکس
+    borderColor: COLORS.border || "#ccc",
+    borderRadius: 8,        // گوشه‌های گرد
+    margin: 5,              // فاصله بین باکس‌ها
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: COLORS.background || "#f9f9f9",
+  },
+
+  previewImage: {
+   width: "100%",          
+    height: "100%",
+   resizeMode: "contain",    
+  },
+
 
   starButton: {
     padding: 8,
@@ -136,6 +175,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
     color: COLORS.textDark,
   },
+
+
 });
 
 export default styles;

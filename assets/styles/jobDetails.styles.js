@@ -36,19 +36,17 @@ infoBox: {
 },
 
 userBox: {
-  width: "100%",               // 👈 عرض ۹۰ درصد صفحه
-  height: 50,                 // 👈 ارتفاع حدود یک بند انگشت (می‌تونی تغییر بدی)
-  backgroundColor: COLORS.background,    // 👈 رنگ پس‌زمینه باکس
-  borderRadius: 8,            // 👈 گوشه‌های گرد
-  flexDirection: "row",       // 👈 عکس و متن کنار هم
-  alignItems: "center",       // 👈 وسط‌چین عمودی
+  width: "100%",             
+  height: 50,                 
+  backgroundColor: COLORS.background,   
+  borderRadius: 8,          
+  flexDirection: "row",      
+  alignItems: "center",      
   justifyContent: "flex-start",
   paddingHorizontal: 10,
-  marginTop: 0,              // 👈 فاصله از بالای صفحه
-  elevation: 3,               // 👈 سایه برای اندروید
-  shadowColor: "#000",        // 👈 سایه برای iOS
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
+  marginTop: 0,             
+          
+
   marginBottom: 10,
 },
 
@@ -71,10 +69,56 @@ userBox: {
   jobImage: {
     width: '100%',
     height: 220,
-    borderRadius: 14,
+    
     marginBottom: 20,
     backgroundColor: COLORS.border,
   },
+
+  mainImage: {
+    width: '100%',
+    height: 220,
+    marginBottom: 20,
+    backgroundColor: COLORS.border,
+    contentFit: "contain",
+
+  },
+
+
+  fullImage: {
+  width: '100%',   // یا '90%' برای فاصله از لبه‌ها
+  height: '80%',   // بیشتر صفحه رو بگیره
+  borderRadius: 0, // معمولاً بدون گوشه گرد
+},
+
+modalContainer: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.9)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+ closeButton: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    padding: 10,
+    backgroundColor: "rgba(255, 254, 254, 1)",
+    borderRadius: 8,
+  },
+
+  thumb: {
+    width: 100,
+    height: 100,
+    margin: 5,
+    borderRadius: 8,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
 
   details: {
     paddingVertical: 10,
@@ -105,12 +149,34 @@ userBox: {
   },
 
   info: {
-    fontSize: 20,
-    color: COLORS.textDark,
+    fontSize: 17,
+    color: COLORS.placeholderText,
     marginBottom: 6,
     lineHeight: 22,
     marginLeft: 8,
   },
+
+   info1: {
+    fontSize: 17,
+    color: COLORS.textDark,
+    marginBottom: 6,
+    lineHeight: 22,
+    marginRight: 12,
+     
+  },
+
+  addressHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginTop: -15,
+  marginBottom: 8,
+},
+
+addressText: {
+  fontSize: 16,
+  lineHeight: 20,
+  color: COLORS.textDark,
+},
 
   caption: {
     fontSize: 15,
@@ -120,7 +186,20 @@ userBox: {
   },
 
   saveButton: {
-  backgroundColor: "#ffffffff",
+  backgroundColor: COLORS.bluee,
+  paddingVertical: 8,
+  paddingHorizontal: 16,
+  borderRadius: 8,
+  borderColor: COLORS.border,  
+  borderWidth: 1,
+  width: 170, 
+  height: 60,
+  alignItems: "center",     // متن افقی وسط
+  justifyContent: "center", // متن عمودی وسط
+},
+
+saveButton1: {
+  backgroundColor: COLORS.redsalamom,
   paddingVertical: 8,
   paddingHorizontal: 16,
   borderRadius: 8,
@@ -142,7 +221,7 @@ buttonRow: {
 
 
 saveButtonText: {
-  color: COLORS.textDark,
+  color: COLORS.white,
   fontSize: 18,
   fontWeight: 'bold',
   textAlign: "center",
@@ -151,13 +230,17 @@ saveButtonText: {
 },
 
 infoRow: {
+  flex: 1,
   flexDirection: 'row',
   alignItems: 'center',
-  marginBottom: 8,
+  justifyContent: "space-between",
+  marginVertical: 4,
 },
 
 icon: {
-  marginRight: 6,
+  marginLeft: 10,
+  
+
 },
 
 separator: {

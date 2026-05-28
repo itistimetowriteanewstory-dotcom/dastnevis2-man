@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Dastnevis",
+    "name": "Hamehkar",
     "slug": "mobile",
     "version": "1.1.0",
     "orientation": "portrait",
-    "icon": "./assets/images/iconman.png",
+    "icon": "./assets/images/hamehkar.png",
     "scheme": "mobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

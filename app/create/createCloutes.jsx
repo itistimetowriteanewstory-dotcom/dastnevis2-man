@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -21,23 +21,29 @@ import * as FileSystem from "expo-file-system";
 import { useAuthStore } from "../../store/authStore";
 import { apiFetch } from '../../store/apiClient';
 import { useFilterStore } from "../../store/fileStore";
+import { useLocalSearchParams } from "expo-router";
+
+
 
 export default function CreateCloutes() {
   const [title, setTitle] = useState("");            
   const [caption, setCaption] = useState("");        
-  const [image, setImage] = useState(null);          
-  const [imageBase64, setImageBase64] = useState(null); 
+ const [images, setImages] = useState([null, null, null, null, null]);
+  const [imagesBase64, setImagesBase64] = useState([null, null, null, null, null]);
   const [loading, setLoading] = useState(false);    
   const [phoneNumber, setPhoneNumber] = useState("");
   const [price, setPrice] = useState("");
+  const [address, setAddress] = useState("");
   
   const router = useRouter();
   const { accessToken } = useAuthStore();
 
   const { createCloutes2, setCreateCloutes2 } = useFilterStore();
 
-  // انتخاب عکس
-  const pickImage = async () => {
+  const { id } = useLocalSearchParams();
+
+
+  const pickImage = async (index) => {
     try {
       if (Platform.OS !== "web") {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -46,109 +52,155 @@ export default function CreateCloutes() {
           return;
         }
       }
-
+  
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "images",
-        allowsEditing: true,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
         aspect: [4, 3],
         quality: 0.3,
         base64: true,
       });
-
+  
       if (!result.canceled) {
-        setImage(result.assets[0].uri);
-        if (result.assets[0].base64) {
-          setImageBase64(result.assets[0].base64);
-        } else {
-          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          setImageBase64(base64);
-        }
+        const uri = result.assets[0].uri;
+        const base64 = result.assets[0].base64;
+  
+        const newImages = [...images];
+        const newImagesBase64 = [...imagesBase64];
+        newImages[index] = uri;
+        newImagesBase64[index] = base64;
+  
+        setImages(newImages);
+        setImagesBase64(newImagesBase64);
       }
     } catch (error) {
-      console.error("خطا: موقع انتخاب عکس", error);
-      Alert.alert("خطا", "مشکلی در انتخاب عکس وجود دارد");
+      console.error("خطا در انتخاب عکس:", error);
+      Alert.alert("خطا", "مشکلی در انتخاب عکس پیش آمد");
     }
   };
+const handleSubmit = async () => {
+  if (!title || !caption || !phoneNumber || !createCloutes2.location) {
+    Alert.alert("خطا", "لطفاً همه‌ی خانه‌های ضروری را پر کنید");
+    return;
+  }
 
-  // ارسال فرم
-  const handleSubmit = async () => {
-    if (!title || !caption || !imageBase64 || !phoneNumber || !createCloutes2.location) {
-      Alert.alert("خطا", "لطفاً همه‌ی خانه‌های ضروری را پر کنید");
+  try {
+    setLoading(true);
+
+    const imageDataUris = [];
+    for (let i = 0; i < images.length; i++) {
+      const base64 = imagesBase64[i];
+      const uri = images[i];
+
+      if (base64 && uri) {
+        const uriParts = uri.split(".");
+        const fileExtension = uriParts[uriParts.length - 1];
+        const imageType = fileExtension ? `image/${fileExtension.toLowerCase()}` : "image/jpeg";
+        imageDataUris.push(`data:${imageType};base64,${base64}`);
+      } else if (uri && uri.startsWith("http")) {
+        imageDataUris.push(uri); // عکس قبلی
+      }
+    }
+
+    const response = await apiFetch(id ? `/cloutes/${id}` : "/cloutes", {
+      method: id ? "PUT" : "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title,
+        caption,
+        images: imageDataUris,
+        phoneNumber,
+        price,
+        address,
+        location: createCloutes2.location,
+        cloutesTexture: createCloutes2.cloutesTexture,
+        cloutesModel: createCloutes2.cloutesModel,
+        cloutesStatus: createCloutes2.cloutesStatus,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      Alert.alert("خطا", errorData.message || "مشکلی پیش آمد");
       return;
     }
 
-    try {
-      setLoading(true);
+    Alert.alert("موفقیت", id ? "آگهی پوشاک با موفقیت ویرایش شد" : "آگهی پوشاک با موفقیت اضافه شد");
 
-      const uriParts = image.split(".");
-      const fileExtension = uriParts[uriParts.length - 1];
-      const imageType = fileExtension
-        ? `image/${fileExtension.toLowerCase()}`
-        : "image/jpeg";
-
-      const imageDataUri = `data:${imageType};base64,${imageBase64}`;
-
-      const response = await apiFetch("/cloutes", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title,
-          caption,
-          image: imageDataUri,
-          phoneNumber,
-          price,
-          location: createCloutes2.location,
-          cloutesTexture: createCloutes2.cloutesTexture,
-          cloutesModel: createCloutes2.cloutesModel,
-          cloutesStatus: createCloutes2.cloutesStatus,
-       
-        }),
-      });
-
-      if (!response.ok) {
-        let errorMessage = "مشکلی پیش آمد";
-        try {
-          const errorData = await response.json();
-          if (errorData.message) {
-            errorMessage = errorData.message;
-          }
-        } catch (e) {
-          console.error("خطا در خواندن پاسخ:", e);
-        }
-        Alert.alert("خطا", errorMessage);
-        setLoading(false);
-        return;
-      }
-
-      const data = await response.json();
-
-      Alert.alert("موفقیت", "آگهی پوشاک با موفقیت اضافه شد");
-      // پاک کردن فرم
+    // پاک کردن فرم فقط در حالت ایجاد
       setTitle("");
       setCaption("");
-      setImage(null);
-      setImageBase64(null);
+      setImages([null, null, null, null, null]);
+      setImagesBase64([null, null, null, null, null]);
       setPhoneNumber("");
-       setCreateCloutes2({
-       location: "",
-       cloutesTexture: "",
-       cloutesModel: "",
-       cloutesStatus: "",
-       });
-      router.push("/page/cloutes");
+      setAddress("");
+      setCreateCloutes2({
+        location: "",
+        cloutesTexture: "",
+        cloutesModel: "",
+        cloutesStatus: "",
+      });
 
-    } catch (error) {
-      console.error("خطا در ارسال پست:", error);
-      Alert.alert("خطا", error.message || "ارسال با مشکل مواجه شد");
-    } finally {
-      setLoading(false);
-    }
-  };
+    router.push("/page/cloutes");
+  } catch (error) {
+    console.error("خطا در ارسال:", error);
+    Alert.alert("خطا", error.message || "ارسال با مشکل مواجه شد");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  useEffect(() => {
+  if (id) {
+    const fetchCloute = async () => {
+      try {
+        const response = await apiFetch(`/cloutes/${id}`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (!response.ok) {
+          console.error("خطا در گرفتن آگهی پوشاک");
+          return;
+        }
+
+        const data = await response.json();
+
+        // پر کردن فرم با داده‌های قبلی
+        setTitle(data.title || "");
+        setCaption(data.caption || "");
+        setPhoneNumber(data.phoneNumber || "");
+        setPrice(data.price || "");
+        setAddress(data.address || "");
+
+        // تنظیم تصاویر با طول ثابت ۵
+        if (data.images && Array.isArray(data.images)) {
+          const paddedImages = [...data.images];
+          while (paddedImages.length < 5) paddedImages.push(null);
+          setImages(paddedImages);
+          setImagesBase64([null, null, null, null, null]);
+        }
+
+        // تنظیم فیلترها
+        setCreateCloutes2({
+          location: data.location || "",
+          cloutesTexture: data.cloutesTexture || "",
+          cloutesModel: data.cloutesModel || "",
+          cloutesStatus: data.cloutesStatus || "",
+        });
+      } catch (error) {
+        console.error("خطا در گرفتن اطلاعات آگهی:", error);
+      }
+    };
+
+    fetchCloute();
+  }
+}, [id]);
+
+
 
 return (
   <KeyboardAvoidingView
@@ -180,27 +232,31 @@ return (
             </View>
           </View>
 
-          {/* image */}
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>عکس پوشاک</Text>
-            <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-              {image ? (
-                <Image source={{ uri: image }} style={styles.previewImage} />
-              ) : (
-                <View style={styles.placeholderContainer}>
-                  <Ionicons name="image-outline" size={40} color={COLORS.textSecondary} />
-                  <Text style={styles.placeholderText}>برای اضافه کردن عکس کلیک کنید</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
+       <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+  {images.map((img, index) => (
+    <TouchableOpacity
+      key={index}
+      style={styles.imagePickerBox}
+      onPress={() => pickImage(index)}
+    >
+      {img ? (
+        <Image source={{ uri: img }} style={styles.previewImage} />
+      ) : (
+        <View style={styles.placeholderContainer}>
+          <Ionicons name="image-outline" size={30} color={COLORS.textSecondary} />
+          <Text style={styles.placeholderText}>انتخاب عکس {index + 1}</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  ))}
+</View>
 
           {/* caption */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>توضیحات</Text>
             <TextInput
               style={styles.textArea}
-              placeholder="توضیحات مربوط به پوشاک را اینجا بنویسید"
+              placeholder="مثال: فروش یک کت زمستانی"
               placeholderTextColor={COLORS.placeholderText}
               value={caption}
               onChangeText={setCaption}
@@ -213,7 +269,7 @@ return (
             <Text style={styles.label}>نمبر تلفون</Text>
             <TextInput
               style={styles.inputContainer}
-              placeholder="نمبر تلفون خود را وارد کنید"
+               placeholder="نمبر تلفون خود را وارد کنید"
               placeholderTextColor={COLORS.placeholderText}
               value={phoneNumber}
               onChangeText={setPhoneNumber}
@@ -221,99 +277,7 @@ return (
             />
           </View>
 
-          {/* location */}
-        <View style={styles.formGroup}>
-  <Text style={styles.label}>ولایت</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/page/select-location",
-        params: { section: "clothes" }, // 👈 مسیر برگشت
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createCloutes2.location ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createCloutes2.location || "ولایت خود را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
-
-
-{/* model */}
-<View style={styles.formGroup}>
-  <Text style={styles.label}>مدل</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/filter",
-        params: { type: "cloutes1Model" },
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createCloutes2.cloutesModel ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createCloutes2.cloutesModel || "مدل را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
-
-{/* status */}
-<View style={styles.formGroup}>
-  <Text style={styles.label}>وضعیت</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/filter",
-        params: { type: "cloutes1Status" },
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createCloutes2.cloutesStatus ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createCloutes2.cloutesStatus || "وضعیت را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
-
-{/* texture */}
-<View style={styles.formGroup}>
-  <Text style={styles.label}>جنس/پارچه</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/filter",
-        params: { type: "cloutes1Texture"},
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createCloutes2.cloutesTexture ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createCloutes2.cloutesTexture || "جنس/پارچه را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
-
+     
 
           {/* price */}
           <View style={styles.formGroup}>
@@ -327,6 +291,98 @@ return (
            
             />
           </View>
+
+          
+          {/* price */}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>منطقه و آدرس</Text>
+            <TextInput
+              style={styles.inputContainer}
+              placeholder="آدرس خودرا بنویسید"
+              placeholderTextColor={COLORS.placeholderText}
+              value={address}
+              onChangeText={setAddress}
+           
+            />
+          </View>
+
+           <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
+  {/* location */}
+    <TouchableOpacity style={styles.halfBox} onPress={() => router.push({
+       pathname: "/page/select-location",
+          params: { section: "clothes" },
+        })
+      }
+    >
+      <Text
+        style={{
+          color: createCloutes2.location ? COLORS.black : COLORS.placeholderText,
+        }}
+      >
+        {createCloutes2.location || "ولایت خود را انتخاب کنید"}
+      </Text>
+    </TouchableOpacity>
+  
+
+  {/* model */}
+    <TouchableOpacity style={styles.halfBox}
+      onPress={() =>
+        router.push({
+          pathname: "/filter",
+          params: { type: "cloutes1Model" },
+        })
+      }
+    >
+      <Text
+        style={{
+          color: createCloutes2.cloutesModel ? COLORS.black : COLORS.placeholderText,
+        }}
+      >
+        {createCloutes2.cloutesModel || "مدل را انتخاب کنید"}
+      </Text>
+    </TouchableOpacity>
+ 
+
+  {/* status */}
+
+    <TouchableOpacity  style={styles.halfBox}
+      onPress={() =>
+        router.push({
+          pathname: "/filter",
+          params: { type: "cloutes1Status" },
+        })
+      }
+    >
+      <Text
+        style={{
+          color: createCloutes2.cloutesStatus ? COLORS.black : COLORS.placeholderText,
+        }}
+      >
+        {createCloutes2.cloutesStatus || "وضعیت را انتخاب کنید"}
+      </Text>
+    </TouchableOpacity>
+
+  {/* texture */}
+    <TouchableOpacity style={styles.halfBox}
+      onPress={() =>
+        router.push({
+          pathname: "/filter",
+          params: { type: "cloutes1Texture" },
+        })
+      }
+    >
+      <Text
+        style={{
+          color: createCloutes2.cloutesTexture ? COLORS.black : COLORS.placeholderText,
+        }}
+      >
+        {createCloutes2.cloutesTexture || "جنس/پارچه را انتخاب کنید"}
+      </Text>
+    </TouchableOpacity>
+  </View>
+
+
+
 
           {/* submit button */}
           <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>

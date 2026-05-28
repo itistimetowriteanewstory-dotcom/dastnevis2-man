@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Linking, Platform, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Linking, Platform, Alert, FlatList, Modal, Dimensions} from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,12 +6,17 @@ import COLORS from "../../colectionColor/colors";
 import { formatPublishDate } from "../../lib/utils";
 import styles from "../../assets/styles/jobDetails.styles"; // می‌تونی استایل جدا بسازی
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "../../store/authStore";
 import { apiFetch } from "../../store/apiClient";
+import { styles1 } from "../../assets/styles/modal.style";
 
 export default function CarDetails() {
   const { data } = useLocalSearchParams();
+  const [visible, setVisible] = useState(false);
+  const [imageIndex, setImageIndex] = useState(0);
+  const flatListRef = useRef(null);
+  const { width } = Dimensions.get("window");
 
   let car = null;
   try {
@@ -38,7 +43,7 @@ export default function CarDetails() {
     Linking.openURL(url).catch((err) => console.error("خطا در باز کردن شماره‌گیر:", err));
   };
 
-  // 📌 تابع ذخیره خودرو
+  // 📌 تابع ذخیره موتر
   const saveCar = async () => {
     try {
       if (!accessToken) {
@@ -47,7 +52,7 @@ export default function CarDetails() {
       }
 
       if (saved) {
-        Alert.alert("اطلاع", "این خودرو قبلاً ذخیره شده");
+        Alert.alert("اطلاع", "این موتر قبلاً ذخیره شده");
         return;
       }
 
@@ -68,12 +73,21 @@ export default function CarDetails() {
       }
 
       setSaved(true);
-      Alert.alert("موفق", "خودرو با موفقیت ذخیره شد");
+      Alert.alert("موفق", "موتر با موفقیت ذخیره شد");
     } catch (error) {
       console.error("Error saving car:", error);
       Alert.alert("خطا", "مشکلی در ارتباط با سرور پیش آمد");
     }
   };
+
+    useEffect(() => {
+      if (visible && flatListRef.current) {
+        // وقتی مودال باز شد، اندیس عکس رو صفر کن
+        setImageIndex(0);
+        // بعد لیست رو به عکس اول ببر
+        flatListRef.current.scrollToIndex({ index: 0, animated: false });
+      }
+    }, [visible]);
 
   return (
     <ScrollView style={styles.container}>
@@ -83,10 +97,16 @@ export default function CarDetails() {
         <Text style={styles.username}>{car.user?.username}</Text>
       </View>
 
-      {/* عکس خودرو */}
-      {car.image && (
-        <Image source={{ uri: car.image }} style={styles.jobImage} contentFit="cover" />
-      )}
+       {/* تصویر اصلی */}
+    {car.images?.length > 0 ? (
+  <TouchableOpacity onPress={() => { setVisible(true); setImageIndex(0); }}>
+    <Image source={{ uri: car.images[0] }} style={styles.mainImage} />
+  </TouchableOpacity>
+) : car.image ? (
+  <TouchableOpacity onPress={() => { setVisible(true); setImageIndex(0); }}>
+    <Image source={{ uri: car.image }} style={styles.mainImage} />
+  </TouchableOpacity>
+) : null}
 
       {/* عنوان */}
       <View style={styles.infoBox}>
@@ -97,68 +117,85 @@ export default function CarDetails() {
         <View style={styles.details}>
 
 
-          {car.adType && (
+         {car.adType && (
   <>
-    <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-      <Ionicons name="albums-outline" size={20} color={COLORS.primary} />
-      <Text style={styles.info}>نوع آگهی: {car.adType}</Text>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="albums-outline" size={20} color={COLORS.primary} />
+        <Text style={styles.info}>نوع آگهی</Text>
+      </View>
+      <Text style={styles.info1}>{car.adType}</Text>
     </View>
     <View style={styles.separator} />
   </>
 )}
 
 
-         
+{car.brand && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="car-outline" size={20} color={COLORS.primary} />
+        <Text style={styles.info}>برند</Text>
+      </View>
+      <Text style={styles.info1}>{car.brand}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
 
-          {car.brand && (
-            <>
-              <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-                <Ionicons name="car-outline" size={20} color={COLORS.primary} />
-                <Text style={styles.info}>برند: {car.brand}</Text>
-              </View>
-              <View style={styles.separator} />
-            </>
-          )}
+{car.model && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="pricetag-outline" size={20} color={COLORS.primary} />
+        <Text style={styles.info}>مدل</Text>
+      </View>
+      <Text style={styles.info1}>{car.model}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
 
-          {car.model && (
-            <>
-              <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-                <Ionicons name="pricetag-outline" size={20} color={COLORS.primary} />
-                <Text style={styles.info}>مدل: {car.model}</Text>
-              </View>
-              <View style={styles.separator} />
-            </>
-          )}
+{car.fuelType && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="flame-outline" size={20} color={COLORS.primary} />
+        <Text style={styles.info}>نوع سوخت</Text>
+      </View>
+      <Text style={styles.info1}>{car.fuelType}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
 
-          {car.fuelType && (
-            <>
-              <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-                <Ionicons name="flame-outline" size={20} color={COLORS.primary} />
-                <Text style={styles.info}>نوع سوخت: {car.fuelType}</Text>
-              </View>
-              <View style={styles.separator} />
-            </>
-          )}
+{car.price && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="cash-outline" size={20} color={COLORS.primary} />
+        <Text style={styles.info}>قیمت</Text>
+      </View>
+      <Text style={styles.info1}>{car.price}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
 
-          {car.price && (
-            <>
-              <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-                <Ionicons name="cash-outline" size={20} color={COLORS.primary} />
-                <Text style={styles.info}>قیمت: {car.price}</Text>
-              </View>
-              <View style={styles.separator} />
-            </>
-          )}
+{car.carcard && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="card-outline" size={20} color={COLORS.primary} />
+        <Text style={styles.info}>آدرس</Text>
+      </View>
+      <Text  style={[styles.info1, {flexWrap: 'wrap'}]}>{car.carcard}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
 
-          {car.carcard && (
-            <>
-              <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
-                <Ionicons name="card-outline" size={20} color={COLORS.primary} />
-                <Text style={styles.info}>منطقه: {car.carcard}</Text>
-              </View>
-              <View style={styles.separator} />
-            </>
-          )}
 
           {car.caption && (
             <>
@@ -183,13 +220,59 @@ export default function CarDetails() {
 
         <TouchableOpacity
           onPress={saveCar}
-          style={[styles.saveButton, saved && { backgroundColor: "gray" }]}
+          style={[styles.saveButton1, saved && { backgroundColor: "gray" }]}
         >
           <Text style={styles.saveButtonText}>
             {saved ? "ذخیره شد" : "ذخیره کنید"}
           </Text>
         </TouchableOpacity>
       </View>
+
+    
+            <Modal visible={visible} transparent={true} onRequestClose={() => setVisible(false)}>
+                   <View style={styles1.container}>
+                     
+                     {/* Header: دکمه بستن */}
+                     <TouchableOpacity onPress={() => setVisible(false)} style={styles1.closeButton}>
+                       <Text style={styles1.closeButtonText}>✕</Text>
+                     </TouchableOpacity>
+                 
+                     {/* Body: لیست عکس‌ها */}
+                     <FlatList
+                       ref={flatListRef}
+                       data={(car.images?.length > 0 
+                         ? car.images 
+                         : car.image 
+                         ? [car.image] 
+                         : []
+                       )}
+                       horizontal
+                       pagingEnabled
+                       initialScrollIndex={imageIndex}
+                       getItemLayout={(data, index) => ({
+                         length: width,
+                         offset: width * index,
+                         index,
+                       })}
+                       renderItem={({ item }) => (
+                         <View style={styles1.imageWrapper}>
+                           <Image source={{ uri: item }} style={styles1.image} />
+                         </View>
+                       )}
+                       onMomentumScrollEnd={(e) => {
+                         const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
+                         setImageIndex(newIndex);
+                       }}
+                     />
+                 
+                     {/* Footer: شمارنده عکس‌ها */}
+                     <View style={styles1.footer}>
+                       <Text style={styles1.footerText}>
+                         {imageIndex + 1} / {car.images?.length || 1}
+                       </Text>
+                     </View>
+                   </View>
+                 </Modal>
 
       <SafeAreaView edges={["bottom"]} style={{ paddingBottom: 80 }} />
     </ScrollView>

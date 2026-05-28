@@ -1,47 +1,59 @@
-import { useState } from 'react';
-import { View, Text, KeyboardAvoidingView, Platform, ScrollView, TextInput, TouchableOpacity, Alert, Image, ActivityIndicator } from 'react-native';
-import { useRouter } from "expo-router";
+import { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+  ActivityIndicator
+} from 'react-native';
+import { useRouter, useLocalSearchParams } from "expo-router";
 import styles from "../../assets/styles/create.styles";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from '../../colectionColor/colors';
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
+
 import { useAuthStore } from "../../store/authStore";
 import { useFilterStore } from "../../store/fileStore";
-import RNPickerSelect from 'react-native-picker-select'; 
+
 import { apiFetch } from '../../store/apiClient';
 
 
 export default function CreateProperty() {
-  const [title, setTitle] = useState("");           
-  const [caption, setCaption] = useState("");       
-  const [image, setImage] = useState(null);         
-  const [imageBase64, setImageBase64] = useState(null); 
-  const [loading, setLoading] = useState(false);    
+  // state ها
+  const [title, setTitle] = useState("");
+  const [caption, setCaption] = useState("");
+  const [images, setImages] = useState([null, null, null, null, null]);
+  const [imagesBase64, setImagesBase64] = useState([null, null, null, null, null]);
+  const [loading, setLoading] = useState(false); // هم برای fetch و هم برای submit
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [location, setLocation] = useState("");
-  const [price, setPrice] = useState("");      
-  const [rentPrice, setRentPrice] = useState("");  // برای اجاره
-  const [mortgagePrice, setMortgagePrice] = useState(""); // برای رهن
-  const [area, setArea] = useState("");     
-  const [city, setCity] = useState("");        
-  const [propertyType, setPropertyType] = useState(""); // rent | mortgage | sale
+  const [city, setCity] = useState("");
 
   const router = useRouter();
   const { accessToken } = useAuthStore();
+ // const { createProperty3, setCreateProperty3 } = useFilterStore();
+ const createProperty3 = useFilterStore(
+  state => state.createProperty3
+);
 
-  const {  createProperty3, setCreateProperty3} = useFilterStore();
+const setCreateProperty3 = useFilterStore(
+  state => state.setCreateProperty3
+);
+  const { id } = useLocalSearchParams();
 
-   const propertyTypeLabels = {
+  const propertyTypeLabels = {
     sale: "فروش",
     rent: "کرایه",
     mortgage: "گرو",
     rent_mortgage: "گرو و کرایه",
   };
 
-
-
-  const pickImage = async () => {
+  // انتخاب عکس
+  const pickImage = async (index) => {
     try {
       if (Platform.OS !== "web") {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -52,23 +64,24 @@ export default function CreateProperty() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "images",
-        allowsEditing: true,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
         aspect: [4, 3],
-        quality: 0.3,
+        quality: 0.15,
         base64: true,
       });
 
       if (!result.canceled) {
-        setImage(result.assets[0].uri);
-        if (result.assets[0].base64) {
-          setImageBase64(result.assets[0].base64);
-        } else {
-          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          setImageBase64(base64);
-        }
+        const uri = result.assets[0].uri;
+        const base64 = result.assets[0].base64;
+
+        const newImages = [...images];
+        const newImagesBase64 = [...imagesBase64];
+        newImages[index] = uri;
+        newImagesBase64[index] = base64;
+
+        setImages(newImages);
+        setImagesBase64(newImagesBase64);
       }
     } catch (error) {
       console.error("خطا در انتخاب عکس:", error);
@@ -76,73 +89,126 @@ export default function CreateProperty() {
     }
   };
 
+  // گرفتن آگهی قبلی در حالت ویرایش
+  useEffect(() => {
+    //  console.log("UPDATED:", createProperty3);
+    if (id) {
+      const fetchProperty = async () => {
+        try {
+          setLoading(true);
+
+          const response = await apiFetch(`/properties/${id}`, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+
+          if (!response.ok) {
+            console.error("خطا در گرفتن آگهی ملک");
+            return;
+          }
+
+          const data = await response.json();
+
+          setTitle(data.title || "");
+          setCaption(data.description || "");
+          setPhoneNumber(data.phoneNumber || "");
+          setCity(data.city || "");
+
+          if (data.images && Array.isArray(data.images)) {
+            const paddedImages = [...data.images];
+            while (paddedImages.length < 5) paddedImages.push(null);
+            setImages(paddedImages);
+            setImagesBase64([null, null, null, null, null]);
+          }
+
+          setCreateProperty3({
+            location: data.location || "",
+            area: data.area || "",
+            propertyType: data.type || "",
+            price: data.price || "",
+            rentPrice: data.rentPrice || "",
+            mortgagePrice: data.mortgagePrice || "",
+          });
+        } catch (error) {
+          console.error("خطا در گرفتن اطلاعات آگهی:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchProperty();
+    }
+  }, [id]);
+
+  // ارسال فرم
   const handleSubmit = async () => {
-    if (!title || !caption || !imageBase64 || !createProperty3.location || !createProperty3.propertyType || !city) {
+    if (!title || !caption || !phoneNumber || !createProperty3.location || !createProperty3.propertyType || !city) {
       Alert.alert("خطا", "لطفاً همه‌ی فیلدهای ضروری را پر کنید");
       return;
     }
 
-    // ✅ اعتبارسنجی شرطی بر اساس نوع آگهی
-  if (createProperty3.propertyType === "sale" && !createProperty3.price) {
-    Alert.alert("خطا", "لطفاً قیمت فروش را وارد کنید");
-    return;
-  }
-  if (createProperty3.propertyType === "rent" && !createProperty3.rentPrice) {
-    Alert.alert("خطا", "لطفاً مبلغ اجاره را وارد کنید");
-    return;
-  }
-  if (createProperty3.propertyType === "mortgage" && !createProperty3.mortgagePrice) {
-    Alert.alert("خطا", "لطفاً مبلغ رهن را وارد کنید");
-    return;
-  }
-  if (createProperty3.propertyType === "rent_mortgage") {
-    if (!createProperty3.rentPrice) {
+    // اعتبارسنجی شرطی
+    if (createProperty3.propertyType === "sale" && !createProperty3.price) {
+      Alert.alert("خطا", "لطفاً قیمت فروش را وارد کنید");
+      return;
+    }
+    if (createProperty3.propertyType === "rent" && !createProperty3.rentPrice) {
       Alert.alert("خطا", "لطفاً مبلغ اجاره را وارد کنید");
       return;
     }
-    if (!createProperty3.mortgagePrice) {
+    if (createProperty3.propertyType === "mortgage" && !createProperty3.mortgagePrice) {
       Alert.alert("خطا", "لطفاً مبلغ رهن را وارد کنید");
       return;
     }
-  }
+    if (createProperty3.propertyType === "rent_mortgage") {
+      if (!createProperty3.rentPrice || !createProperty3.mortgagePrice) {
+        Alert.alert("خطا", "لطفاً مبلغ اجاره و رهن را وارد کنید");
+        return;
+      }
+    }
 
     try {
       setLoading(true);
 
-      const uriParts = image.split(".");
-      const fileExtension = uriParts[uriParts.length - 1];
-      const imageType = fileExtension ? `image/${fileExtension.toLowerCase()}` : "image/jpeg";
-      const imageDataUri = `data:${imageType};base64,${imageBase64}`;
+      const imageDataUris = [];
+      for (let i = 0; i < images.length; i++) {
+        const base64 = imagesBase64[i];
+        const uri = images[i];
 
-      // ساخت payload بر اساس مدل
+        if (base64 && uri) {
+          const uriParts = uri.split(".");
+          const fileExtension = uriParts[uriParts.length - 1];
+          const imageType = fileExtension ? `image/${fileExtension.toLowerCase()}` : "image/jpeg";
+          imageDataUris.push(`data:${imageType};base64,${base64}`);
+        } else if (uri && uri.startsWith("http")) {
+          imageDataUris.push(uri);
+        }
+      }
+
       let payload = {
         title,
         description: caption,
-        image: imageDataUri,
+        images: imageDataUris,
         phoneNumber,
-        location: createProperty3.location,   // از استور
-        area: createProperty3.area,           // از استور
+        location: createProperty3.location,
+        area: createProperty3.area,
         city,
         type: createProperty3.propertyType,
-
       };
 
-    if (createProperty3.propertyType === "sale") {
-  payload.price = createProperty3.price;
-} else if (createProperty3.propertyType === "rent") {
-  payload.rentPrice = createProperty3.rentPrice;
-} else if (createProperty3.propertyType === "mortgage") {
-  payload.mortgagePrice = createProperty3.mortgagePrice;
-} else if (createProperty3.propertyType === "rent_mortgage") {
-  payload.rentPrice = createProperty3.rentPrice;
-  payload.mortgagePrice = createProperty3.mortgagePrice;
-}
+      if (createProperty3.propertyType === "sale") {
+        payload.price = createProperty3.price;
+      } else if (createProperty3.propertyType === "rent") {
+        payload.rentPrice = createProperty3.rentPrice;
+      } else if (createProperty3.propertyType === "mortgage") {
+        payload.mortgagePrice = createProperty3.mortgagePrice;
+      } else if (createProperty3.propertyType === "rent_mortgage") {
+        payload.rentPrice = createProperty3.rentPrice;
+        payload.mortgagePrice = createProperty3.mortgagePrice;
+      }
 
-
-
-
-      const response = await apiFetch("/properties", {
-        method: "POST",
+      const response = await apiFetch(id ? `/properties/${id}` : "/properties", {
+        method: id ? "PUT" : "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
@@ -159,26 +225,31 @@ export default function CreateProperty() {
           console.error("خطا در خواندن پاسخ:", e);
         }
         Alert.alert("خطا", errorMessage);
-        setLoading(false);
+
         return;
       }
 
-      Alert.alert("موفقیت", "ملک با موفقیت ثبت شد");
-      setTitle("");
-      setCaption("");
-      setImage(null);
-      setImageBase64(null);
-      setPhoneNumber("");
+      Alert.alert("موفقیت", id ? "آگهی ملک با موفقیت ویرایش شد" : "آگهی ملک با موفقیت ثبت شد");
 
-      setCity("");
-      setCreateProperty3({
-      location: "",
-      setPrice: "",
-      setArea: "",
-      setPropertyType: "",
-       });
-      router.push("/");
+setTitle("");
+setCaption("");
+setPhoneNumber("");
+setCity("");
 
+setImages([null, null, null, null, null]);
+setImagesBase64([null, null, null, null, null]);
+
+setCreateProperty3({
+  location: "",
+  area: "",
+  propertyType: "",
+  price: "",
+  rentPrice: "",
+  mortgagePrice: "",
+});
+
+
+      router.push("/page/properties");
     } catch (error) {
       console.error("خطا در ارسال ملک:", error);
       Alert.alert("خطا", error.message || "ارسال با مشکل مواجه شد");
@@ -187,7 +258,19 @@ export default function CreateProperty() {
     }
   };
 
+  // اگر در حالت ویرایش هستیم و هنوز داده‌ها نیامده‌اند
+  if (loading && id) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={{ marginTop: 10 }}>در حال بارگذاری...</Text>
+      </View>
+    );
+  }
 
+//console.log("propertyType:", createProperty3.propertyType);
+
+  // بخش رندر فرم
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <ScrollView contentContainerStyle={styles.container} style={styles.scrollViewStyle}>
@@ -212,20 +295,26 @@ export default function CreateProperty() {
               </View>
             </View>
 
-            {/* عکس */}
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>عکس ملک</Text>
-              <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-                {image ? (
-                  <Image source={{ uri: image }} style={styles.previewImage} />
-                ) : (
-                  <View style={styles.placeholderContainer}>
-                    <Ionicons name="image-outline" size={40} color={COLORS.textSecondary} />
-                    <Text style={styles.placeholderText}>برای اضافه کردن عکس کلیک کنید</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            </View>
+          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+  {images.map((img, index) => (
+    <TouchableOpacity
+      key={index}
+      style={styles.imagePickerBox}
+      onPress={() => pickImage(index)}
+    >
+      {img ? (
+        <Image source={{ uri: img }} style={styles.previewImage} />
+      ) : (
+        <View style={styles.placeholderContainer}>
+          <Ionicons name="image-outline" size={30} color={COLORS.textSecondary} />
+          <Text style={styles.placeholderText}>انتخاب عکس {index + 1}</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  ))}
+</View>
+
+
 
             {/* توضیحات */}
             <View style={styles.formGroup}>
@@ -240,104 +329,7 @@ export default function CreateProperty() {
               />
             </View>
 
-       <View style={styles.formGroup}>
-  <Text style={styles.label}>نوع آگهی</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/filter",
-        params: { type: "propertyType" }, // 👈 صفحه انتخاب نوع آگهی
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createProperty3.propertyType ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {propertyTypeLabels[createProperty3.propertyType] || "نوع آگهی را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
-
-
-{createProperty3.propertyType === "sale" && (
-  <View style={styles.formGroup}>
-    <Text style={styles.label}>قیمت فروش</Text>
-    <TouchableOpacity
-      style={styles.inputContainer}
-      onPress={() =>
-        router.push({
-          pathname: "/filter",
-          params: { type: "price" },
-        })
-      }
-    >
-      <Text
-        style={{
-          color: createProperty3.price ? COLORS.black : COLORS.placeholderText,
-          fontSize: 16,
-        }}
-      >
-        {createProperty3.price || "قیمت فروش را انتخاب کنید"}
-      </Text>
-    </TouchableOpacity>
-  </View>
-)}
-
-{/* کرایه */}
-{(createProperty3.propertyType === "rent" || createProperty3.propertyType === "rent_mortgage") && (
-  <View style={styles.formGroup}>
-    <Text style={styles.label}>کرایه</Text>
-    <TouchableOpacity
-      style={styles.inputContainer}
-      onPress={() =>
-        router.push({
-          pathname: "/filter",
-          params: { type: "rentPrice" },
-        })
-      }
-    >
-      <Text
-        style={{
-          color: createProperty3.rentPrice ? COLORS.black : COLORS.placeholderText,
-          fontSize: 16,
-        }}
-      >
-        {createProperty3.rentPrice || "مبلغ کرایه را انتخاب کنید"}
-      </Text>
-    </TouchableOpacity>
-  </View>
-)}
-
-{/* گرو */}
-{(createProperty3.propertyType === "mortgage" || createProperty3.propertyType === "rent_mortgage") && (
-  <View style={styles.formGroup}>
-    <Text style={styles.label}>گرو</Text>
-    <TouchableOpacity
-      style={styles.inputContainer}
-      onPress={() =>
-        router.push({
-          pathname: "/filter",
-          params: { type: "mortgagePrice" },
-        })
-      }
-    >
-      <Text
-        style={{
-          color: createProperty3.mortgagePrice ? COLORS.black : COLORS.placeholderText,
-          fontSize: 16,
-        }}
-      >
-        {createProperty3.mortgagePrice || "مبلغ گرو را انتخاب کنید"}
-      </Text>
-    </TouchableOpacity>
-  </View>
-)}
-
-
+      
 
             {/* شماره تماس */}
             <View style={styles.formGroup}>
@@ -352,32 +344,11 @@ export default function CreateProperty() {
               />
             </View>
 
-            {/* location */}
-        <View style={styles.formGroup}>
-  <Text style={styles.label}>ولایت</Text>
-  <TouchableOpacity
-    style={styles.inputContainer}
-    onPress={() =>
-      router.push({
-        pathname: "/page/select-location",
-        params: { section: "property" }, // 👈 مسیر برگشت
-      })
-    }
-  >
-    <Text
-      style={{
-        color: createProperty3.location ? COLORS.black : COLORS.placeholderText,
-        fontSize: 16,
-      }}
-    >
-      {createProperty3.location || "ولایت خود را انتخاب کنید"}
-    </Text>
-  </TouchableOpacity>
-</View>
+
 
              {/* موقعیت */}
             <View style={styles.formGroup}>
-              <Text style={styles.label}>منطقه</Text>
+              <Text style={styles.label}>منطقه و آدرس</Text>
               <TextInput
                 style={styles.inputContainer}
                 placeholder="آدرس دقیق ملک را بنویسید"
@@ -389,23 +360,107 @@ export default function CreateProperty() {
 
 
            
+<View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
+  {/* نوع آگهی */}
+  <TouchableOpacity
+    style={styles.halfBox}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "propertyType" },
+      })
+    }
+  >
+    <Text style={{ color: createProperty3.propertyType ? COLORS.black : COLORS.placeholderText, fontSize: 14 }}>
+      {propertyTypeLabels[createProperty3.propertyType] || "کلیک کنید و نوع آگهی را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
 
-            {/* متراژ */}
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>متراژ (متر مربع)</Text>
-              <TextInput
-                style={styles.inputContainer}
-                placeholder="مثال: ۸۰"
-                placeholderTextColor={COLORS.placeholderText}
-                value={area}
-                onChangeText={setArea}
-                
-              />
-            </View>
 
-          
+  {/* قیمت فروش */}
+  {createProperty3.propertyType === "sale" && (
+    <TouchableOpacity
+      style={styles.halfBox}
+      onPress={() =>
+        router.push({
+          pathname: "/filter",
+          params: { type: "price" },
+        })
+      }
+    >
+      <Text style={{ color: createProperty3.price ? COLORS.black : COLORS.placeholderText }}>
+        {createProperty3.price || "قیمت فروش را انتخاب کنید"}
+      </Text>
+    </TouchableOpacity>
+  )}
+
+  {/* کرایه */}
+  {(createProperty3.propertyType === "rent" || createProperty3.propertyType === "rent_mortgage") && (
+    <TouchableOpacity
+      style={styles.halfBox}
+      onPress={() =>
+        router.push({
+          pathname: "/filter",
+          params: { type: "rentPrice" },
+        })
+      }
+    >
+      <Text style={{ color: createProperty3.rentPrice ? COLORS.black : COLORS.placeholderText }}>
+        {createProperty3.rentPrice || "مبلغ کرایه را انتخاب کنید"}
+      </Text>
+    </TouchableOpacity>
+  )}
+
+  {/* گرو */}
+  {(createProperty3.propertyType === "mortgage" || createProperty3.propertyType === "rent_mortgage") && (
+    <TouchableOpacity
+      style={styles.halfBox}
+      onPress={() =>
+        router.push({
+          pathname: "/filter",
+          params: { type: "mortgagePrice" },
+        })
+      }
+    >
+      <Text style={{ color: createProperty3.mortgagePrice ? COLORS.black : COLORS.placeholderText }}>
+        {createProperty3.mortgagePrice || "مبلغ گرو را انتخاب کنید"}
+      </Text>
+    </TouchableOpacity>
+  )}
+
+  {/* location */}
+  <TouchableOpacity
+    style={styles.halfBox}
+    onPress={() =>
+      router.push({
+        pathname: "/page/select-location",
+        params: { section: "property" },
+      })
+    }
+  >
+    <Text style={{ color: createProperty3.location ? COLORS.black : COLORS.placeholderText, fontSize: 14 }}>
+      {createProperty3.location || "ولایت خود را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
+
+  {/* area */}
+  <TouchableOpacity
+    style={styles.halfBox}
+    onPress={() =>
+      router.push({
+        pathname: "/filter",
+        params: { type: "area" },
+      })
+    }
+  >
+    <Text style={{ color: createProperty3.area ? COLORS.black : COLORS.placeholderText }}>
+      {createProperty3.area || "متراژ خانه یا زمین خویش را انتخاب کنید"}
+    </Text>
+  </TouchableOpacity>
+</View>
 
 
+           
             {/* دکمه ثبت */}
             <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
               {loading ? (

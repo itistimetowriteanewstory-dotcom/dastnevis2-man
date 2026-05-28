@@ -61,7 +61,7 @@ export default function SelectLocation() {
             }}
             onPress={() => handleSelect(item)}
           >
-            <Text style={{ fontSize: 18 }}>{item}</Text>
+            <Text style={{ fontSize: 19 }}>{item}</Text>
           </TouchableOpacity>
         )}
       />
