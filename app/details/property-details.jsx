@@ -196,7 +196,7 @@ export default function PropertyDetails() {
   </>
 )}
 
-  {/* {property.city && (
+   {property.city && (
   <>
     <View style={styles.infoRow}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -212,7 +212,7 @@ export default function PropertyDetails() {
     </View>
     <View style={styles.separator} />
   </>
-)} */}
+)} 
 
 
 
@@ -220,14 +220,14 @@ export default function PropertyDetails() {
 
 
 
-        {property.description && (
+         {property.description && (
             <>
            <Text style={styles.sectionTitle}>توضیحات</Text>
           <Text style={styles.caption}>{property.description}</Text>
           </>
         )}
 
-{property.city && (
+{/* {property.city && (
   <>
   <View style={styles.separator} />
 
@@ -239,7 +239,7 @@ export default function PropertyDetails() {
   {property.city}
 </Text>
   </>
-)}
+)}  */}
 
 
          </View>

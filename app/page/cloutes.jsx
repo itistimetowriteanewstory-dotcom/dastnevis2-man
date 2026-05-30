@@ -147,6 +147,7 @@ const router = useRouter();
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
             padding: 16,
+             marginTop: 70,
           }}
         >
           {/* دکمه بستن */}

@@ -50,8 +50,13 @@ if (result.accessToken) {
    <View style={styles.card}>
 { /* header */}
 <View style={styles.header}>
-  <Text style={styles.title}> دست نویس</Text>
-  <Text style={styles.subtitle}> با این برنامه شغل مورد نظر خود را پیدا کنید و به صورت رایگان آگهی های شغلی خودتان را به دیگران معرفی کنید.</Text>
+  <Text style={styles.title}> همه کار </Text>
+  <Text style={styles.subtitle}> 
+   هر چیزی که نیاز دارید پیدا کنید یا آگهی خودتان را رایگان ثبت کنید
+   ؛ از استخدام و فرصت‌های شغلی تا خرید و فروش ملک، موتر
+   ، پوشاک، مواد غذایی و انواع کالا و خدمات.
+
+    </Text>
 </View>
 
 <View style={styles.formContainer}>

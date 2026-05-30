@@ -23,7 +23,7 @@ export default function HelpAndRulesScreen() {
         <TouchableOpacity onPress={handleEmailPress}>
           <Text style={styles.email}>{reportEmail}</Text>
         </TouchableOpacity>
-        <Text style={styles.text}>تخلفات شما در اسرع وقت پیگیری خواهد شد ✅</Text>
+        <Text style={styles.text}>پیام های  شما در اسرع وقت پیگیری خواهد شد ✅</Text>
       </View>
 
        {/* بخش راهنما */}

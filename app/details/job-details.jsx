@@ -125,18 +125,7 @@ export default function JobDetails() {
 
 
   
-{parsedJob.jobtitle && (
-  <>
-    <View style={styles.infoRow}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Ionicons name="business-outline" size={20} color={COLORS.primary} style={styles.icon} />
-        <Text style={styles.info}>محل کار</Text>
-      </View>
-      <Text style={styles.info1}>{parsedJob.jobtitle}</Text>
-    </View>
-    <View style={styles.separator} />
-  </>
-)}
+
 
 {/* ساعت کاری */}
 {parsedJob.workingHours && (
@@ -168,7 +157,18 @@ export default function JobDetails() {
 
 
 
-
+{parsedJob.jobtitle && (
+  <>
+    <View style={styles.infoRow}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="business-outline" size={20} color={COLORS.primary} style={styles.icon} />
+        <Text style={styles.info}>محل کار</Text>
+      </View>
+      <Text style={styles.info1}>{parsedJob.jobtitle}</Text>
+    </View>
+    <View style={styles.separator} />
+  </>
+)}
 
 
   

@@ -162,7 +162,9 @@ modalContainer: {
     marginBottom: 6,
     lineHeight: 22,
     marginRight: 12,
-     
+      flex: 1,          // مهم
+  flexWrap: "wrap", // مهم
+  textAlign: "right",
   },
 
   addressHeader: {
