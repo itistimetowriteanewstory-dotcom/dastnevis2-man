@@ -197,21 +197,21 @@ export default function JobDetails() {
     style={styles.saveButton}
     onPress={() => handleCall(parsedJob.phoneNumber)}
   >
-    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6,  }}>
+   <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6,  }}> 
    
  <Text style={styles.saveButtonText}>تماس بگیرید</Text>
   <Ionicons name="call-outline" size={22} color={COLORS.white} style={styles.icon} />
 
-    </View>
+     </View> 
    
   </TouchableOpacity>
 
   {/* دکمه ذخیره */}
   <TouchableOpacity
     onPress={saveJob}
-    style={[styles.saveButton1, saved && { backgroundColor: "gray" }]}
+    style={[styles.saveButton1, saved && { backgroundColor: "white" }]}
   >
-    <Text style={styles.saveButtonText}>
+    <Text style={styles.saveButtonText1}>
       {saved ? "ذخیره شد" : "ذخیره کنید"}
     </Text>
   </TouchableOpacity>

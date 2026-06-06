@@ -187,48 +187,87 @@ addressText: {
     lineHeight: 24,
   },
 
-  saveButton: {
-  backgroundColor: COLORS.bluee,
-  paddingVertical: 8,
-  paddingHorizontal: 16,
-  borderRadius: 8,
-  borderColor: COLORS.border,  
-  borderWidth: 1,
-  width: 170, 
-  height: 60,
-  alignItems: "center",     // متن افقی وسط
-  justifyContent: "center", // متن عمودی وسط
-},
+//   saveButton: {
+//   backgroundColor: COLORS.bluee,
+//   paddingVertical: 8,
+//   paddingHorizontal: 16,
+//   borderRadius: 8,
+//   borderColor: COLORS.border,  
+//   borderWidth: 1,
+//   width: 170, 
+//   height: 60,
+//   alignItems: "center",     // متن افقی وسط
+//   justifyContent: "center", // متن عمودی وسط
+// },
 
-saveButton1: {
-  backgroundColor: COLORS.redsalamom,
-  paddingVertical: 8,
-  paddingHorizontal: 16,
-  borderRadius: 8,
-  borderColor: COLORS.border,  
-  borderWidth: 1,
-  width: 170, 
-  height: 60,
-  alignItems: "center",     // متن افقی وسط
-  justifyContent: "center", // متن عمودی وسط
-},
+// saveButton1: {
+//   backgroundColor: COLORS.redsalamom,
+//   paddingVertical: 8,
+//   paddingHorizontal: 16,
+//   borderRadius: 8,
+//   borderColor: COLORS.border,  
+//   borderWidth: 1,
+//   width: 170, 
+//   height: 60,
+//   alignItems: "center",     // متن افقی وسط
+//   justifyContent: "center", // متن عمودی وسط
+// },
 
-buttonRow: {
-  flexDirection: "row",       // دکمه‌ها کنار هم
-  justifyContent: "space-between", // فاصله بین‌شون
-  paddingHorizontal: 0,
-  marginTop: 40,
-},
+// buttonRow: {
+//   flexDirection: "row",       // دکمه‌ها کنار هم
+//   justifyContent: "space-between", // فاصله بین‌شون
+//   paddingHorizontal: 0,
+//   marginTop: 40,
+// },
 
 
+
+// saveButtonText: {
+//   color: COLORS.white,
+//   fontSize: 18,
+//   fontWeight: 'bold',
+//   textAlign: "center",
+
+
+// },
 
 saveButtonText: {
   color: COLORS.white,
-  fontSize: 18,
-  fontWeight: 'bold',
-  textAlign: "center",
+  fontSize: 16,
+  fontWeight: "600",
+},
 
+saveButtonText1: {
+  color: COLORS.redsalamom,
+  fontSize: 16,
+  fontWeight: "600",
+},
 
+saveButton: {
+  flex: 1,
+  height: 52,
+  backgroundColor: COLORS.bluee,
+  borderRadius: 12,
+  justifyContent: "center",
+  alignItems: "center",
+
+},
+
+saveButton1: {
+  flex: 1,
+  height: 52,
+  backgroundColor: "#fff",
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: COLORS.redsalamom,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+buttonRow: {
+  flexDirection: "row",
+  gap: 12,
+  marginTop: 16,
 },
 
 infoRow: {

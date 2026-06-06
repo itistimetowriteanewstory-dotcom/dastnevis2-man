@@ -235,9 +235,9 @@ export default function KitchenDetails() {
 
           <TouchableOpacity
             onPress={saveItem}
-            style={[styles.saveButton1, saved && { backgroundColor: "gray" }]}
+            style={[styles.saveButton1, saved && { backgroundColor: "white" }]}
           >
-            <Text style={styles.saveButtonText}>
+            <Text style={styles.saveButtonText1}>
               {saved ? "ذخیره شد" : "ذخیره کنید"}
             </Text>
           </TouchableOpacity>

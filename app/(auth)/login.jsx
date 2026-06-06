@@ -1,4 +1,4 @@
-import { View, Text, Image, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Alert, } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Alert, ScrollView, } from 'react-native';
 import styles from "../../assets/styles/login.styles";
 import { useState, useEffect } from 'react';
 import COLORS from '../../colectionColor/colors';
@@ -60,6 +60,12 @@ const router = useRouter();
   style={{flex:1}}
   behavior={Platform.OS === "ios" ? "padding" : "height"}
   >
+      <ScrollView
+    contentContainerStyle={{ flexGrow: 1 }}
+    keyboardShouldPersistTaps="handled"
+  >
+
+ 
     <View style={styles.container}>
       { /* illustration */}
       <View style={styles.topIllustration}>
@@ -70,6 +76,20 @@ const router = useRouter();
         </View>
         <View style={styles.card}>
          <View style={styles.formContainer}>
+
+          <Text
+  style={{
+    textAlign: "center",
+    color: COLORS.placeholderText,
+    fontSize: 12,
+    marginBottom: 15,
+    paddingHorizontal: 10,
+  }}
+>
+ لطفاً ایمیل و رمز عبور خود را به خاطر بسپارید. به منظور افزایش امنیت، ممکن است 
+ بعد پنج روز باز نکردن متوالی برنامه، نیاز به ورود مجدد به حساب کاربری خویش داشته باشید.
+</Text>
+
 { /* email */}
  <View style={styles.inputGroup}>
   <Text style={styles.label}>ایمیل</Text>
@@ -126,6 +146,8 @@ const router = useRouter();
   </View>
  </View>
 
+ 
+
  <TouchableOpacity style={styles.button} onPress={handleLogin}
  disabled={isLoading}>
 {isLoading ? (
@@ -150,6 +172,7 @@ const router = useRouter();
          </View>
         </View>
       </View>
+       </ScrollView>
    </KeyboardAvoidingView>
   );
 }

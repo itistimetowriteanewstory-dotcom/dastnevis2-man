@@ -227,6 +227,10 @@ export default function CreateEat() {
               </View>
             </View>
 
+            <Text style={styles.imageHint}>
+ افزودن حداقل یک عکس الزامی است پر کردن همه باکس ها اجباری نیست.
+</Text>
+
           <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
   {images.map((img, index) => (
     <TouchableOpacity

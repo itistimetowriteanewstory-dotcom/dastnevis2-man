@@ -1,4 +1,4 @@
-import { View, Text, KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, ActivityIndicator, Alert, ScrollView,} from 'react-native';
 import styles from "../../assets/styles/signup.styles";
 import {Ionicons} from "@expo/vector-icons";
 import COLORS from '../../colectionColor/colors';
@@ -45,7 +45,11 @@ if (result.accessToken) {
       style={{flex:1}}
       behavior={Platform.OS === "ios" ? "padding" : "height"} >
    
-    
+      <ScrollView
+    contentContainerStyle={{ flexGrow: 1 }}
+    keyboardShouldPersistTaps="handled"
+    showsVerticalScrollIndicator={false}
+  >
    <View style={styles.container}>
    <View style={styles.card}>
 { /* header */}
@@ -135,8 +139,14 @@ if (result.accessToken) {
         />
 
     </TouchableOpacity>
+
   </View>
 </View>
+
+<Text style={styles.noticeText}>
+  لطفاً ایمیل و رمز عبور خود را به خاطر بسپارید. برای حفظ امنیت حساب، ممکن است در آینده نیاز به ورود مجدد داشته باشید.
+</Text>
+
 { /* sign up button */}
 <TouchableOpacity
   style={styles.button}
@@ -167,6 +177,7 @@ if (result.accessToken) {
 </View>
    </View>
    </View>
+   </ScrollView>
       </KeyboardAvoidingView>
   );
 }

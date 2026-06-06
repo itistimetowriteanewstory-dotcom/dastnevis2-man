@@ -220,9 +220,9 @@ export default function CarDetails() {
 
         <TouchableOpacity
           onPress={saveCar}
-          style={[styles.saveButton1, saved && { backgroundColor: "gray" }]}
+          style={[styles.saveButton1, saved && { backgroundColor: "white" }]}
         >
-          <Text style={styles.saveButtonText}>
+          <Text style={styles.saveButtonText1}>
             {saved ? "ذخیره شد" : "ذخیره کنید"}
           </Text>
         </TouchableOpacity>

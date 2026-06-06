@@ -176,6 +176,14 @@ const styles = StyleSheet.create({
     color: COLORS.textDark,
   },
 
+  imageHint: {
+  fontSize: 12,
+  color: COLORS.textSecondary,
+  textAlign: "left",
+  marginBottom: 10,
+  lineHeight: 18,
+},
+
 
 });
 

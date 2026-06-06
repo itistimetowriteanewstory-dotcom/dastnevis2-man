@@ -94,6 +94,14 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontWeight: "600",
   },
+
+  noticeText: {
+  fontSize: 12,
+  textAlign: "left",
+  color: COLORS.placeholderText,
+  marginBottom: 0,
+  lineHeight: 18,
+}
 });
 
 export default styles;
