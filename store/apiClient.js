@@ -1,54 +1,87 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { API_URL } from "../colectionColor/api";
+import { useAuthStore } from "./authStore";
 
-// یک تابع کمکی برای درخواست‌ها
+let refreshPromise = null;
+
+
+
+
 export async function apiFetch(endpoint, options = {}) {
-  let accessToken = await AsyncStorage.getItem("accessToken");
-  const refreshToken = await AsyncStorage.getItem("refreshToken");
+  const { accessToken, refreshToken, setTokens } = useAuthStore.getState();
 
-  // اضافه کردن هدر Authorization
+  // هدر اولیه (برای درخواست اول)
   const headers = {
     "Content-Type": "application/json",
     ...(options.headers || {}),
     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
   };
 
-  // اولین درخواست
+ 
+  // ارسال اولین درخواست
   let response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
   });
 
-  // اگر Access Token منقضی شده بود
-  if (response.status === 401 && refreshToken) {
+ // console.log("RESPONSE:", endpoint, response.status);
+
+  // اگر 401 بود → تلاش برای رفرش
+  if (
+    response.status === 401 &&
+    refreshToken &&
+    endpoint !== "/auth/refresh"
+  ) {
+    console.log("401 ERROR ON:", endpoint);
+
     try {
-      // درخواست رفرش
-      const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
+      // جلوگیری از چند رفرش همزمان
+      if (!refreshPromise) {
+        refreshPromise = (async () => {
+          const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refreshToken }),
+          });
+
+          // اگر رفرش‌توکن منقضی شده → خروج
+          if (refreshRes.status === 401) {
+            const { logout } = useAuthStore.getState();
+            await logout();
+            throw new Error("Session expired");
+          }
+
+          // اگر خطای شبکه یا سرور → logout نکن
+          if (!refreshRes.ok) {
+            throw new Error("Network error during refresh");
+          }
+
+          const data = await refreshRes.json();
+          console.log("REFRESH RESPONSE:", data);
+
+          // ذخیره accessToken جدید + نگه داشتن refreshToken قدیمی
+          await setTokens(data.accessToken, refreshToken);
+
+          return data;
+        })();
+      }
+
+      // منتظر رفرش
+      const data = await refreshPromise;
+      refreshPromise = null;
+
+      // درخواست اصلی را دوباره با توکن جدید بزن
+      response = await fetch(`${API_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {}),
+          Authorization: `Bearer ${data.accessToken}`,
+        },
       });
 
-      if (refreshRes.ok) {
-        const data = await refreshRes.json();
-        accessToken = data.accessToken;
-
-        // ذخیره Access Token جدید
-        await AsyncStorage.setItem("accessToken", accessToken);
-
-        // درخواست اصلی رو دوباره بفرست
-        response = await fetch(`${API_URL}${endpoint}`, {
-          ...options,
-          headers: {
-            ...headers,
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-      } else {
-        // اگر Refresh Token هم منقضی شده بود → کاربر باید لاگین کنه
-        throw new Error("Session expired, please login again");
-      }
     } catch (err) {
+      refreshPromise = null;
       throw err;
     }
   }

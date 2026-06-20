@@ -64,10 +64,7 @@ export default function Jobs() {
     });
 
 
-    const res = await apiFetch(`/jobs?${queryParams.toString()}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
+    const res = await apiFetch(`/jobs?${queryParams.toString()}`);
 
 
 
@@ -89,35 +86,41 @@ export default function Jobs() {
 
 
   useEffect(() => {
-      const checkToken = async () => {
-    try {
-      const refreshToken = await AsyncStorage.getItem("refreshToken");
-      if (!refreshToken) {
-        router.replace("/(auth)/login"); // مستقیم به login
-        return;
-      }
-
-      const res = await apiFetch("/auth/refresh", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        await AsyncStorage.setItem("accessToken", data.accessToken);
-        fetchJobs();
-      } else {
-        await AsyncStorage.multiRemove(["accessToken", "refreshToken"]);
-        router.replace("/(auth)/login");
-      }
-    } catch (err) {
+  const checkToken = async () => {
+  try {
+    const refreshToken = await AsyncStorage.getItem("refreshToken");
+    if (!refreshToken) {
       router.replace("/(auth)/login");
-    } finally {
-      setChecking(false);
+      return; // مهم
     }
-  };
 
+    const res = await apiFetch("/auth/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+
+      const { setTokens } = useAuthStore.getState();
+      await setTokens(data.accessToken, refreshToken);
+
+      await fetchJobs();
+      return; // مهم
+    } else {
+      await AsyncStorage.multiRemove(["accessToken", "refreshToken"]);
+      router.replace("/(auth)/login");
+      return; // مهم
+    }
+
+  } catch (err) {
+    router.replace("/(auth)/login");
+    return; // مهم
+  } finally {
+    setChecking(false);
+  }
+};
   checkToken();
 
 
