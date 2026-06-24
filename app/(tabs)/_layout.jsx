@@ -40,8 +40,16 @@ export default function TabLayout() {
 
   const checkForUpdate = async () => {
     try {
-      const res = await apiFetch("/app/version", "GET", null, accessToken);
+   const response = await apiFetch("/app/version");
+   const res = await response.json();
+
+// console.log("API JSON:", res);
+
       const currentVersion = Constants.expoConfig?.version;
+
+// console.log("Current:", currentVersion);
+// console.log("Latest:", res.latestVersion);
+// console.log("Force:", res.forceUpdate);
     
 
       if (res.forceUpdate && res.latestVersion !== currentVersion) {

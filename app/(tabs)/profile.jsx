@@ -64,7 +64,7 @@ export default function Profile() {
 
   <TouchableOpacity
     style={styles.socialButton}
-    onPress={() => Linking.openURL("https://wa.me/YOUR_PHONE")}
+    onPress={() => Linking.openURL("https://wa.me/41786023739")}
   >
     <Ionicons name="logo-whatsapp" size={24}  />
     <Text style={styles.socialText}>واتساپ</Text>
@@ -72,15 +72,15 @@ export default function Profile() {
 
   <TouchableOpacity
     style={styles.socialButton}
-    onPress={() => Linking.openURL("https://t.me/YOUR_USERNAME")}
+    onPress={() => Linking.openURL("mailto:dastnevis.site@gmail.com")}
   >
-    <Ionicons name="paper-plane-outline" size={24}  />
-    <Text style={styles.socialText}>تلگرام</Text>
+    <Ionicons name="mail-outline" size={24}  />
+    <Text style={styles.socialText}>ایمیل</Text>
   </TouchableOpacity>
 
   <TouchableOpacity
     style={styles.socialButton}
-    onPress={() => Linking.openURL("https://facebook.com/profile.php?id61590900141814")}
+    onPress={() => Linking.openURL("https://facebook.com/profile.php?id=61590900141814")}
   >
     <Ionicons name="logo-facebook" size={24}  />
     <Text style={styles.socialText}>فیسبوک</Text>
