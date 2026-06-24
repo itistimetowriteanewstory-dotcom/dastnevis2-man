@@ -12,17 +12,16 @@
       "supportsTablet": true
     },
     "android": {
-      
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/hamehkar.png",
         "backgroundColor": "#fefdfd"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.dastnevis.mobile",
-       "googleServicesFile": "./google-services.json",
-       "permissions": [
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
         "NOTIFICATIONS"
-       ]
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -40,7 +39,9 @@
           "backgroundColor": "#fefdfd"
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
