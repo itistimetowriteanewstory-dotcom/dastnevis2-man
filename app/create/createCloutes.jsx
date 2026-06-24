@@ -34,7 +34,7 @@ export default function CreateCloutes() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [price, setPrice] = useState("");
   const [address, setAddress] = useState("");
-  
+  const [submitLoading, setSubmitLoading] = useState(false);
   const router = useRouter();
   const { accessToken } = useAuthStore();
 
@@ -83,9 +83,15 @@ const handleSubmit = async () => {
     Alert.alert("خطا", "لطفاً همه‌ی خانه‌های ضروری را پر کنید");
     return;
   }
+  const hasAtLeastOneImage = images.some(img => img !== null);
+
+if (!hasAtLeastOneImage) {
+  Alert.alert("خطا", "حداقل یک عکس باید انتخاب شود");
+  return;
+}
 
   try {
-    setLoading(true);
+    setSubmitLoading(true);
 
     const imageDataUris = [];
     for (let i = 0; i < images.length; i++) {
@@ -149,7 +155,7 @@ const handleSubmit = async () => {
     console.error("خطا در ارسال:", error);
     Alert.alert("خطا", error.message || "ارسال با مشکل مواجه شد");
   } finally {
-    setLoading(false);
+   setSubmitLoading(false);
   }
 };
 
@@ -157,6 +163,7 @@ const handleSubmit = async () => {
   if (id) {
     const fetchCloute = async () => {
       try {
+         setLoading(true);
         const response = await apiFetch(`/cloutes/${id}`, {
           method: "GET",
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -193,6 +200,8 @@ const handleSubmit = async () => {
         });
       } catch (error) {
         console.error("خطا در گرفتن اطلاعات آگهی:", error);
+      } finally {
+        setLoading(false); // 👈 همیشه خاموش میشه (حتی error یا return)
       }
     };
 
@@ -200,7 +209,14 @@ const handleSubmit = async () => {
   }
 }, [id]);
 
-
+if (loading) {
+  return (
+    <View style={styles.containerLoading}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+      <Text style={styles.textLoading}>در حال بارگذاری...</Text>
+    </View>
+  );
+}
 
 return (
   <KeyboardAvoidingView
@@ -388,8 +404,8 @@ return (
 
 
           {/* submit button */}
-          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
-            {loading ? (
+          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={submitLoading}>
+            {submitLoading ? (
               <ActivityIndicator color={COLORS.black} />
             ) : (
               <>

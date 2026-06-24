@@ -168,7 +168,7 @@ let data;
         const data = await response.json();
 
           const { setTokens } = useAuthStore.getState();
-          await setTokens(data.accessToken, refreshToken);
+          await setTokens(data.accessToken, data.refreshToken);
 
           set({ user });
 
@@ -190,13 +190,43 @@ let data;
     }
   },
 
-  // -----------------------------
-  //  خروج
-  // -----------------------------
+
   logout: async () => {
-    await AsyncStorage.multiRemove(["accessToken", "refreshToken", "user"]);
-    set({ accessToken: null, refreshToken: null, user: null });
-  },
+  try {
+    const refreshToken = await AsyncStorage.getItem("refreshToken");
+
+    if (refreshToken) {
+      await fetch("/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+    }
+  } catch (error) {
+    console.log("logout error:", error);
+  }
+
+  await AsyncStorage.multiRemove([
+    "accessToken",
+    "refreshToken",
+    "user",
+  ]);
+
+  set({
+    accessToken: null,
+    refreshToken: null,
+    user: null,
+  });
+}
+  // // -----------------------------
+  // //  خروج
+  // // -----------------------------
+  // logout: async () => {
+  //   await AsyncStorage.multiRemove(["accessToken", "refreshToken", "user"]);
+  //   set({ accessToken: null, refreshToken: null, user: null });
+  // },
 
 }));
 

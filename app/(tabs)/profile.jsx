@@ -6,7 +6,7 @@ import ProfileHeader from "../../component/ProfileHeader";
 import LogoutButton from "../../component/LogoutButton";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../colectionColor/colors";
-
+import { Linking } from "react-native";
 
 export default function Profile() {
 
@@ -19,6 +19,9 @@ export default function Profile() {
     <View style={styles.container}>
       <ProfileHeader />
       <LogoutButton />
+
+    
+
 
       {/* دکمه رفتن به صفحه راهنما و قوانین */}
       <TouchableOpacity
@@ -46,7 +49,46 @@ export default function Profile() {
         <Ionicons name="briefcase-outline" size={20} color={COLORS.textDark} />
         <Text style={styles.helpButtonText}>آگهی‌های من</Text>
       </TouchableOpacity>
-    </View>
+            {/* شبکه‌های اجتماعی */}
+<View style={styles.containerSocial}>
+  <Text style={styles.titleSocial}>مارا در شبکه های اجتماعی دنبال کنید.</Text>
+
+ <View style={styles.grid}>
+  <TouchableOpacity
+    style={styles.socialButton}
+    onPress={() => Linking.openURL("https://www.instagram.com/hamekarofficial/")}
+  >
+    <Ionicons name="logo-instagram" size={24}  />
+    <Text style={styles.socialText}>اینستاگرام</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.socialButton}
+    onPress={() => Linking.openURL("https://wa.me/YOUR_PHONE")}
+  >
+    <Ionicons name="logo-whatsapp" size={24}  />
+    <Text style={styles.socialText}>واتساپ</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.socialButton}
+    onPress={() => Linking.openURL("https://t.me/YOUR_USERNAME")}
+  >
+    <Ionicons name="paper-plane-outline" size={24}  />
+    <Text style={styles.socialText}>تلگرام</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.socialButton}
+    onPress={() => Linking.openURL("https://facebook.com/profile.php?id61590900141814")}
+  >
+    <Ionicons name="logo-facebook" size={24}  />
+    <Text style={styles.socialText}>فیسبوک</Text>
+  </TouchableOpacity>
+  </View>
+ </View>
+</View>
+   
   );
 }
 

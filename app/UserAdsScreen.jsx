@@ -33,67 +33,93 @@ export default function UserAdsScreen() {
   const { accessToken } = useAuthStore();
   const router = useRouter();
 
-  // 📌 گرفتن آگهی‌های کاربر
+  
+
   const fetchData = async () => {
-    try {
-      setIsLoading(true);
+    // console.log("fetchData started");
+  try {
+    setIsLoading(true);
 
-      const jobsRes = await apiFetch("/jobs/user", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const jobsData = await jobsRes.json();
-      if (!jobsRes.ok) throw new Error(jobsData.message || "خطا در بارگذاری شغل‌ها");
+    const headers = { Authorization: `Bearer ${accessToken}` };
 
-      const propsRes = await apiFetch("/properties/user", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const propsData = await propsRes.json();
-      if (!propsRes.ok) throw new Error(propsData.message || "خطا در بارگذاری ملک‌ها");
+    const [
+      jobsRes,
+      propsRes,
+      carsRes,
+      cloutesRes,
+      kitchenRes,
+      eatsRes
+    ] = await Promise.all([
+      apiFetch("/jobs/user", { headers }),
+      apiFetch("/properties/user", { headers }),
+      apiFetch("/car/user", { headers }),
+      apiFetch("/cloutes/user", { headers }),
+      apiFetch("/kitchen/user", { headers }),
+      apiFetch("/eat/user", { headers })
+    ]);
 
-      const carsRes = await apiFetch("/car/user", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const carsData = await carsRes.json();
-      if (!carsRes.ok) throw new Error(carsData.message || "خطا در بارگذاری موترها");
+//     // 🔥 اینجا لاگ‌ها را بگذار
+// console.log("jobs:", jobsRes.status);
+// console.log("props:", propsRes.status);
+// console.log("cars:", carsRes.status);
+// console.log("cloutes:", cloutesRes.status);
+// console.log("kitchen:", kitchenRes.status);
+// console.log("eats:", eatsRes.status);
 
-      const cloutesRes = await apiFetch("/cloutes/user", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      });
-       const cloutesData = await cloutesRes.json();
-      if (!cloutesRes.ok) throw new Error(cloutesData.message || "خطا در بارگذاری پوشاک");
+    const [
+      jobsData,
+      propsData,
+      carsData,
+      cloutesData,
+      kitchenData,
+      eatsData
+    ] = await Promise.all([
+      jobsRes.json(),
+      propsRes.json(),
+      carsRes.json(),
+      cloutesRes.json(),
+      kitchenRes.json(),
+      eatsRes.json()
+    ]);
 
-      const kitchenRes = await apiFetch("/kitchen/user", {
-       headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const kitchenData = await kitchenRes.json();
-      if (!kitchenRes.ok) throw new Error(kitchenData.message || "خطا در بارگذاری لوازم خانه");
+   if (!jobsRes.ok) {
+  throw new Error(jobsData.message || "خطا در بارگذاری شغل‌ها");
+}
 
-     const eatsRes = await apiFetch("/eat/user", {
-     headers: { Authorization: `Bearer ${accessToken}` },
-     });
-      const eatsData = await eatsRes.json();
-      if (!eatsRes.ok) throw new Error(eatsData.message || "خطا در بارگذاری مواد غذایی‌ها");
+if (!propsRes.ok) {
+  throw new Error(propsData.message || "خطا در بارگذاری ملک‌ها");
+}
 
+if (!carsRes.ok) {
+  throw new Error(carsData.message || "خطا در بارگذاری موترها");
+}
+    if (!cloutesRes.ok) {
+  throw new Error(cloutesData.message || "خطا در بارگذاری پوشاک");
+}
+    if (!kitchenRes.ok) {
+  throw new Error(kitchenData.message || "خطا در بارگذاری لوازم خانه");
+}
+    if (!eatsRes.ok) {
+  throw new Error(eatsData.message || "خطا در بارگذاری مواد غذایی");
+}
 
+    setJobs(jobsData);
+    setProperties(propsData);
+    setCars(carsData);
+    setCloutes(cloutesData);
+    setKitchen(kitchenData);
+    setEats(eatsData);
 
-
-      setJobs(jobsData);
-      setProperties(propsData);
-      setCars(carsData);
-      setCloutes(cloutesData);
-      setKitchen(kitchenData);
-      setEats(eatsData);
-
-    } catch (error) {
-      Alert.alert("خطا", "بارگذاری اطلاعات کاربر با خطا مواجه شد");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  } catch (error) {
+    Alert.alert("خطا", "بارگذاری اطلاعات کاربر با خطا مواجه شد");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   useEffect(() => {
-    fetchData();
-  }, []);
+  fetchData();
+}, []);
 
   // 📌 حذف شغل
   const handleDeleteJob = async (jobId) => {

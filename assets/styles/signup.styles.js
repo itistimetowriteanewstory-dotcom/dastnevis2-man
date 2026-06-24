@@ -95,6 +95,24 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  checkboxContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginVertical: 12,
+  paddingHorizontal: 4,
+},
+
+checkbox: {
+  marginRight: 8,
+},
+
+checkboxText: {
+  flex: 1,
+  fontSize: 14,
+  color: COLORS.text,
+  lineHeight: 20,
+},
+
   noticeText: {
   fontSize: 12,
   textAlign: "left",

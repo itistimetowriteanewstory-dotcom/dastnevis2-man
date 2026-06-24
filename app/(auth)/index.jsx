@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 import { useAuthStore } from '../../store/authStore';
 import { registerForPushNotificationsAsync } from "../../lib/notification";
 import { Link } from "expo-router";
-
+import { Linking } from "react-native";
 
 export default function Signup() {
 
@@ -17,11 +17,17 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
  
   const {user, isLoading, register}=useAuthStore();
-
+  const [agree, setAgree] = useState(false);
   
   const router = useRouter();
 
   const handleSignUp = async () => {
+
+    if (!agree) {
+    Alert.alert("توجه", "برای ثبت‌نام باید با قوانین و حریم خصوصی موافقت کنید.");
+    return;
+  }
+
     const result = await register(username, email, password);
 
 //  if(!result.success) Alert.alert("Error", result.error );
@@ -37,8 +43,7 @@ if (result.accessToken) {
 
   };
 
-  
-
+ 
   return (
 
   <KeyboardAvoidingView
@@ -141,6 +146,38 @@ if (result.accessToken) {
     </TouchableOpacity>
 
   </View>
+</View>
+
+{/* terms & privacy checkbox */}
+<View style={styles.checkboxContainer}>
+  <TouchableOpacity 
+    onPress={() => setAgree(!agree)} 
+    style={styles.checkbox}
+  >
+    <Ionicons 
+      name={agree ? "checkbox-outline" : "square-outline"} 
+      size={22} 
+      color={COLORS.primary} 
+    />
+  </TouchableOpacity>
+
+  <Text style={styles.checkboxText}>
+    با ثبت‌نام، من با 
+    <Text 
+      style={{ color: COLORS.bluee }}
+      onPress={() => Linking.openURL("https://sites.google.com/view/dastnevis-privacypolicy/home")}
+    >
+      {" "}قوانین و مقرارت{" "}
+    </Text>
+    و
+    <Text 
+      style={{ color: COLORS.bluee }}
+      onPress={() => Linking.openURL("https://sites.google.com/view/dastnevis-privacypolicy/home")}
+    >
+      {" "}حریم خصوصی{" "}
+    </Text>
+    موافق هستم.
+  </Text>
 </View>
 
 <Text style={styles.noticeText}>

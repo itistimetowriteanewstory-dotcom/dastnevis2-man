@@ -19,6 +19,7 @@ const [caption, setCaption] = useState("");
  const [images, setImages] = useState([null, null, null, null, null]);
   const [imagesBase64, setImagesBase64] = useState([null, null, null, null, null]);
 const [loading, setLoading] = useState(false);    
+const [submitLoading, setSubmitLoading] = useState(false);
 const [phoneNumber, setPhoneNumber] = useState("");
 const [jobtitle, setJobtitle] = useState("");
 
@@ -105,9 +106,16 @@ const { id } = useLocalSearchParams();
   Alert.alert("خطا", "لطفاً همه‌ی خانه‌ها را پر کنید");
   return;
 }
+ // 🔥 چک کردن حداقل یک عکس
+  const hasAtLeastOneImage = images.some(img => img !== null);
+
+  if (!hasAtLeastOneImage) {
+    Alert.alert("خطا", "حداقل یک عکس باید انتخاب شود");
+    return;
+  }
 
   try {
-    setLoading(true);
+    setSubmitLoading(true);
 
     // آماده‌سازی عکس‌ها
     let imageDataUris = [];
@@ -182,13 +190,16 @@ setCreateJobs1({
     console.error("خطا در ارسال:", error);
     Alert.alert("خطا", error.message || "ارسال با مشکل مواجه شد");
   } finally {
-    setLoading(false);
+    setSubmitLoading(false);
   }
 };
 
 
 useEffect(() => {
   if (id) {
+
+    setLoading(true);
+
     fetchAdById(id).then(data => {
       if (!data) return;
 
@@ -214,11 +225,24 @@ useEffect(() => {
         workingHours: data.workingHours || "",
         paymentType: data.paymentType || "",
       });
+    })
+     .catch(error => {
+      console.error("خطا در گرفتن آگهی:", error);
+    })
+    .finally(() => {
+      setLoading(false);
     });
   }
 }, [id]);
 
-
+if (loading) {
+  return (
+    <View style={styles.containerLoading}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+      <Text style={styles.textLoading}>در حال بارگذاری...</Text>
+    </View>
+  );
+}
   return (
     <KeyboardAvoidingView style={{ flex: 1}} behavior={Platform.OS === "ios" ? "padding" : "height"}>
 
@@ -379,9 +403,9 @@ useEffect(() => {
 <TouchableOpacity
   style={styles.button}
   onPress={handleSubmit}
-  disabled={loading}
+  disabled={submitLoading}
 >
-  {loading ? (
+  {submitLoading ? (
     <ActivityIndicator color={COLORS.black} />
   ) : (
     <>

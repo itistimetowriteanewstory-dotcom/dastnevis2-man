@@ -30,6 +30,7 @@ export default function CreateHomeAndKitchen() {
   const [images, setImages] = useState([null, null, null, null, null]);
   const [imagesBase64, setImagesBase64] = useState([null, null, null, null, null]);
   const [loading, setLoading] = useState(false);    
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [price, setPrice] = useState("");
   const [address, setAddress] = useState("");
@@ -82,9 +83,16 @@ const handleSubmit = async () => {
     Alert.alert("خطا", "لطفاً همه‌ی خانه‌های ضروری را پر کنید");
     return;
   }
+  // 🔥 چک کردن حداقل یک عکس
+  const hasAtLeastOneImage = images.some(img => img !== null);
+
+  if (!hasAtLeastOneImage) {
+    Alert.alert("خطا", "حداقل یک عکس باید انتخاب شود");
+    return;
+  }
 
   try {
-    setLoading(true);
+     setSubmitLoading(true);
 
     const imageDataUris = [];
     for (let i = 0; i < images.length; i++) {
@@ -154,7 +162,7 @@ const handleSubmit = async () => {
       console.error("خطا در ارسال پست:", error);
       Alert.alert("خطا", error.message || "ارسال با مشکل مواجه شد");
     } finally {
-      setLoading(false);
+     setSubmitLoading(false);
     }
  };
 
@@ -162,6 +170,7 @@ const handleSubmit = async () => {
   if (id) {
     const fetchHome = async () => {
       try {
+         setLoading(true);
         const response = await apiFetch(`/kitchen/${id}`, {
           method: "GET",
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -200,6 +209,8 @@ const handleSubmit = async () => {
         });
       } catch (error) {
         console.error("خطا در گرفتن اطلاعات آگهی:", error);
+      }  finally {
+        setLoading(false); // 👈 پایان لودینگ
       }
     };
 
@@ -207,6 +218,14 @@ const handleSubmit = async () => {
   }
 }, [id]);
 
+if (loading) {
+  return (
+    <View style={styles.containerLoading}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+      <Text style={styles.textLoading}>در حال بارگذاری...</Text>
+    </View>
+  );
+}
 
 return (
   <KeyboardAvoidingView
@@ -414,8 +433,8 @@ return (
 
 
           {/* submit button */}
-          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
-            {loading ? (
+          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={submitLoading}>
+            {submitLoading ? (
               <ActivityIndicator color={COLORS.black} />
             ) : (
               <>

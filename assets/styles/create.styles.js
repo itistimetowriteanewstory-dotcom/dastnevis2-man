@@ -176,6 +176,19 @@ const styles = StyleSheet.create({
     color: COLORS.textDark,
   },
 
+   containerLoading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+
+  textLoading: {
+    marginTop: 10,
+    color: COLORS.primary,
+    fontSize: 16,
+  },
+
   imageHint: {
   fontSize: 12,
   color: COLORS.textSecondary,

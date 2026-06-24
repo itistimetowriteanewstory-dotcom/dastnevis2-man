@@ -29,6 +29,7 @@ export default function CreateEat() {
   const [images, setImages] = useState([null, null, null, null, null]);
   const [imagesBase64, setImagesBase64] = useState([null, null, null, null, null]);
   const [loading, setLoading] = useState(false);    
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [price, setPrice] = useState("");
   const [address, setAddress] = useState("");
@@ -85,9 +86,15 @@ export default function CreateEat() {
     Alert.alert("خطا", "لطفاً همه‌ی خانه‌های ضروری را پر کنید");
     return;
   }
+  const hasAtLeastOneImage = images.some(img => img !== null);
+
+if (!hasAtLeastOneImage) {
+  Alert.alert("خطا", "حداقل یک عکس باید انتخاب شود");
+  return;
+}
 
   try {
-    setLoading(true);
+    setSubmitLoading(true);
 
     const imageDataUris = [];
     for (let i = 0; i < images.length; i++) {
@@ -147,7 +154,7 @@ export default function CreateEat() {
       console.error("خطا در ارسال پست:", error);
       Alert.alert("خطا", error.message || "ارسال با مشکل مواجه شد");
     } finally {
-      setLoading(false);
+      setSubmitLoading(false);
     }
   };
 
@@ -155,6 +162,7 @@ export default function CreateEat() {
   if (id) {
     const fetchEat = async () => {
       try {
+         setLoading(true);
         const response = await apiFetch(`/eat/${id}`, {
           method: "GET",
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -188,6 +196,8 @@ export default function CreateEat() {
         });
       } catch (error) {
         console.error("خطا در گرفتن اطلاعات آگهی:", error);
+      } finally {
+        setLoading(false); // 👈 پایان لودینگ
       }
     };
 
@@ -195,6 +205,14 @@ export default function CreateEat() {
   }
 }, [id]);
 
+if (loading) {
+  return (
+    <View style={styles.containerLoading}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+      <Text style={styles.textLoading}>در حال بارگذاری...</Text>
+    </View>
+  );
+}
 
   // 👇 بخش UI (return)
   return (
@@ -325,8 +343,8 @@ export default function CreateEat() {
             </View>
 
             {/* submit button */}
-            <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
-              {loading ? (
+            <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={submitLoading}>
+              {submitLoading ? (
                 <ActivityIndicator color={COLORS.black} />
               ) : (
                 <>

@@ -32,7 +32,7 @@ export default function CreateProperty() {
   const [loading, setLoading] = useState(false); // هم برای fetch و هم برای submit
   const [phoneNumber, setPhoneNumber] = useState("");
   const [city, setCity] = useState("");
-
+  const [submitLoading, setSubmitLoading] = useState(false);
   const router = useRouter();
   const { accessToken } = useAuthStore();
  // const { createProperty3, setCreateProperty3 } = useFilterStore();
@@ -147,6 +147,13 @@ const setCreateProperty3 = useFilterStore(
       return;
     }
 
+    const hasAtLeastOneImage = images.some(img => img !== null);
+
+if (!hasAtLeastOneImage) {
+  Alert.alert("خطا", "حداقل یک عکس باید انتخاب شود");
+  return;
+}
+
     // اعتبارسنجی شرطی
     if (createProperty3.propertyType === "sale" && !createProperty3.price) {
       Alert.alert("خطا", "لطفاً قیمت فروش را وارد کنید");
@@ -168,7 +175,7 @@ const setCreateProperty3 = useFilterStore(
     }
 
     try {
-      setLoading(true);
+      setSubmitLoading(true);
 
       const imageDataUris = [];
       for (let i = 0; i < images.length; i++) {
@@ -254,16 +261,16 @@ setCreateProperty3({
       console.error("خطا در ارسال ملک:", error);
       Alert.alert("خطا", error.message || "ارسال با مشکل مواجه شد");
     } finally {
-      setLoading(false);
+      setSubmitLoading(false);
     }
   };
 
   // اگر در حالت ویرایش هستیم و هنوز داده‌ها نیامده‌اند
-  if (loading && id) {
+  if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={styles.containerLoading}>
         <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={{ marginTop: 10 }}>در حال بارگذاری...</Text>
+        <Text style={styles.textLoading}>در حال بارگذاری...</Text>
       </View>
     );
   }
@@ -466,8 +473,8 @@ setCreateProperty3({
 
            
             {/* دکمه ثبت */}
-            <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
-              {loading ? (
+            <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={submitLoading}>
+              {submitLoading ? (
                 <ActivityIndicator color={COLORS.black} />
               ) : (
                 <>

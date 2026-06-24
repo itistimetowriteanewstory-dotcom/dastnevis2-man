@@ -21,7 +21,7 @@ export default function CreateCar() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [carcard, setCarcard] = useState("");
   const [price, setPrice] = useState("");
-  
+  const [submitLoading, setSubmitLoading] = useState(false);
   const { id } = useLocalSearchParams(); 
 
   const { createCar1, setCreateCar1 } = useFilterStore();
@@ -70,6 +70,7 @@ useEffect(() => {
   if (id) {
     const fetchCar = async () => {
       try {
+        setLoading(true); // 👈 شروع لودینگ
         const response = await apiFetch(`/car/${id}`, {
           method: "GET",
           headers: {
@@ -110,6 +111,8 @@ useEffect(() => {
         });
       } catch (error) {
         console.error("خطا در گرفتن اطلاعات آگهی:", error);
+      } finally {
+        setLoading(false); // 👈 همیشه خاموش میشه (حتی error یا return)
       }
     };
 
@@ -121,14 +124,21 @@ useEffect(() => {
   // ارسال فرم
   const handleSubmit = async () => {
      
-    if (!title || !caption ||  imagesBase64.every(img => !img) || !phoneNumber || !createCar1.location) {
+    if (!title || !caption || !phoneNumber || !createCar1.location) {
       Alert.alert("خطا", "لطفاً همه‌ی خانه‌های ضروری را پر کنید");
       return;
     }
 
+    const hasAtLeastOneImage = images.some(img => img !== null);
+
+if (!hasAtLeastOneImage) {
+  Alert.alert("خطا", "حداقل یک عکس باید انتخاب شود");
+  return;
+}
+
     try {
       
-      setLoading(true);
+      setSubmitLoading(true);
 
 
 
@@ -187,7 +197,7 @@ for (let i = 0; i < images.length; i++) {
           console.error("خطا در خواندن پاسخ:", e);
         }
         Alert.alert("خطا", errorMessage);
-        setLoading(false);
+
         return;
       }
 
@@ -215,13 +225,20 @@ for (let i = 0; i < images.length; i++) {
       console.error("خطا در ارسال پست:", error);
       Alert.alert("خطا", error.message || "ارسال با مشکل مواجه شد");
     } finally {
-      setLoading(false);
+       setSubmitLoading(false);
     }
   };
 
  
 
-
+if (loading) {
+  return (
+    <View style={styles.containerLoading}>
+      <ActivityIndicator size="large" color={COLORS.primary} />
+      <Text style={styles.textLoading}>در حال بارگذاری...</Text>
+    </View>
+  );
+}
   return (
   <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
     <ScrollView contentContainerStyle={styles.container} style={styles.scrollViewStyle}>
@@ -371,8 +388,8 @@ for (let i = 0; i < images.length; i++) {
 
 
           {/* submit button */}
-          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
-            {loading ? (
+          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={submitLoading}>
+            {submitLoading ? (
               <ActivityIndicator color={COLORS.black} />
             ) : (
               <>
@@ -392,3 +409,4 @@ for (let i = 0; i < images.length; i++) {
   </KeyboardAvoidingView>
 );
 }
+

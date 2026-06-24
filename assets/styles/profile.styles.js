@@ -191,6 +191,44 @@ helpButtonText: {
     fontWeight: "600",
     fontSize: 14,
   },
+  containerSocial: {
+    marginTop: 30,
+    paddingHorizontal: 20,
+    borderColor: COLORS.black,
+    borderWidth: 1,  
+    borderRadius: 12,
+  },
+
+  titleSocial: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: COLORS.textDark,
+    marginBottom: 12,
+    marginTop: 15,
+  },
+
+  grid: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  justifyContent: "space-between",
+},
+
+  socialButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.lightGray,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    marginRight: 10,
+  },
+
+  socialText: {
+    fontSize: 15,
+    color: COLORS.textDark,
+    marginLeft: 10,
+  },
 });
 
 export default styles;
